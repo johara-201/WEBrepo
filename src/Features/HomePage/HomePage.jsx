@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { getJobs } from "./homeService";
 import { filterJobs } from "../../Services/JobsService";
 import JobList from "./JobList";
+import heroIllustration from "../../assets/hero-illustration.png";
+import logoImg from "../../assets/logo.png";
 
 const CATEGORIES = [
   { label: "רכז/ת נועי",    value: "רכז",         emoji: "👥", iconBg: "#FFB74D" },
@@ -19,10 +21,10 @@ const NAV_LINKS = [
   { label: "שאלות ותשובות", page: "faq" },
 ];
 
-/* ── איור Hero בSVG ── */
+/* ── איור Hero ── */
 function HeroIllustration() {
   return (
-    <svg viewBox="0 0 480 380" xmlns="http://www.w3.org/2000/svg" className="w-full max-w-lg">
+    <svg viewBox="0 0 480 380" xmlns="http://www.w3.org/2000/svg" className="w-full max-w-lg" style={{display:'none'}}>
       {/* שמיים */}
       <rect width="480" height="380" fill="#EBF5EB" rx="24"/>
 
@@ -171,14 +173,8 @@ function HomePage({ onSelectJob, onAdminClick }) {
       <header className="sticky top-0 z-30 bg-[#f5f0e8]/95 backdrop-blur border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           {/* לוגו */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-[#2f6b46] flex items-center justify-center text-white text-lg shadow">
-              🌿
-            </div>
-            <div className="leading-tight">
-              <p className="font-bold text-[#1a3d2b] text-[15px]">אשכול בית הכרם</p>
-              <p className="text-[10px] text-gray-500 tracking-wide">חינוך · קהילה · מנהיגות</p>
-            </div>
+          <div className="flex items-center">
+            <img src={logoImg} alt="אשכול בית הכרם" className="h-14 w-auto" />
           </div>
 
           {/* ניווט */}
@@ -255,7 +251,11 @@ function HomePage({ onSelectJob, onAdminClick }) {
 
         {/* איור */}
         <div className="flex-1 order-1 md:order-2 flex justify-center">
-          <HeroIllustration />
+          <img
+            src={heroIllustration}
+            alt="צעירים בטבע ובקהילה"
+            className="w-full max-w-lg rounded-3xl object-cover"
+          />
         </div>
       </section>
 
@@ -323,7 +323,7 @@ function HomePage({ onSelectJob, onAdminClick }) {
 
       {/* ───── FOOTER ───── */}
       <footer className="bg-white border-t border-stone-200 text-center text-xs text-gray-400 py-6">
-        הזדמנויות לחיים | משרות בחינוך, נוער וקהילה · אשכול בית הכרם
+        הזדמנויות לחיים | משרות בחינוך, נוער וקהילה
       </footer>
     </div>
   );
