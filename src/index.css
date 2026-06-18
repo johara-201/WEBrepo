@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+:root {
+  --brand: #2f6b46;        /* ירוק ראשי */
+  --brand-dark: #245539;
+  --brand-light: #e9f1ea;
+  --cream: #f6f5ef;        /* רקע חמים */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", "Heebo", Arial, sans-serif;
+  background: var(--cream);
+  color: #1f2937;
+}
