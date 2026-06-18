@@ -55,11 +55,11 @@ function JobCard({ job, onSelect }) {
       )}
 
       {/* תחתית */}
-      <div className="flex items-center justify-between pt-1 border-t border-gray-50">
+      <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-auto">
         {ago && <span className="text-xs text-gray-400">{ago}</span>}
         <button
           onClick={(e) => { e.stopPropagation(); onSelect(job); }}
-          className="text-xs font-semibold text-[#2f6b46] hover:underline mr-auto"
+          className="bg-[#2f6b46] text-white text-xs font-bold px-4 py-1.5 rounded-lg hover:bg-[#245539] transition"
         >
           לפרטים ←
         </button>
