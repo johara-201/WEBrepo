@@ -9,7 +9,6 @@ import icon2 from "../../assets/icon2.png";
 import icon3 from "../../assets/icon3.png";
 import icon4 from "../../assets/icon4.png";
 import icon5 from "../../assets/icon5.png";
-import searchIcon from "../../assets/search icon.png";
 
 /* אייקון SVG למנהל/ת */
 function ManagerIcon() {
@@ -165,7 +164,6 @@ function HomePage({ onSelectJob, onAdminClick }) {
               onClick={() => document.getElementById("jobs-section")?.scrollIntoView({ behavior: "smooth" })}
               className="bg-[#2f6b46] text-white px-8 py-3 rounded-xl text-sm font-bold hover:bg-[#245539] transition whitespace-nowrap"
             >
-              <img src={searchIcon} alt="" className="w-5 h-5 inline-block ml-2" />
               חפש משרות
             </button>
           </div>
