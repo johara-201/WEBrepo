@@ -61,7 +61,7 @@ function JobCard({ job, onSelect }) {
           onClick={(e) => { e.stopPropagation(); onSelect(job); }}
           className="bg-[#2f6b46] text-white text-xs font-bold px-4 py-1.5 rounded-lg hover:bg-[#245539] transition"
         >
-          לפרטים ←
+          לפרטים
         </button>
       </div>
     </div>

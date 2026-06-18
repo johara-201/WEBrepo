@@ -114,64 +114,58 @@ function HomePage({ onSelectJob, onAdminClick }) {
 
       {/* ───── HERO (תמונת רקע מלאה) ───── */}
       <section
-        className="relative w-full overflow-hidden"
+        className="relative w-full overflow-hidden flex flex-col justify-between"
         style={{
           backgroundImage: `url(${heroIllustration})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          minHeight: "420px",
+          minHeight: "460px",
         }}
       >
-        {/* Overlay לקריאות */}
-        <div className="absolute inset-0 bg-white/55" />
-
-        <div className="relative max-w-7xl mx-auto px-6 py-16 flex flex-col items-end justify-center" style={{ minHeight: "420px" }}>
-          <div className="max-w-xl text-right">
-            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900 mb-4">
+        {/* טקסט במרכז */}
+        <div className="flex-1 flex items-center justify-center px-6 py-10">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900 mb-3 drop-shadow-sm">
               הזדמנויות לחיים
-              <br />
-              <span className="text-[#2f6b46] text-3xl md:text-4xl font-bold">
-                משרות בחינוך, נוער וקהילה
-              </span>
             </h1>
-            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-              פלטפורמת החיפוש למשרות בחינוך הבלתי פורמלי
-              <br />
-              באזור בית הכרם
+            <p className="text-2xl md:text-3xl font-bold text-[#2f6b46] drop-shadow-sm">
+              משרות בחינוך, נוער וקהילה
             </p>
+          </div>
+        </div>
 
-            {/* שורת חיפוש */}
-            <div className="bg-white rounded-2xl shadow-lg p-2 flex flex-col sm:flex-row gap-2 border border-gray-100">
-              <input
-                type="text"
-                value={filters.searchText}
-                onChange={(e) => updateFilter("searchText", e.target.value)}
-                placeholder="מה אתם מחפשים?"
-                className="flex-1 px-4 py-3 text-right text-gray-800 bg-transparent focus:outline-none placeholder-gray-400"
-              />
-              <select
-                value={filters.city}
-                onChange={(e) => updateFilter("city", e.target.value)}
-                className="px-3 py-3 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none"
-              >
-                <option value="all">כל הישובים</option>
-                {cities.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <select
-                value={filters.jobType}
-                onChange={(e) => updateFilter("jobType", e.target.value)}
-                className="px-3 py-3 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none"
-              >
-                <option value="all">כל התפקידים</option>
-                {jobTypes.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
-              <button
-                onClick={() => document.getElementById("jobs-section")?.scrollIntoView({ behavior: "smooth" })}
-                className="bg-[#2f6b46] text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-[#245539] transition whitespace-nowrap"
-              >
-                🔍 חפש משרות
-              </button>
-            </div>
+        {/* סרגל חיפוש בתחתית — לכל רוחב */}
+        <div className="w-full bg-white/90 backdrop-blur-sm border-t border-gray-100 px-4 py-3">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row gap-2 items-stretch">
+            <input
+              type="text"
+              value={filters.searchText}
+              onChange={(e) => updateFilter("searchText", e.target.value)}
+              placeholder="מה אתם מחפשים?"
+              className="flex-1 px-4 py-3 text-right text-gray-800 bg-white border border-gray-200 rounded-xl focus:outline-none placeholder-gray-400"
+            />
+            <select
+              value={filters.city}
+              onChange={(e) => updateFilter("city", e.target.value)}
+              className="px-3 py-3 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl focus:outline-none"
+            >
+              <option value="all">כל הישובים</option>
+              {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select
+              value={filters.jobType}
+              onChange={(e) => updateFilter("jobType", e.target.value)}
+              className="px-3 py-3 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl focus:outline-none"
+            >
+              <option value="all">כל התפקידים</option>
+              {jobTypes.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <button
+              onClick={() => document.getElementById("jobs-section")?.scrollIntoView({ behavior: "smooth" })}
+              className="bg-[#2f6b46] text-white px-8 py-3 rounded-xl text-sm font-bold hover:bg-[#245539] transition whitespace-nowrap"
+            >
+              🔍 חפש משרות
+            </button>
           </div>
         </div>
       </section>
@@ -184,7 +178,7 @@ function HomePage({ onSelectJob, onAdminClick }) {
             onClick={resetCategory}
             className="bg-[#2f6b46] text-white text-sm font-bold px-5 py-2 rounded-xl hover:bg-[#245539] transition"
           >
-            ← לכל הקטגוריות
+            לכל הקטגוריות
           </button>
         </div>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
