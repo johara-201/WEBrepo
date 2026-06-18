@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getJobs } from "./homeService";
-import { filterJobs } from "../../services/JobsService";
+import { filterJobs } from "../../Services/JobsService";
 
 import SearchBar from "./SearchBar";
 import Filters from "./Filters";
