@@ -1,5 +1,5 @@
 import "./App.css"
-import ComponentSwitcher from "./components/ComponentSwitcher"
+import ComponentSwitcher from "./Components/ComponentSwitcher"
 
 function App() {
   return <ComponentSwitcher />
