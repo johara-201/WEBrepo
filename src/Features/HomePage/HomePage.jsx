@@ -23,7 +23,7 @@ function ManagerIcon() {
 }
 
 const CATEGORIES = [
-  { label: "רכז/ת נועי",    value: "רכז",           icon: icon1 },
+  { label: "רכז/ת נוער",    value: "רכז",           icon: icon1 },
   { label: "מדריך/ה",        value: "מדריך",          icon: icon2 },
   { label: "עובד/ת קהילה",   value: "עובד קהילה",     icon: icon3 },
   { label: "מנהל/ת תוכנית", value: "מנהל תוכנית",   icon: icon4 },
@@ -122,14 +122,14 @@ function HomePage({ onSelectJob, onAdminClick }) {
           minHeight: "460px",
         }}
       >
-        {/* טקסט במרכז */}
-        <div className="flex-1 flex items-center justify-center px-6 py-10">
+        {/* טקסט — גבוה ומרכזי */}
+        <div className="flex-1 flex items-start justify-center px-6 pt-10">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900 mb-3 drop-shadow-sm">
               הזדמנויות לחיים
             </h1>
             <p className="text-2xl md:text-3xl font-bold text-[#2f6b46] drop-shadow-sm">
-              משרות בחינוך, נוער וקהילה
+              פלטפורמת משרות בחינוך, נוער וקהילה
             </p>
           </div>
         </div>
