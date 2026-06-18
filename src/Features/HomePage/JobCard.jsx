@@ -1,28 +1,67 @@
+function timeAgo(dateStr) {
+  if (!dateStr) return null;
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days === 0) return "היום";
+  if (days === 1) return "לפני יום";
+  if (days < 7) return `לפני ${days} ימים`;
+  const weeks = Math.floor(days / 7);
+  if (weeks === 1) return "לפני שבוע";
+  if (weeks < 5) return `לפני ${weeks} שבועות`;
+  return `לפני ${Math.floor(days / 30)} חודשים`;
+}
+
 function JobCard({ job, onSelect }) {
+  const ago = timeAgo(job.publishDate);
+
   return (
-    <div className="flex flex-col rounded-2xl border border-stone-200 bg-white p-5 transition hover:shadow-md hover:border-[#2f6b46]/40">
-      <div className="mb-3">
-        <h2 className="text-lg font-bold text-gray-800">{job.title}</h2>
-        <p className="text-sm font-medium text-[#2f6b46]">{job.organization}</p>
+    <div
+      className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col gap-3 shadow-sm hover:shadow-md hover:border-[#2f6b46]/30 transition cursor-pointer"
+      onClick={() => onSelect(job)}
+    >
+      {/* כותרת + ארגון */}
+      <div>
+        <h3 className="font-bold text-gray-800 text-base leading-snug">{job.title}</h3>
+        <p className="text-sm text-[#2f6b46] font-medium mt-0.5">{job.organization}</p>
       </div>
 
-      <div className="mb-3 flex flex-wrap gap-2">
-        {job.city && <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs text-gray-700">📍 {job.city}</span>}
-        {job.jobType && <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs text-gray-700">{job.jobType}</span>}
-        {job.employmentPercent && <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs text-gray-700">{job.employmentPercent}% משרה</span>}
-        {job.distanceMinutes && <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs text-gray-700">עד {job.distanceMinutes} דק' נסיעה</span>}
-        {job.suitableForStudents && <span className="rounded-full bg-[#e9f1ea] px-2.5 py-1 text-xs text-[#2f6b46]">מתאים לסטודנטים</span>}
+      {/* תגיות */}
+      <div className="flex flex-wrap gap-1.5">
+        {job.city && (
+          <span className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 rounded-full px-2.5 py-1">
+            📍 {job.city}
+          </span>
+        )}
+        {job.jobType && (
+          <span className="text-xs text-gray-500 bg-gray-50 rounded-full px-2.5 py-1">
+            {job.jobType}
+          </span>
+        )}
+        {job.employmentPercent && (
+          <span className="text-xs text-gray-500 bg-gray-50 rounded-full px-2.5 py-1">
+            {job.employmentPercent}% משרה
+          </span>
+        )}
+        {job.suitableForStudents && (
+          <span className="text-xs text-[#2f6b46] bg-[#e9f5ef] rounded-full px-2.5 py-1">
+            מתאים לסטודנטים
+          </span>
+        )}
       </div>
 
-      <p className="mb-4 grow text-sm text-gray-600 line-clamp-2">{job.description}</p>
+      {/* תיאור קצר */}
+      {job.description && (
+        <p className="text-sm text-gray-500 line-clamp-2 grow">{job.description}</p>
+      )}
 
-      <div className="mt-auto flex items-center justify-between gap-3">
-        <span className="text-xs text-gray-400">{job.source === "manual" ? "פרסום עצמאי" : job.sourceName}</span>
+      {/* תחתית */}
+      <div className="flex items-center justify-between pt-1 border-t border-gray-50">
+        {ago && <span className="text-xs text-gray-400">{ago}</span>}
         <button
-          onClick={() => onSelect(job)}
-          className="rounded-lg bg-[#2f6b46] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#245539]"
+          onClick={(e) => { e.stopPropagation(); onSelect(job); }}
+          className="text-xs font-semibold text-[#2f6b46] hover:underline mr-auto"
         >
-          לפרטים והגשת מועמדות
+          לפרטים ←
         </button>
       </div>
     </div>

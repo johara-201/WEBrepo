@@ -34,6 +34,7 @@ function ComponentSwitcher() {
     <HomePage
       onSelectJob={openJobDetails}
       onAdminClick={goAdmin}
+      onPostJobClick={goPostJob}
     />
   );
 }
