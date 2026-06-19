@@ -11,6 +11,24 @@ const applicationSchema = new mongoose.Schema(
     phone: { type: String },
     message: { type: String },
     submittedAt: { type: Date, default: Date.now },
+    jobRemoved: {
+      type: Boolean,
+      default: false,
+    },
+
+    hiddenFromAdmin: {
+      type: Boolean,
+      default: false,
+    },
+
+    removedJobTitle: {
+      type: String,
+      default: "",
+    },
+
+    removedJobAt: {
+      type: Date,
+    },
   },
   { collection: "Applications", versionKey: false }
 );

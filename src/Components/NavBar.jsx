@@ -3,6 +3,10 @@ import { useAuth } from "../Context/AuthContext";
 
 function NavBar({ activePage, onHome, onSearch, onAbout, onFaq, onAdmin, onDashboard }) {
   const { user, admin, logout, isUser, isAdmin } = useAuth();
+  const handleLogout = () => {
+  logout();
+  onHome?.();
+};
 
   const links = [
     { label: "דף הבית",       key: "home",   fn: onHome   },
@@ -19,10 +23,15 @@ function NavBar({ activePage, onHome, onSearch, onAbout, onFaq, onAdmin, onDashb
           className="text-sm font-semibold text-[#4f46e5] hover:underline">
           {admin?.username} ⭐
         </button>
-        <button onClick={logout}
-          className="text-xs border border-gray-300 text-gray-500 px-3 py-1.5 rounded-xl hover:bg-gray-50 transition">
-          יציאה
-        </button>
+        <button
+          onClick={() => {
+            logout();
+            onHome();
+          }}
+          className="text-xs border border-gray-300 text-gray-500 px-3 py-1.5 rounded-xl hover:bg-gray-50 transition"
+          >
+           יציאה
+          </button>
       </div>
     );
   } else if (isUser) {
@@ -32,10 +41,13 @@ function NavBar({ activePage, onHome, onSearch, onAbout, onFaq, onAdmin, onDashb
           className="text-sm font-semibold text-[#2f6b46] hover:underline">
           {user?.name?.split(" ")[0]} 👤
         </button>
-        <button onClick={logout}
-          className="text-xs border border-gray-300 text-gray-500 px-3 py-1.5 rounded-xl hover:bg-gray-50 transition">
-          יציאה
-        </button>
+        <button
+  onClick={handleLogout}
+  className="inline-flex items-center gap-1.5 text-xs font-semibold border border-red-200 text-red-600 bg-white px-3 py-1.5 rounded-xl hover:bg-red-50 hover:border-red-300 transition shadow-sm"
+>
+  <span>🚪</span>
+  <span>יציאה</span>
+</button>
       </div>
     );
   } else {

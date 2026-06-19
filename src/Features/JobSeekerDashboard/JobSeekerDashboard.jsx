@@ -5,6 +5,7 @@ import {
   getProfile, updateProfile,
   uploadCV, deleteCV, getCVUrl,
   getMyApplications, withdrawApplication,
+  changePassword,
 } from "./jobSeekerService";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -98,6 +99,131 @@ function ProfilePanel({ token }) {
             </div>
           )
       }
+    </div>
+  );
+}
+// ── פאנל: שינוי סיסמה ───────────────────────────────────────────────────────
+function PasswordPanel({ token }) {
+  const [form, setForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  const [msg, setMsg] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const inputClass =
+    "w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-right outline-none transition focus:border-[#2f6b46] focus:bg-white focus:ring-2 focus:ring-[#2f6b46]/20";
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setMsg("");
+    setError("");
+
+    if (!form.currentPassword || !form.newPassword || !form.confirmPassword) {
+      setError("יש למלא את כל השדות");
+      return;
+    }
+
+    if (form.newPassword.length < 6) {
+      setError("הסיסמה החדשה חייבת להכיל לפחות 6 תווים");
+      return;
+    }
+
+    if (form.newPassword !== form.confirmPassword) {
+      setError("אימות הסיסמה אינו תואם לסיסמה החדשה");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      await changePassword(token, {
+        currentPassword: form.currentPassword,
+        newPassword: form.newPassword,
+      });
+
+      setMsg("הסיסמה עודכנה בהצלחה ✓");
+      setForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (err) {
+      setError(err.message || "שגיאה בשינוי הסיסמה");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <div className="mb-6">
+        <h2 className="text-lg font-bold text-gray-800">שינוי סיסמה</h2>
+        <p className="text-sm text-gray-400 mt-1">
+          כאן ניתן לעדכן את סיסמת המשתמש שלך.
+        </p>
+      </div>
+
+      {msg && <p className="text-green-600 text-sm mb-4">{msg}</p>}
+      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+        <div>
+          <label className="text-xs font-semibold text-gray-500 mb-1 block">
+            סיסמה נוכחית
+          </label>
+          <input
+            type="password"
+            value={form.currentPassword}
+            onChange={(e) =>
+              setForm((p) => ({ ...p, currentPassword: e.target.value }))
+            }
+            className={inputClass}
+            placeholder="הכניסי סיסמה נוכחית"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-gray-500 mb-1 block">
+            סיסמה חדשה
+          </label>
+          <input
+            type="password"
+            value={form.newPassword}
+            onChange={(e) =>
+              setForm((p) => ({ ...p, newPassword: e.target.value }))
+            }
+            className={inputClass}
+            placeholder="הכניסי סיסמה חדשה"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-gray-500 mb-1 block">
+            אימות סיסמה חדשה
+          </label>
+          <input
+            type="password"
+            value={form.confirmPassword}
+            onChange={(e) =>
+              setForm((p) => ({ ...p, confirmPassword: e.target.value }))
+            }
+            className={inputClass}
+            placeholder="הקלידי שוב את הסיסמה החדשה"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-[#2f6b46] text-white text-sm font-bold px-6 py-3 rounded-xl hover:bg-[#245539] transition disabled:opacity-60"
+        >
+          {loading ? "מעדכן..." : "עדכן סיסמה"}
+        </button>
+      </form>
     </div>
   );
 }
@@ -235,26 +361,66 @@ function ApplicationsPanel({ token, onViewJob }) {
           <p>לא הגשת מועמדות עדיין</p>
         </div>
       )}
-      <div className="flex flex-col gap-3">
-        {apps.map(app => (
-          <div key={app._id}
-            className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:bg-gray-50 transition">
-            <div className="w-10 h-10 rounded-xl bg-[#e9f5ef] flex items-center justify-center text-xl shrink-0">
-              💼
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-gray-800 text-sm truncate">{app.jobTitle || "משרה"}</p>
-              <p className="text-xs text-gray-400">
-                הוגש: {new Date(app.submittedAt).toLocaleDateString("he-IL")}
-              </p>
-            </div>
-            <button onClick={() => withdraw(app._id)}
-              className="text-xs text-red-500 border border-red-100 px-3 py-1.5 rounded-xl hover:bg-red-50 transition shrink-0">
-              הסרה
-            </button>
+    <div className="flex flex-col gap-3">
+  {apps.map((app) => {
+    const removed = app.jobRemoved || app.jobExists === false;
+    const title = app.jobTitle || app.job?.title || "משרה";
+
+    return (
+      <div
+        key={app._id}
+        className={`flex items-center gap-4 p-4 rounded-2xl border transition ${
+          removed
+            ? "border-orange-200 bg-orange-50/70"
+            : "border-gray-100 hover:bg-gray-50"
+        }`}
+      >
+        <div
+          className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 ${
+            removed ? "bg-orange-100" : "bg-[#e9f5ef]"
+          }`}
+        >
+          {removed ? "⚠️" : "💼"}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p
+              className={`font-semibold text-sm truncate ${
+                removed ? "text-orange-800" : "text-gray-800"
+              }`}
+            >
+              {title}
+            </p>
+
+            {removed && (
+              <span className="text-[11px] font-bold text-orange-700 bg-orange-100 border border-orange-200 px-2 py-0.5 rounded-full">
+                המשרה הוסרה
+              </span>
+            )}
           </div>
-        ))}
+
+          <p className="text-xs text-gray-400 mt-1">
+            הוגש: {new Date(app.submittedAt).toLocaleDateString("he-IL")}
+          </p>
+
+          {removed && (
+            <p className="text-xs text-orange-700 mt-1">
+              המשרה נמחקה על ידי המנהל ולכן כבר לא זמינה באתר.
+            </p>
+          )}
+        </div>
+
+        <button
+          onClick={() => withdraw(app._id)}
+          className="text-xs text-red-500 border border-red-100 px-3 py-1.5 rounded-xl hover:bg-red-50 transition shrink-0"
+        >
+          {removed ? "הסרה מהרשימה" : "הסרה"}
+        </button>
       </div>
+    );
+  })}
+</div>
     </div>
   );
 }
@@ -262,6 +428,7 @@ function ApplicationsPanel({ token, onViewJob }) {
 // ── דף ראשי ───────────────────────────────────────────────────────────────────
 const SIDEBAR_ITEMS = [
   { key: "profile",      label: "פרטים אישיים", emoji: "👤" },
+  { key: "password",     label: "שינוי סיסמה",  emoji: "🔒" },
   { key: "cv",           label: "קורות חיים",   emoji: "📄" },
   { key: "applications", label: "המשרות שלי",   emoji: "💼" },
 ];
@@ -312,10 +479,12 @@ function JobSeekerDashboard({ onHome, onSearch, onAbout, onFaq, onAdmin }) {
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">
             {activeTab === "profile"      && "הפרטים האישיים שלי"}
+            {activeTab === "password"     && "שינוי סיסמה"}
             {activeTab === "cv"           && "קורות החיים שלי"}
             {activeTab === "applications" && "המשרות שהגשתי"}
           </h1>
           {activeTab === "profile"      && <ProfilePanel      token={token} />}
+          {activeTab === "password"     && <PasswordPanel     token={token} />}
           {activeTab === "cv"           && <CVPanel           token={token} />}
           {activeTab === "applications" && <ApplicationsPanel token={token} onViewJob={onSearch} />}
         </div>

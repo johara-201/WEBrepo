@@ -61,3 +61,22 @@ export async function withdrawApplication(token, appId) {
   });
   if (!res.ok) throw new Error("שגיאה בהסרת מועמדות");
 }
+
+export async function changePassword(token, data) {
+  const res = await fetch(`${API}/api/users/me/password`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(result.error || "שגיאה בשינוי הסיסמה");
+  }
+
+  return result;
+}

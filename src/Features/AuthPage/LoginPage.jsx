@@ -163,59 +163,87 @@ function LoginPage({ onSuccess, onClose, onHome }) {
     <div dir="rtl" className="min-h-screen bg-[#f9f8f4] flex">
 
       {/* ─── פאנל שמאל: אילוסטרציה ─────────────────────────────────────── */}
-      <div className="hidden md:flex flex-col justify-between w-[42%] relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #1a4d2e 0%, #2f6b46 60%, #4a9e6b 100%)" }}>
-        <div className="p-8">
-          <button onClick={onHome || onClose}>
-            <img src={logoImg} alt="לוגו" className="h-14 w-auto brightness-200 opacity-90" />
-          </button>
-        </div>
-        <div className="px-10 pb-16">
-          <h2 className="text-white text-3xl font-extrabold leading-tight mb-4">
-            יחד מחזקים<br />את החינוך<br />בקהילה שלנו
-          </h2>
-          <p className="text-white/70 text-sm leading-relaxed">
-            הזדמנויות לחיים, פלטפורמת משרות בחינוך, נוער וקהילה באזור בית הכרם.
-          </p>
-        </div>
+      <div
+  className="hidden md:flex flex-col w-[42%] relative overflow-hidden"
+  style={{ background: "linear-gradient(135deg, #1a4d2e 0%, #2f6b46 60%, #4a9e6b 100%)" }}
+>
+  <div className="p-8 relative z-10">
+    <button onClick={onHome || onClose}>
+      <img src={logoImg} alt="לוגו" className="h-14 w-auto brightness-200 opacity-90" />
+    </button>
+  </div>
+
+  <div className="px-10 pt-4 relative z-10 text-right">
+    <h2 className="text-white text-4xl font-extrabold leading-tight mb-4">
+      יחד מחזקים<br />את החינוך<br />בקהילה שלנו
+    </h2>
+
+    <p className="text-white/80 text-base leading-relaxed max-w-md">
+      הזדמנויות לחיים, פלטפורמת משרות בחינוך, נוער וקהילה באזור בית הכרם.
+    </p>
+  </div>
         <div className="absolute bottom-0 left-0 right-0 h-48 overflow-hidden opacity-20">
           <img src={heroIllustration} alt="" className="w-full object-cover object-top" />
         </div>
       </div>
 
       {/* ─── פאנל ימין: טפסים ───────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col justify-center items-center px-8 py-12">
-        <div className="w-full max-w-sm">
+<div className="flex-1 flex justify-center items-center px-8 py-12">
+  <div className="w-full max-w-md">
 
-          {/* כפתור חזרה */}
-          <button onClick={onHome || onClose}
-            className="text-sm text-gray-400 hover:text-gray-600 mb-8 flex items-center gap-1">
-            → חזרה לדף הבית
-          </button>
+    {/* כפתור חזרה לדף הבית - קטן ובצד */}
+    <div className="text-right mb-4">
+      <button
+        onClick={onHome || onClose}
+        className="inline-flex items-center justify-center gap-2 bg-[#2f6b46] text-white font-bold px-4 py-2 rounded-xl hover:bg-[#245539] transition shadow-md text-xs"
+      >
+        <span>🏠</span>
+        <span>חזרה לדף הבית</span>
+      </button>
+    </div>
 
-          <h1 className="text-3xl font-extrabold text-gray-900 mb-1">ברוכים הבאים</h1>
-          <p className="text-gray-400 text-sm mb-7">התחברו כדי להמשיך</p>
+    {/* כרטיסיית התחברות */}
+    <div className="bg-white border border-gray-100 rounded-3xl shadow-xl px-8 py-9">
 
-          {/* טאבים */}
-          <div className="flex bg-gray-100 rounded-2xl p-1 mb-6">
-            <button onClick={() => setTab("user")}
-              className={`flex-1 py-2 rounded-xl text-sm font-semibold transition ${tab === "user"
-                ? "bg-white text-[#2f6b46] shadow-sm"
-                : "text-gray-500 hover:text-gray-700"}`}>
-              מחפש/ת עבודה
-            </button>
-            <button onClick={() => setTab("admin")}
-              className={`flex-1 py-2 rounded-xl text-sm font-semibold transition ${tab === "admin"
-                ? "bg-white text-[#4f46e5] shadow-sm"
-                : "text-gray-500 hover:text-gray-700"}`}>
-              מנהל/ת
-            </button>
-          </div>
+      <h1 className="text-3xl font-extrabold text-gray-900 mb-1 text-center">
+        ברוכים הבאים
+      </h1>
 
-          {tab === "user"  && <UserPanel  onSuccess={onSuccess} onClose={onClose} />}
-          {tab === "admin" && <AdminPanel onSuccess={onSuccess} />}
-        </div>
+      <p className="text-gray-400 text-sm mb-7 text-center">
+        התחברו כדי להמשיך
+      </p>
+
+      {/* טאבים */}
+      <div className="flex bg-gray-100 rounded-2xl p-1 mb-6">
+        <button
+          onClick={() => setTab("user")}
+          className={`flex-1 py-2 rounded-xl text-sm font-semibold transition ${
+            tab === "user"
+              ? "bg-white text-[#2f6b46] shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          מחפש/ת עבודה
+        </button>
+
+        <button
+          onClick={() => setTab("admin")}
+          className={`flex-1 py-2 rounded-xl text-sm font-semibold transition ${
+            tab === "admin"
+              ? "bg-white text-[#4f46e5] shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          מנהל/ת
+        </button>
       </div>
+
+      {tab === "user" && <UserPanel onSuccess={onSuccess} onClose={onClose} />}
+      {tab === "admin" && <AdminPanel onSuccess={onSuccess} />}
+
+    </div>
+  </div>
+</div>
     </div>
   );
 }
