@@ -3,7 +3,7 @@ import { getJobs } from "./homeService";
 import { filterJobs } from "../../Services/JobsService";
 import JobList from "./JobList";
 import heroIllustration from "../../assets/hero-illustration.png";
-import logoImg from "../../assets/logo.png";
+import NavBar from "../../Components/NavBar";
 import icon1 from "../../assets/icon1.png";
 import icon2 from "../../assets/icon2.png";
 import icon3 from "../../assets/icon3.png";
@@ -38,7 +38,7 @@ const NAV_LINKS = [
   { label: "שאלות ותשובות" },
 ];
 
-function HomePage({ onSelectJob, onAdminClick, onAboutClick, onFaqClick, onSearchClick }) {
+function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -92,34 +92,7 @@ function HomePage({ onSelectJob, onAdminClick, onAboutClick, onFaqClick, onSearc
   return (
     <div dir="rtl" className="min-h-screen bg-white text-right text-gray-800 font-sans">
 
-      {/* ───── HEADER ───── */}
-      <header className="sticky top-0 z-30 bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between">
-          <img src={logoImg} alt="אשכול בית הכרם" className="h-14 w-auto" />
-          <nav className="hidden md:flex items-center gap-7">
-            {NAV_LINKS.map((link) => (
-              <button
-                key={link.label}
-                onClick={
-                  link.label === "אודות" ? onAboutClick :
-                  link.label === "שאלות ותשובות" ? onFaqClick :
-                  link.label === "חיפוש משרות" ? onSearchClick :
-                  undefined
-                }
-                className="text-sm text-gray-600 hover:text-[#2f6b46] font-medium transition"
-              >
-                {link.label}
-              </button>
-            ))}
-          </nav>
-          <button
-            onClick={onAdminClick}
-            className="text-sm font-semibold border-2 border-[#2f6b46] text-[#2f6b46] hover:bg-[#2f6b46] hover:text-white px-5 py-2 rounded-xl transition"
-          >
-            התחברות
-          </button>
-        </div>
-      </header>
+      <NavBar activePage="home" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} />
 
       {/* ───── HERO (תמונת רקע מלאה) ───── */}
       <section

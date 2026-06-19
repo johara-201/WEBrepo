@@ -1,5 +1,5 @@
 import { useState } from "react";
-import logoImg from "../../assets/logo.png";
+import NavBar from "../../Components/NavBar";
 
 const FAQ_SECTIONS = [
   {
@@ -147,7 +147,8 @@ function AccordionItem({ q, a }) {
   );
 }
 
-function FAQPage({ onBack, onAdminClick }) {
+function FAQPage({ onHome, onAdmin, onSearch, onAbout, onFaq }) {
+  const onBack = onHome;
   const [activeSection, setActiveSection] = useState(null);
 
   const displayed = activeSection
@@ -157,35 +158,7 @@ function FAQPage({ onBack, onAdminClick }) {
   return (
     <div dir="rtl" className="min-h-screen bg-white text-right text-gray-800 font-sans">
 
-      {/* ───── HEADER ───── */}
-      <header className="sticky top-0 z-30 bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between">
-          <button onClick={onBack}>
-            <img src={logoImg} alt="אשכול בית הכרם" className="h-14 w-auto" />
-          </button>
-          <nav className="hidden md:flex items-center gap-7">
-            {["דף הבית", "חיפוש משרות", "אודות", "שאלות ותשובות"].map((link) => (
-              <button
-                key={link}
-                onClick={link === "דף הבית" ? onBack : undefined}
-                className={`text-sm font-medium transition ${
-                  link === "שאלות ותשובות"
-                    ? "text-[#2f6b46] font-bold border-b-2 border-[#2f6b46] pb-0.5"
-                    : "text-gray-600 hover:text-[#2f6b46]"
-                }`}
-              >
-                {link}
-              </button>
-            ))}
-          </nav>
-          <button
-            onClick={onAdminClick}
-            className="text-sm font-semibold border-2 border-[#2f6b46] text-[#2f6b46] hover:bg-[#2f6b46] hover:text-white px-5 py-2 rounded-xl transition"
-          >
-            התחברות
-          </button>
-        </div>
-      </header>
+      <NavBar activePage="faq" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} />
 
       {/* ───── HERO ───── */}
       <section className="bg-[#f9f8f4] border-b border-gray-100">
