@@ -6,6 +6,7 @@ import AdminDashboard from "../Features/AdminDashboard/AdminDashboard";
 import PostJobPage from "../Features/PostJobPage/PostJobPage";
 import AboutPage from "../Features/AboutPage/AboutPage";
 import FAQPage from "../Features/FAQPage/FAQPage";
+import SearchPage from "../Features/SearchPage/SearchPage";
 
 function ComponentSwitcher() {
   const [activePage, setActivePage] = useState("home");
@@ -15,7 +16,8 @@ function ComponentSwitcher() {
   const goAdmin = () => setActivePage("admin");
   const goPostJob = () => setActivePage("postJob");
   const goAbout = () => setActivePage("about");
-  const goFaq   = () => setActivePage("faq");
+  const goFaq    = () => setActivePage("faq");
+  const goSearch = () => setActivePage("search");
 
   const openJobDetails = (job) => {
     setSelectedJob(job);
@@ -37,6 +39,17 @@ function ComponentSwitcher() {
   if (activePage === "faq") {
     return <FAQPage onBack={goHome} onAdminClick={goAdmin} />;
   }
+  if (activePage === "search") {
+    return (
+      <SearchPage
+        onSelectJob={openJobDetails}
+        onBack={goHome}
+        onAdminClick={goAdmin}
+        onAboutClick={goAbout}
+        onFaqClick={goFaq}
+      />
+    );
+  }
 
   return (
     <HomePage
@@ -44,6 +57,7 @@ function ComponentSwitcher() {
       onAdminClick={goAdmin}
       onAboutClick={goAbout}
       onFaqClick={goFaq}
+      onSearchClick={goSearch}
     />
   );
 }
