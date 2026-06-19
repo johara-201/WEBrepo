@@ -38,7 +38,7 @@ const NAV_LINKS = [
   { label: "שאלות ותשובות" },
 ];
 
-function HomePage({ onSelectJob, onAdminClick, onAboutClick }) {
+function HomePage({ onSelectJob, onAdminClick, onAboutClick, onFaqClick }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -100,7 +100,7 @@ function HomePage({ onSelectJob, onAdminClick, onAboutClick }) {
             {NAV_LINKS.map((link) => (
               <button
                 key={link.label}
-                onClick={link.label === "אודות" ? onAboutClick : undefined}
+                onClick={link.label === "אודות" ? onAboutClick : link.label === "שאלות ותשובות" ? onFaqClick : undefined}
                 className="text-sm text-gray-600 hover:text-[#2f6b46] font-medium transition"
               >
                 {link.label}
