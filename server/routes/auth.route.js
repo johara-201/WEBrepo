@@ -7,6 +7,12 @@ const Admin     = require("../models/adminSchema");
 const router    = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "beit-hakerem-secret-2024";
 
+// ─── בדיקה אם צריך הגדרה ראשונית ────────────────────────────────────────────
+router.get("/admin/needs-setup", async (req, res) => {
+  const count = await Admin.countDocuments();
+  res.json({ needsSetup: count === 0 });
+});
+
 // ─── רישום מחפש עבודה ───────────────────────────────────────────────────────
 router.post("/register", async (req, res) => {
   try {
