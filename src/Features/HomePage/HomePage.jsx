@@ -38,7 +38,7 @@ const NAV_LINKS = [
   { label: "שאלות ותשובות" },
 ];
 
-function HomePage({ onSelectJob, onAdminClick }) {
+function HomePage({ onSelectJob, onAdminClick, onAboutClick }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -98,7 +98,11 @@ function HomePage({ onSelectJob, onAdminClick }) {
           <img src={logoImg} alt="אשכול בית הכרם" className="h-14 w-auto" />
           <nav className="hidden md:flex items-center gap-7">
             {NAV_LINKS.map((link) => (
-              <button key={link.label} className="text-sm text-gray-600 hover:text-[#2f6b46] font-medium transition">
+              <button
+                key={link.label}
+                onClick={link.label === "אודות" ? onAboutClick : undefined}
+                className="text-sm text-gray-600 hover:text-[#2f6b46] font-medium transition"
+              >
                 {link.label}
               </button>
             ))}
