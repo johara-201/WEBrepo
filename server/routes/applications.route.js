@@ -1,11 +1,23 @@
-const express = require("express");
-const router = express.Router();
+const express     = require("express");
+const router      = express.Router();
 const Application = require("../models/applicationSchema");
+const { requireUser, requireAdmin } = require("../middleware/authMiddleware");
 
-// POST - submit a new application
+// ─── POST - הגשת מועמדות (עם או בלי כניסה) ──────────────────────────────────
 router.post("/", async (req, res) => {
   try {
-    const application = new Application(req.body);
+    const data = { ...req.body };
+    // אם יש Authorization header של משתמש רשום, נשמור userId
+    const auth = req.headers.authorization;
+    if (auth?.startsWith("Bearer ")) {
+      try {
+        const jwt = require("jsonwebtoken");
+        const JWT_SECRET = process.env.JWT_SECRET || "beit-hakerem-secret-2024";
+        const decoded = jwt.verify(auth.split(" ")[1], JWT_SECRET);
+        if (decoded.type === "user") data.userId = decoded.id;
+      } catch {} // token לא חובה
+    }
+    const application = new Application(data);
     await application.save();
     res.status(201).send(application);
   } catch (error) {
@@ -13,31 +25,64 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET - all applications (for admin)
-router.get("/", async (req, res) => {
+// ─── GET - כל המועמדויות (מנהל) ─────────────────────────────────────────────
+router.get("/", requireAdmin, async (req, res) => {
   try {
-    const applications = await Application.find({}).sort({ submittedAt: -1 });
+    const query = req.canSeeAll ? {} : { postedBy: req.adminId };
+    const applications = await Application.find(query).sort({ submittedAt: -1 });
     res.status(200).send(applications);
   } catch (error) {
     res.status(500).send(error);
   }
 });
 
-// GET - applications for a specific job
-router.get("/job/:jobId", async (req, res) => {
+// ─── GET - מועמדויות של משתמש מחובר ─────────────────────────────────────────
+router.get("/my", requireUser, async (req, res) => {
   try {
-    const applications = await Application.find({ jobId: req.params.jobId }).sort({ submittedAt: -1 });
+    const applications = await Application.find({ userId: req.userId })
+      .sort({ submittedAt: -1 });
     res.status(200).send(applications);
   } catch (error) {
     res.status(500).send(error);
   }
 });
 
-// DELETE - delete an application
+// ─── GET - מועמדויות לפי משרה (מנהל) ─────────────────────────────────────────
+router.get("/job/:jobId", requireAdmin, async (req, res) => {
+  try {
+    const applications = await Application.find({ jobId: req.params.jobId })
+      .sort({ submittedAt: -1 });
+    res.status(200).send(applications);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+// ─── DELETE - הסרת מועמדות ───────────────────────────────────────────────────
+// משתמש רשום מוחק מועמדות שלו עצמו
 router.delete("/:id", async (req, res) => {
   try {
+    const auth = req.headers.authorization;
+    let userId = null;
+    if (auth?.startsWith("Bearer ")) {
+      try {
+        const jwt = require("jsonwebtoken");
+        const JWT_SECRET = process.env.JWT_SECRET || "beit-hakerem-secret-2024";
+        const decoded = jwt.verify(auth.split(" ")[1], JWT_SECRET);
+        if (decoded.type === "user") userId = decoded.id;
+      } catch {}
+    }
+
+    if (userId) {
+      // מחפש עבודה יכול למחוק רק מועמדות שלו
+      const app = await Application.findById(req.params.id);
+      if (!app) return res.status(404).send("לא נמצא");
+      if (String(app.userId) !== String(userId)) {
+        return res.status(403).send("אין הרשאה");
+      }
+    }
     await Application.findByIdAndDelete(req.params.id);
-    res.status(200).send("Application deleted");
+    res.status(200).send("מועמדות נמחקה");
   } catch (error) {
     res.status(500).send(error);
   }
