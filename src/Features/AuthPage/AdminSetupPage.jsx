@@ -5,8 +5,8 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function AdminSetupPage({ onDone }) {
   const [form, setForm] = useState({
-    username: "", password: "", email: "",
-    secondUsername: "", secondPassword: "", secondEmail: "",
+    username: "", password: "",
+    secondUsername: "", secondPassword: "",
   });
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
@@ -62,17 +62,15 @@ function AdminSetupPage({ onDone }) {
           {/* מנהל 1 */}
           <div className="bg-[#f0f0fe] rounded-2xl p-5 flex flex-col gap-3">
             <h2 className="font-bold text-[#4f46e5] text-sm">מנהל ראשי #1 (יארה)</h2>
-            {field('שם משתמש',  'username',       'text',     'לדוגמה: yara')}
-            {field('סיסמה',      'password',       'password', 'לפחות 6 תווים')}
-            {field('אימייל',     'email',           'email',    'yarra@bkerem.org.il')}
+            {field('שם משתמש', 'username',       'text',     'לדוגמה: yara')}
+            {field('סיסמה',     'password',       'password', 'לפחות 6 תווים')}
           </div>
 
           {/* מנהל 2 */}
           <div className="bg-[#f0f0fe] rounded-2xl p-5 flex flex-col gap-3">
             <h2 className="font-bold text-[#4f46e5] text-sm">מנהל ראשי #2 (רכזת משאבי אנוש)</h2>
-            {field('שם משתמש',  'secondUsername', 'text',     'לדוגמה: hr_coordinator')}
-            {field('סיסמה',      'secondPassword', 'password', 'לפחות 6 תווים')}
-            {field('אימייל',     'secondEmail',     'email',    'אימייל רכזת משאבי אנוש')}
+            {field('שם משתמש', 'secondUsername', 'text',     'לדוגמה: hr_coordinator')}
+            {field('סיסמה',     'secondPassword', 'password', 'לפחות 6 תווים')}
           </div>
 
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}

@@ -89,7 +89,7 @@ router.post("/admin/setup", async (req, res) => {
     const count = await Admin.countDocuments();
     if (count > 0) return res.status(403).json({ error: "הגדרה ראשונית כבר בוצעה" });
 
-    const { username, password, email, secondUsername, secondPassword, secondEmail } = req.body;
+    const { username, password, secondUsername, secondPassword } = req.body;
     if (!username || !password || !secondUsername || !secondPassword) {
       return res.status(400).json({ error: "שדות חסרים" });
     }
@@ -98,8 +98,8 @@ router.post("/admin/setup", async (req, res) => {
     const hash2 = await bcrypt.hash(secondPassword, 10);
 
     await Admin.insertMany([
-      { username, email, password: hash1, role: "super", canSeeAll: true },
-      { username: secondUsername, email: secondEmail, password: hash2, role: "super", canSeeAll: true },
+      { username, password: hash1, role: "super", canSeeAll: true },
+      { username: secondUsername, password: hash2, role: "super", canSeeAll: true },
     ]);
 
     res.status(201).json({ message: "שני מנהלים ראשיים נוצרו בהצלחה" });
