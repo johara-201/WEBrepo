@@ -1,8 +1,16 @@
-const express  = require("express");
-const bcrypt    = require("bcryptjs");
-const jwt       = require("jsonwebtoken");
-const User      = require("../models/userSchema");
-const Admin     = require("../models/adminSchema");
+const express      = require("express");
+const bcrypt       = require("bcryptjs");
+const jwt          = require("jsonwebtoken");
+const User         = require("../models/userSchema");
+const Admin        = require("../models/adminSchema");
+const Application  = require("../models/applicationSchema");
+
+async function claimGuestApplications(userId, email) {
+  await Application.updateMany(
+    { email, userId: { $exists: false } },
+    { $set: { userId } }
+  );
+}
 
 const router    = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "beit-hakerem-secret-2024";
@@ -26,7 +34,7 @@ router.post("/register", async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     const user   = await User.create({ email, password: hashed, name, phone });
     const token  = jwt.sign({ id: user._id, type: "user" }, JWT_SECRET, { expiresIn: "7d" });
-
+    await claimGuestApplications(user._id, user.email);
     res.status(201).json({ token, user: { _id: user._id, name: user.name, email: user.email } });
   } catch (err) {
     console.error(err);
@@ -45,6 +53,7 @@ router.post("/login", async (req, res) => {
     if (!match) return res.status(401).json({ error: "אימייל או סיסמה שגויים" });
 
     const token = jwt.sign({ id: user._id, type: "user" }, JWT_SECRET, { expiresIn: "7d" });
+    await claimGuestApplications(user._id, user.email);
     res.json({ token, user: { _id: user._id, name: user.name, email: user.email } });
   } catch (err) {
     console.error(err);
