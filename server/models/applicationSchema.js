@@ -29,6 +29,15 @@ const applicationSchema = new mongoose.Schema(
     removedJobAt: {
       type: Date,
     },
+
+    cancelledByUser: {
+      type: Boolean,
+      default: false,
+    },
+
+    cancelledAt: {
+      type: Date,
+    },
   },
   { collection: "Applications", versionKey: false }
 );

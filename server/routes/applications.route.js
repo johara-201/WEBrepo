@@ -39,7 +39,7 @@ router.get("/", requireAdmin, async (req, res) => {
 // ─── GET - מועמדויות של משתמש מחובר ─────────────────────────────────────────
 router.get("/my", requireUser, async (req, res) => {
   try {
-    const applications = await Application.find({ userId: req.userId })
+    const applications = await Application.find({ userId: req.userId, cancelledByUser: { $ne: true } })
       .sort({ submittedAt: -1 });
     res.status(200).send(applications);
   } catch (error) {
@@ -73,16 +73,19 @@ router.delete("/:id", async (req, res) => {
       } catch {}
     }
 
-    if (userId) {
-      // מחפש עבודה יכול למחוק רק מועמדות שלו
-      const app = await Application.findById(req.params.id);
-      if (!app) return res.status(404).send("לא נמצא");
-      if (String(app.userId) !== String(userId)) {
-        return res.status(403).send("אין הרשאה");
-      }
+    if (!userId) return res.status(401).send("אין הרשאה");
+
+    const app = await Application.findById(req.params.id);
+    if (!app) return res.status(404).send("לא נמצא");
+    if (String(app.userId) !== String(userId)) {
+      return res.status(403).send("אין הרשאה");
     }
-    await Application.findByIdAndDelete(req.params.id);
-    res.status(200).send("מועמדות נמחקה");
+
+    await Application.findByIdAndUpdate(req.params.id, {
+      cancelledByUser: true,
+      cancelledAt: new Date(),
+    });
+    res.status(200).send("מועמדות בוטלה");
   } catch (error) {
     res.status(500).send(error);
   }

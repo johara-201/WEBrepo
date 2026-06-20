@@ -24,7 +24,12 @@ function ViewApplications({ onClose }) {
       <div className="mb-12 w-full max-w-3xl rounded-2xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-800">
-            מועמדויות שהתקבלו ({applications.length})
+            מועמדויות שהתקבלו ({applications.filter(a => !a.cancelledByUser).length})
+            {applications.some(a => a.cancelledByUser) && (
+              <span className="mr-2 text-sm font-normal text-red-400">
+                · {applications.filter(a => a.cancelledByUser).length} בוטלו
+              </span>
+            )}
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
         </div>
@@ -38,19 +43,31 @@ function ViewApplications({ onClose }) {
         {!loading && applications.length > 0 && (
           <div className="space-y-3">
             {applications.map((app) => (
-              <div key={app._id} className="rounded-xl border border-stone-200 p-4">
+              <div key={app._id} className={`rounded-xl border p-4 ${app.cancelledByUser ? "border-red-200 bg-red-50/50" : "border-stone-200"}`}>
                 <div className="mb-1 flex items-center justify-between">
-                  <span className="font-semibold text-gray-800">{app.fullName}</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`font-semibold ${app.cancelledByUser ? "text-gray-400 line-through" : "text-gray-800"}`}>{app.fullName}</span>
+                    {app.cancelledByUser && (
+                      <span className="text-[11px] font-bold text-red-600 bg-red-100 border border-red-200 px-2 py-0.5 rounded-full">
+                        ביטל מועמדות
+                      </span>
+                    )}
+                  </div>
                   <span className="text-xs text-gray-400">
                     {new Date(app.submittedAt).toLocaleDateString("he-IL")}
                   </span>
                 </div>
-                <p className="text-sm text-[#2f6b46] mb-1">{app.jobTitle}</p>
-                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                <p className={`text-sm mb-1 ${app.cancelledByUser ? "text-gray-400" : "text-[#2f6b46]"}`}>{app.jobTitle}</p>
+                <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                   <span>📧 {app.email}</span>
                   {app.phone && <span>📞 {app.phone}</span>}
                 </div>
-                {app.message && (
+                {app.cancelledByUser && app.cancelledAt && (
+                  <p className="mt-1 text-xs text-red-400">
+                    בוטל ב־{new Date(app.cancelledAt).toLocaleDateString("he-IL")}
+                  </p>
+                )}
+                {app.message && !app.cancelledByUser && (
                   <p className="mt-2 rounded-lg bg-gray-50 p-3 text-sm text-gray-700 italic">
                     "{app.message}"
                   </p>
