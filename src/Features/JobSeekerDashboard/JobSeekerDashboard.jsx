@@ -433,14 +433,14 @@ const SIDEBAR_ITEMS = [
   { key: "applications", label: "המשרות שלי",   emoji: "💼" },
 ];
 
-function JobSeekerDashboard({ onHome, onSearch, onAbout, onFaq, onAdmin }) {
+function JobSeekerDashboard({ onHome, onSearch, onAbout, onFaq, onAdmin, onDashboard }) {
   const { user, token, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#f9f8f4] text-right text-gray-800 font-sans">
       <NavBar activePage="dashboard" onHome={onHome} onSearch={onSearch}
-        onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} />
+        onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} onDashboard={onDashboard} />
 
       <div className="max-w-5xl mx-auto px-6 py-8 flex gap-6 items-start">
 

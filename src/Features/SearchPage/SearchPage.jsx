@@ -70,7 +70,7 @@ const EMPTY_FILTERS = {
   organization: "all",
 };
 
-function SearchPage({ onSelectJob, onHome, onAdmin, onSearch, onAbout, onFaq }) {
+function SearchPage({ onSelectJob, onHome, onAdmin, onSearch, onAbout, onFaq, onDashboard }) {
   const [jobs, setJobs]       = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState("newest");
@@ -134,7 +134,7 @@ function SearchPage({ onSelectJob, onHome, onAdmin, onSearch, onAbout, onFaq }) 
   return (
     <div dir="rtl" className="min-h-screen bg-[#f9f8f4] text-right text-gray-800 font-sans">
 
-      <NavBar activePage="search" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} />
+      <NavBar activePage="search" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} onDashboard={onDashboard} />
 
       <div className="max-w-7xl mx-auto px-6 py-8 flex gap-6 items-start">
 

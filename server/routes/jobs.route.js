@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const Job = require("../models/jobSchema");
+const Application = require("../models/applicationSchema");
 
 // GET all jobs
 router.get("/", async (req, res) => {
@@ -60,6 +61,9 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     await Job.findByIdAndDelete(req.params.id);
+
+    // מחיקת כל המועמדויות של המשרה שנמחקה
+    await Application.deleteMany({ jobId: req.params.id });
 
     res.status(200).send("Job deleted");
   } catch (error) {

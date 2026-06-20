@@ -22,12 +22,12 @@ const KPIS = [
   { num: "15",   label: "יישובים באזור" },
 ];
 
-function AboutPage({ onHome, onAdmin, onSearch, onAbout, onFaq }) {
+function AboutPage({ onHome, onAdmin, onSearch, onAbout, onFaq, onDashboard }) {
   const onBack = onHome;
   return (
     <div dir="rtl" className="min-h-screen bg-white text-right text-gray-800 font-sans">
 
-      <NavBar activePage="about" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} />
+      <NavBar activePage="about" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} onDashboard={onDashboard} />
 
       {/* ───── HERO ───── */}
       <section

@@ -51,7 +51,7 @@ function ComponentSwitcher() {
     return <LoginPage {...nav} onSuccess={handleAuthSuccess} onClose={goHome} />;
 
   if (activePage === "details")
-    return <JobDetailsPage job={selectedJob} onBack={goHome} />;
+    return <JobDetailsPage job={selectedJob} onBack={goHome} {...nav} activePage="details" />;
 
   if (activePage === "admin")
     return <AdminDashboard {...nav} onBack={goHome} onPostJob={goPostJob} />;

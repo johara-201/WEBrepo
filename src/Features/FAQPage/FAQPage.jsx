@@ -147,7 +147,7 @@ function AccordionItem({ q, a }) {
   );
 }
 
-function FAQPage({ onHome, onAdmin, onSearch, onAbout, onFaq }) {
+function FAQPage({ onHome, onAdmin, onSearch, onAbout, onFaq, onDashboard }) {
   const onBack = onHome;
   const [activeSection, setActiveSection] = useState(null);
 
@@ -158,7 +158,7 @@ function FAQPage({ onHome, onAdmin, onSearch, onAbout, onFaq }) {
   return (
     <div dir="rtl" className="min-h-screen bg-white text-right text-gray-800 font-sans">
 
-      <NavBar activePage="faq" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} />
+      <NavBar activePage="faq" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} onDashboard={onDashboard} />
 
       {/* ───── HERO ───── */}
       <section className="bg-[#f9f8f4] border-b border-gray-100">

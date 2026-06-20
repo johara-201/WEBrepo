@@ -1,7 +1,8 @@
 import { useState } from "react";
 import ApplicationForm from "./ApplicationForm";
+import NavBar from "../../Components/NavBar";
 
-function JobDetailsPage({ job, onBack }) {
+function JobDetailsPage({ job, onBack, onHome, onSearch, onAbout, onFaq, onAdmin, onDashboard }) {
   const [showForm, setShowForm] = useState(false);
 
   if (!job) {
@@ -16,18 +17,20 @@ function JobDetailsPage({ job, onBack }) {
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#f6f5ef] text-right">
-      {/* Header */}
-      <header className="sticky top-0 z-20 bg-[#f6f5ef]/90 backdrop-blur border-b border-stone-200">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🌱</span>
-            <p className="font-extrabold text-[#2f6b46]">אשכול בית הכרם</p>
-          </div>
-          <button onClick={onBack} className="text-sm text-[#2f6b46] hover:underline">
-            ← חזרה לכל המשרות
-          </button>
-        </div>
-      </header>
+      <NavBar
+        activePage="details"
+        onHome={onHome}
+        onSearch={onSearch}
+        onAbout={onAbout}
+        onFaq={onFaq}
+        onAdmin={onAdmin}
+        onDashboard={onDashboard}
+      />
+      <div className="max-w-4xl mx-auto px-4 pt-4">
+        <button onClick={onBack} className="text-sm text-[#2f6b46] hover:underline">
+          ← חזרה לכל המשרות
+        </button>
+      </div>
 
       <main className="mx-auto max-w-4xl px-4 py-8">
         <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
