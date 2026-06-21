@@ -1,7 +1,7 @@
 function StatsCards({ jobs }) {
   const totalJobs = jobs.length;
   const manualJobs = jobs.filter((job) => job.source === "manual").length;
-  const externalJobs = jobs.filter((job) => job.source === "external").length;
+  const externalJobs = jobs.filter((job) => job.isExternal).length;
   const studentJobs = jobs.filter((job) => job.suitableForStudents).length;
 
   const cards = [

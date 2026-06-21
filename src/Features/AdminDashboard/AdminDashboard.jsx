@@ -9,6 +9,7 @@ import ViewApplications from "./ViewApplications";
 import NavBar from "../../Components/NavBar";
 import { useAuth } from "../../Context/AuthContext";
 import { AdminProfilePanel, AdminsListPanel } from "./AdminManagement";
+import { importLocalJobsSources, importCuratedLocalFeed } from "../../Services/ExternalJobsService";
 
 const SIDEBAR = [
   { key: "dashboard",   label: "לוח בקרה",     emoji: "🏠" },
@@ -25,6 +26,10 @@ function AdminDashboard({ onBack, onPostJob, onHome, onSearch, onAbout, onFaq })
   const [editingJob,      setEditingJob]      = useState(null);
   const [deletingJob,     setDeletingJob]     = useState(null);
   const [showApplications, setShowApplications] = useState(false);
+  const [importingLocal,   setImportingLocal]   = useState(false);
+  const [importLocalMsg,   setImportLocalMsg]   = useState("");
+  const [importingCurated, setImportingCurated] = useState(false);
+  const [importCuratedMsg, setImportCuratedMsg] = useState("");
 
   const loadJobs = async () => {
     try {
@@ -44,6 +49,38 @@ function AdminDashboard({ onBack, onPostJob, onHome, onSearch, onAbout, onFaq })
       setDeletingJob(null);
       loadJobs();
     } catch { alert("אירעה שגיאה במחיקה"); }
+  };
+
+  const handleImportLocalSources = async () => {
+    try {
+      setImportingLocal(true);
+      setImportLocalMsg("");
+      const result = await importLocalJobsSources();
+      setImportLocalMsg(
+        result.imported > 0
+          ? `✅ יובאו ${result.imported} משרות חיצוניות אמיתיות ממקור API. מקורות מקומיים דורשים בדיקה ידנית.`
+          : `✅ לא נמצאו משרות רלוונטיות. מקורות מקומיים דורשים בדיקה ידנית.`
+      );
+      loadJobs();
+    } catch {
+      setImportLocalMsg("❌ שגיאה בייבוא משרות ממקורות מקומיים");
+    } finally {
+      setImportingLocal(false);
+    }
+  };
+
+  const handleImportCuratedFeed = async () => {
+    try {
+      setImportingCurated(true);
+      setImportCuratedMsg("");
+      const result = await importCuratedLocalFeed();
+      setImportCuratedMsg(`✅ יובאו ${result.imported} משרות אמיתיות ממאגר חיצוני`);
+      loadJobs();
+    } catch {
+      setImportCuratedMsg("❌ שגיאה בייבוא ממאגר החיצוני");
+    } finally {
+      setImportingCurated(false);
+    }
   };
 
   const sidebar = SIDEBAR.filter(s => !s.superOnly || isSuperAdmin);
@@ -87,6 +124,14 @@ function AdminDashboard({ onBack, onPostJob, onHome, onSearch, onAbout, onFaq })
                 className="w-full text-right px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition flex items-center gap-2">
                 <span>📋</span> מועמדויות
               </button>
+              <button onClick={handleImportLocalSources} disabled={importingLocal}
+                className="w-full text-right px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition flex items-center gap-2 disabled:opacity-50">
+                <span>🌐</span> {importingLocal ? "מייבא..." : "ייבוא משרות ממקורות מקומיים"}
+              </button>
+              <button onClick={handleImportCuratedFeed} disabled={importingCurated}
+                className="w-full text-right px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition flex items-center gap-2 disabled:opacity-50">
+                <span>📥</span> {importingCurated ? "מייבא..." : "ייבוא משרות אמיתיות ממאגר חיצוני"}
+              </button>
               <button onClick={() => { logout(); onBack(); }}
                 className="w-full text-right px-3 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50 transition flex items-center gap-2">
                 <span>🚪</span> יציאה
@@ -101,6 +146,8 @@ function AdminDashboard({ onBack, onPostJob, onHome, onSearch, onAbout, onFaq })
           {activeTab === "dashboard" && (
             <>
               <h1 className="text-2xl font-bold text-gray-900 mb-6">לוח בקרה</h1>
+              {importLocalMsg  && <p className="mb-2 text-sm font-medium text-gray-700">{importLocalMsg}</p>}
+              {importCuratedMsg && <p className="mb-4 text-sm font-medium text-gray-700">{importCuratedMsg}</p>}
               {loading && <p className="py-10 text-center text-gray-400">טוען נתונים...</p>}
               {error   && <p className="py-10 text-center text-red-600">{error}</p>}
               {!loading && !error && (

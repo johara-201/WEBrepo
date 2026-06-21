@@ -5,6 +5,7 @@ function PostJobPage({ onBack }) {
   const [formData, setFormData] = useState({
     title: "",
     organization: "",
+    organizationType: "",
     city: "",
     jobType: "",
     employmentPercent: "",
@@ -29,10 +30,10 @@ function PostJobPage({ onBack }) {
     const jobToSend = {
       ...formData,
       employmentPercent: Number(formData.employmentPercent),
-      distanceMinutes: Number(formData.distanceMinutes),
-      source: "manual",
-      sourceName: "פרסום עצמאי",
-      publishDate: new Date(),
+      distanceMinutes:   Number(formData.distanceMinutes),
+      source:            "manual",
+      sourceName:        "פרסום עצמאי",
+      publishDate:       new Date(),
     };
 
     try {
@@ -73,7 +74,7 @@ function PostJobPage({ onBack }) {
               פרסום משרה חדשה
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/80">
-              מלאי את פרטי המשרה כדי להוסיף אותה למאגר המשרות באתר.
+              פרסמי משרה בתחומי נוער, חינוך בלתי פורמלי, קהילה ומנהיגות באזור אשכול בית הכרם.
             </p>
           </div>
 
@@ -87,7 +88,7 @@ function PostJobPage({ onBack }) {
                 </label>
                 <input
                   name="title"
-                  placeholder="לדוגמה: מדריך/ה חינוכי/ת"
+                  placeholder="לדוגמה: רכז/ת נוער, מדריך/ה, מנחה קבוצות..."
                   value={formData.title}
                   onChange={handleChange}
                   className={inputClass}
@@ -101,7 +102,7 @@ function PostJobPage({ onBack }) {
                 </label>
                 <input
                   name="organization"
-                  placeholder="שם הארגון"
+                  placeholder="שם הארגון / הרשות"
                   value={formData.organization}
                   onChange={handleChange}
                   className={inputClass}
@@ -110,11 +111,33 @@ function PostJobPage({ onBack }) {
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
+                  סוג ארגון
+                </label>
+                <select
+                  name="organizationType"
+                  value={formData.organizationType}
+                  onChange={handleChange}
+                  className={inputClass}
+                >
+                  <option value="">בחרי סוג ארגון</option>
+                  <option value="רשות מקומית">רשות מקומית</option>
+                  <option value="מחלקת נוער">מחלקת נוער</option>
+                  <option value='מתנ"ס / מרכז קהילתי'>מתנ"ס / מרכז קהילתי</option>
+                  <option value="תנועת נוער / ארגון נוער">תנועת נוער / ארגון נוער</option>
+                  <option value="עמותה">עמותה</option>
+                  <option value="קרן / תוכנית חינוכית">קרן / תוכנית חינוכית</option>
+                  <option value="משרד ממשלתי">משרד ממשלתי</option>
+                  <option value="אחר">אחר</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
                   יישוב
                 </label>
                 <input
                   name="city"
-                  placeholder="לדוגמה: בית ג׳אן"
+                  placeholder="לדוגמה: כרמיאל, סח'נין, משגב..."
                   value={formData.city}
                   onChange={handleChange}
                   className={inputClass}
@@ -125,13 +148,23 @@ function PostJobPage({ onBack }) {
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   סוג תפקיד
                 </label>
-                <input
+                <select
                   name="jobType"
-                  placeholder="לדוגמה: חינוך / נוער / קהילה"
                   value={formData.jobType}
                   onChange={handleChange}
                   className={inputClass}
-                />
+                >
+                  <option value="">בחרי סוג תפקיד</option>
+                  <option value="מדריך/ה">מדריך/ה</option>
+                  <option value="רכז/ת נוער">רכז/ת נוער</option>
+                  <option value="רכז/ת קהילה">רכז/ת קהילה</option>
+                  <option value="מנחה קבוצות">מנחה קבוצות</option>
+                  <option value="מנהל/ת תוכנית">מנהל/ת תוכנית</option>
+                  <option value="עובד/ת נוער">עובד/ת נוער</option>
+                  <option value="איש/אישה חינוך בלתי פורמלי">איש/אישה חינוך בלתי פורמלי</option>
+                  <option value="מנהל/ת מחלקה">מנהל/ת מחלקה</option>
+                  <option value="אחר">אחר</option>
+                </select>
               </div>
 
               <div>
@@ -196,7 +229,7 @@ function PostJobPage({ onBack }) {
                   מתאים לסטודנטים
                 </p>
                 <p className="text-xs text-gray-500">
-                  סמני אם המשרה מתאימה גם לסטודנטים.
+                  סמני אם המשרה מתאימה לסטודנטים ובוגרי תואר.
                 </p>
               </div>
 

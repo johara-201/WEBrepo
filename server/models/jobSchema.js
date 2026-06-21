@@ -14,7 +14,9 @@ let Job = new mongoose.Schema(
     sourceName: { type: String },
     applyUrl: { type: String },
     publishDate: { type: Date },
-    postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" }, // מנהל שפרסם
+    postedBy:         { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
+    organizationType: { type: String },
+    isExternal:       { type: Boolean, default: false },
   },
   { collection: "Jobs", versionKey: false }
 );
