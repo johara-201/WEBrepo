@@ -38,7 +38,7 @@ const NAV_LINKS = [
   { label: "שאלות ותשובות" },
 ];
 
-function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDashboard }) {
+function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDashboard, onAIChat }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -92,7 +92,7 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
   return (
     <div dir="rtl" className="min-h-screen bg-white text-right text-gray-800 font-sans">
 
-      <NavBar activePage="home" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} onDashboard={onDashboard} />
+      <NavBar activePage="home" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} onDashboard={onDashboard} onAIChat={onAIChat} />
 
       {/* ───── HERO (תמונת רקע מלאה) ───── */}
       <section

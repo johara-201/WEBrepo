@@ -1,3 +1,4 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const Job = require("./models/jobSchema");
 
@@ -57,7 +58,7 @@ const jobs = [
 ];
 
 mongoose
-  .connect("mongodb://johara2012000_db_user:qA6ztSvJyMKZNK6t@ac-77qve2r-shard-00-00.ybdhare.mongodb.net:27017,ac-77qve2r-shard-00-01.ybdhare.mongodb.net:27017,ac-77qve2r-shard-00-02.ybdhare.mongodb.net:27017/?ssl=true&replicaSet=atlas-iod2l4-shard-0&authSource=admin&appName=Cluster0")
+  .connect(process.env.MONGODB_URI)
   .then(async () => {
     await Job.deleteMany({});           // ניקוי קודם
     await Job.insertMany(jobs);          // הכנסת הנתונים

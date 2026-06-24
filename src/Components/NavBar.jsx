@@ -1,7 +1,7 @@
 import logoImg from "../assets/logo.png";
 import { useAuth } from "../Context/AuthContext";
 
-function NavBar({ activePage, onHome, onSearch, onAbout, onFaq, onAdmin, onDashboard }) {
+function NavBar({ activePage, onHome, onSearch, onAbout, onFaq, onAdmin, onDashboard, onAIChat }) {
   const { user, admin, logout, isUser, isAdmin } = useAuth();
   const handleLogout = () => {
   logout();
@@ -13,6 +13,7 @@ function NavBar({ activePage, onHome, onSearch, onAbout, onFaq, onAdmin, onDashb
     { label: "חיפוש משרות",   key: "search", fn: onSearch },
     { label: "אודות",          key: "about",  fn: onAbout  },
     { label: "שאלות ותשובות", key: "faq",    fn: onFaq    },
+    { label: "צ׳אט AI", key: "aiChat", fn: onAIChat },
   ];
 
   let rightBtn;

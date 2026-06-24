@@ -7,6 +7,7 @@ const applicationsRouter = require("./routes/applications.route");
 const authRouter      = require("./routes/auth.route");
 const usersRouter     = require("./routes/users.route");
 const adminMgmtRouter = require("./routes/adminManagement.route");
+const aiRouter = require("./routes/ai.routes");
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +25,7 @@ app.use("/api/applications", applicationsRouter);
 app.use("/api/auth",         authRouter);
 app.use("/api/users",        usersRouter);
 app.use("/api/admins",       adminMgmtRouter);
+app.use("/api/ai",           aiRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

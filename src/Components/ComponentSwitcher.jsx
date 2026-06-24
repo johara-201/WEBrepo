@@ -10,6 +10,7 @@ import FAQPage             from "../Features/FAQPage/FAQPage";
 import SearchPage          from "../Features/SearchPage/SearchPage";
 import LoginPage           from "../Features/AuthPage/LoginPage";
 import JobSeekerDashboard  from "../Features/JobSeekerDashboard/JobSeekerDashboard";
+import AIChat              from "../Features/AIChat/AIChat";
 
 function ComponentSwitcher() {
   const { isUser, isAdmin } = useAuth();
@@ -27,6 +28,7 @@ function ComponentSwitcher() {
   const goFaq       = () => setActivePage("faq");
   const goSearch    = () => setActivePage("search");
   const goDashboard = () => setActivePage("dashboard");
+  const goAIChat    = () => setActivePage("aiChat");
 
   const nav = {
     onHome:      goHome,
@@ -35,6 +37,7 @@ function ComponentSwitcher() {
     onFaq:       goFaq,
     onAdmin:     goAdmin,
     onDashboard: goDashboard,
+    onAIChat:    goAIChat,
   };
 
   const openJobDetails = (job) => {
@@ -46,6 +49,7 @@ function ComponentSwitcher() {
     if (type === "admin") setActivePage("admin");
     else                  setActivePage("dashboard");
   };
+
 
   if (activePage === "login")
     return <LoginPage {...nav} onSuccess={handleAuthSuccess} onClose={goHome} />;
@@ -71,7 +75,11 @@ function ComponentSwitcher() {
   if (activePage === "search")
     return <SearchPage {...nav} onSelectJob={openJobDetails} />;
 
+  if (activePage === "aiChat")
+    return <AIChat {...nav} />;
+
   return <HomePage {...nav} onSelectJob={openJobDetails} />;
+
 }
 
 export default ComponentSwitcher;
