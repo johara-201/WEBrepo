@@ -81,9 +81,22 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
   };
 
   const resetCategory = () => {
-    setActiveCategory(null);
-    updateFilter("jobType", "all");
-  };
+  setActiveCategory(null);
+  setFilters((prev) => ({
+    ...prev,
+    jobType: "all",
+    searchText: "",
+    city: "all",
+    employmentPercent: "all",
+    organization: "all",
+    distanceMinutes: "all",
+    forStudents: false,
+  }));
+
+  document.getElementById("jobs-section")?.scrollIntoView({
+    behavior: "smooth",
+  });
+};
 
   const cities   = [...new Set(jobs.map((j) => j.city).filter(Boolean))];
   const jobTypes = [...new Set(jobs.map((j) => j.jobType).filter(Boolean))];
