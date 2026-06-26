@@ -5,6 +5,7 @@ const path = require("path");
 
 const Job = require("../models/jobSchema");
 const Application = require("../models/applicationSchema");
+const User = require("../models/userSchema");
 
 const CURATED_LOCAL_FEED_URL = process.env.CURATED_LOCAL_FEED_URL || "http://localhost:3000/api/jobs/curated-feed-data";
 
@@ -27,6 +28,27 @@ router.get("/curated-feed-data", async (req, res) => {
     res.json(jobs);
   } catch (error) {
     res.status(500).send({ error: "שגיאה בקריאת קובץ המשרות" });
+  }
+});
+
+// GET site statistics for About page
+router.get("/stats/summary", async (req, res) => {
+  try {
+    const activeJobs = await Job.countDocuments({});
+    const registeredUsers = await User.countDocuments({});
+    const applications = await Application.countDocuments({});
+    const organizations = await Job.distinct("organization");
+    const cities = await Job.distinct("city");
+
+    res.status(200).json({
+      activeJobs,
+      organizations: organizations.filter(Boolean).length,
+      registeredUsers,
+      applications,
+      cities: cities.filter(Boolean).length,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "שגיאה בשליפת נתוני האתר" });
   }
 });
 

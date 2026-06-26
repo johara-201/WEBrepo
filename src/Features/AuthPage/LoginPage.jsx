@@ -96,19 +96,6 @@ function UserPanel({ onSuccess, onClose }) {
             ? "האימייל הזה כבר קיים במערכת. אפשר להתחבר לחשבון הקיים או להשתמש באימייל אחר."
             : error}
         </p>
-
-        {isEmailAlreadyRegistered && (
-          <button
-            type="button"
-            onClick={() => {
-              setMode("login");
-              setError("");
-            }}
-            className="mt-2 text-xs font-bold text-[#2f6b46] hover:underline"
-          >
-            מעבר להתחברות
-          </button>
-        )}
       </div>
     </div>
   </div>

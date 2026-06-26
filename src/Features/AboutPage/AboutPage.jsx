@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import heroIllustration from "../../assets/hero-illustration.png";
 import NavBar from "../../Components/NavBar";
 
@@ -15,15 +16,37 @@ const STEPS = [
   { num: "4", text: "חיבור לקהילה והשפעה" },
 ];
 
-const KPIS = [
-  { num: "350+", label: "משרות ויוזמות פעילות" },
-  { num: "40+",  label: "ארגונים שותפים" },
-  { num: "1,000+", label: "משתמשים רשומים" },
-  { num: "15",   label: "יישובים באזור" },
-];
-
 function AboutPage({ onHome, onAdmin, onSearch, onAbout, onFaq, onDashboard }) {
   const onBack = onHome;
+  const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+const [stats, setStats] = useState({
+  activeJobs: 0,
+  organizations: 0,
+  registeredUsers: 0,
+  applications: 0,
+});
+
+useEffect(() => {
+  async function loadStats() {
+    try {
+      const res = await fetch(`${API}/api/jobs/stats/summary`);
+      const data = await res.json();
+      setStats(data);
+    } catch (error) {
+      console.error("Failed to load about stats:", error);
+    }
+  }
+
+  loadStats();
+}, [API]);
+
+const KPIS = [
+  { num: stats.activeJobs, label: "משרות ויוזמות פעילות" },
+  { num: stats.organizations, label: "ארגונים שותפים" },
+  { num: stats.registeredUsers, label: "משתמשים רשומים" },
+  { num: stats.applications, label: "מועמדויות שהוגשו" },
+];
   return (
     <div dir="rtl" className="min-h-screen bg-white text-right text-gray-800 font-sans">
 
@@ -118,8 +141,10 @@ function AboutPage({ onHome, onAdmin, onSearch, onAbout, onFaq, onDashboard }) {
               key={k.label}
               className="bg-[#f9f8f4] rounded-2xl p-8 text-center border border-gray-100"
             >
-              <p className="text-4xl font-extrabold text-[#2f6b46] mb-2">{k.num}</p>
-              <p className="text-sm text-gray-500 font-medium">{k.label}</p>
+                  <p className="text-4xl font-extrabold text-[#2f6b46] mb-2">
+                      {Number(k.num).toLocaleString("he-IL")}
+                  </p>              
+          <p className="text-sm text-gray-500 font-medium">{k.label}</p>
             </div>
           ))}
         </div>
