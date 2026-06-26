@@ -11,6 +11,7 @@ function UserPanel({ onSuccess, onClose }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const isEmailAlreadyRegistered = error.includes("אימייל כבר רשום");
 
   const update = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -78,7 +79,40 @@ function UserPanel({ onSuccess, onClose }) {
         </div>
       </div>
 
-      {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+      {error && (
+  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-right shadow-sm">
+    <div className="flex items-start gap-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+        ⚠️
+      </div>
+
+      <div className="flex-1">
+        <p className="text-sm font-bold text-red-700">
+          {isEmailAlreadyRegistered ? "האימייל כבר רשום" : "שגיאה"}
+        </p>
+
+        <p className="mt-1 text-xs leading-5 text-red-600">
+          {isEmailAlreadyRegistered
+            ? "האימייל הזה כבר קיים במערכת. אפשר להתחבר לחשבון הקיים או להשתמש באימייל אחר."
+            : error}
+        </p>
+
+        {isEmailAlreadyRegistered && (
+          <button
+            type="button"
+            onClick={() => {
+              setMode("login");
+              setError("");
+            }}
+            className="mt-2 text-xs font-bold text-[#2f6b46] hover:underline"
+          >
+            מעבר להתחברות
+          </button>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
       <button type="submit" disabled={loading}
         className="w-full bg-[#2f6b46] text-white font-bold py-3 rounded-xl hover:bg-[#245539] transition disabled:opacity-60 text-sm mt-1">

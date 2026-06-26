@@ -29,7 +29,11 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "שם, אימייל וסיסמה הם שדות חובה" });
     }
     const exists = await User.findOne({ email });
-    if (exists) return res.status(400).json({ error: "אימייל כבר רשום" });
+    if (exists) {
+        return res.status(400).json({
+        error: "אימייל כבר רשום"
+      });
+    }
 
     const hashed = await bcrypt.hash(password, 10);
     const user   = await User.create({ email, password: hashed, name, phone });
