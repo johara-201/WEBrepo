@@ -101,12 +101,25 @@ router.put("/:id", async (req, res) => {
 // DELETE job
 router.delete("/:id", async (req, res) => {
   try {
-    await Job.findByIdAndDelete(req.params.id);
+    const job = await Job.findByIdAndDelete(req.params.id);
+
+    if (!job) {
+      return res.status(404).send("Job not found");
+    }
+
+    // לא מוחקים מועמדויות כדי שהמשתמש יראה שהמשרה הוסרה
+    await Application.updateMany(
+      { jobId: req.params.id },
+      {
+        $set: {
+          jobRemoved: true,
+          removedJobTitle: job.title,
+          removedJobAt: new Date(),
+        },
+      }
+    );
 
     req.app.get("broadcastStatsUpdate")?.();
-
-    // מחיקת כל המועמדויות של המשרה שנמחקה
-    await Application.deleteMany({ jobId: req.params.id });
 
     res.status(200).send("Job deleted");
   } catch (error) {
