@@ -39,14 +39,37 @@ useEffect(() => {
   }
 
   loadStats();
+  const wsUrl = API.replace("http", "ws");
+const socket = new WebSocket(wsUrl);
+
+socket.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+
+  if (data.type === "statsUpdated") {
+    loadStats();
+  }
+};
+
+socket.onerror = (error) => {
+  console.error("WebSocket error:", error);
+};
+
+return () => {
+  socket.close();
+};
+
+  const intervalId = setInterval(loadStats, 15000);
+
+  return () => clearInterval(intervalId);
 }, [API]);
 
 const KPIS = [
-  { num: stats.activeJobs, label: "משרות ויוזמות פעילות", icon: "💼" },
-  { num: stats.organizations, label: "ארגונים שותפים", icon: "🤝" },
-  { num: stats.registeredUsers, label: "משתמשים רשומים", icon: "👥" },
-  { num: stats.applications, label: "מועמדויות שהוגשו", icon: "📝" },
+  { num: stats.activeJobs, label: "משרות ויוזמות פעילות", icon: "💼", suffix: "+" },
+  { num: stats.organizations, label: "ארגונים שותפים", icon: "🤝", suffix: "+" },
+  { num: stats.registeredUsers, label: "משתמשים רשומים", icon: "👥", suffix: "+" },
+  { num: stats.applications, label: "מועמדויות שהוגשו", icon: "📝", suffix: "+" },
 ];
+
   return (
     <div dir="rtl" className="min-h-screen bg-white text-right text-gray-800 font-sans">
 
@@ -149,6 +172,7 @@ const KPIS = [
 
   <p className="mb-2 text-5xl font-extrabold text-[#2f6b46]">
     {Number(k.num).toLocaleString("he-IL")}
+    <span className="text-3xl text-[#2f6b46]">{k.suffix}</span>
   </p>
 
   <p className="text-sm font-bold text-gray-700">

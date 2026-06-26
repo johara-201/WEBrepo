@@ -73,6 +73,7 @@ router.post("/", async (req, res) => {
     const job = new Job(req.body);
 
     await job.save();
+    req.app.get("broadcastStatsUpdate")?.();
 
     res.status(201).send(job);
   } catch (error) {
@@ -89,6 +90,8 @@ router.put("/:id", async (req, res) => {
       { new: true }
     );
 
+    req.app.get("broadcastStatsUpdate")?.();
+
     res.status(200).send(job);
   } catch (error) {
     res.status(500).send(error);
@@ -99,6 +102,8 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     await Job.findByIdAndDelete(req.params.id);
+
+    req.app.get("broadcastStatsUpdate")?.();
 
     // מחיקת כל המועמדויות של המשרה שנמחקה
     await Application.deleteMany({ jobId: req.params.id });
@@ -268,6 +273,7 @@ router.post("/import-local-sources", async (req, res) => {
   try {
     await Job.deleteMany({ source: "external-local" });
     const saved = await Job.insertMany(jobsToSave);
+    req.app.get("broadcastStatsUpdate")?.();
     res.status(200).send({
       imported:       saved.length,
       checkedSources,
@@ -314,6 +320,7 @@ router.post("/import-curated-local-feed", async (req, res) => {
 
     await Job.deleteMany({ source: "curated-local-feed" });
     const saved = await Job.insertMany(mappedJobs);
+    req.app.get("broadcastStatsUpdate")?.();
 
     res.status(200).send({ imported: saved.length, jobs: saved });
   } catch (error) {
