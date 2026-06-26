@@ -19,16 +19,23 @@ function ViewApplications({ onClose }) {
     load();
   }, []);
 
+  const visibleApplications = applications.filter(
+  (app) => !app.jobRemoved && !app.cancelledByUser
+);
+
+const cancelledApplications = applications.filter(
+  (app) => app.cancelledByUser
+);
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 pt-12" dir="rtl">
       <div className="mb-12 w-full max-w-3xl rounded-2xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-800">
-            מועמדויות שהתקבלו ({applications.filter(a => !a.cancelledByUser).length})
-            {applications.some(a => a.cancelledByUser) && (
-              <span className="mr-2 text-sm font-normal text-red-400">
-                · {applications.filter(a => a.cancelledByUser).length} בוטלו
-              </span>
+            מועמדויות שהתקבלו ({visibleApplications.length})
+              {cancelledApplications.length > 0 && (
+                <span className="mr-2 text-sm font-normal text-red-400">
+{cancelledApplications.length} בוטלו              </span>
             )}
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
@@ -36,14 +43,11 @@ function ViewApplications({ onClose }) {
 
         {loading && <p className="py-8 text-center text-gray-500">טוען מועמדויות...</p>}
 
-        {!loading && applications.length === 0 && (
-          <p className="py-8 text-center text-gray-500">עדיין לא התקבלו מועמדויות.</p>
+{!loading && visibleApplications.length === 0 && (          <p className="py-8 text-center text-gray-500">עדיין לא התקבלו מועמדויות.</p>
         )}
 
-        {!loading && applications.length > 0 && (
-          <div className="space-y-3">
-            {applications.map((app) => (
-              <div key={app._id} className={`rounded-xl border p-4 ${app.cancelledByUser ? "border-red-200 bg-red-50/50" : "border-stone-200"}`}>
+{!loading && visibleApplications.length > 0 && (          <div className="space-y-3">
+{visibleApplications.map((app) => (              <div key={app._id} className={`rounded-xl border p-4 ${app.cancelledByUser ? "border-red-200 bg-red-50/50" : "border-stone-200"}`}>
                 <div className="mb-1 flex items-center justify-between">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`font-semibold ${app.cancelledByUser ? "text-gray-400 line-through" : "text-gray-800"}`}>{app.fullName}</span>
