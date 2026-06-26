@@ -42,10 +42,10 @@ useEffect(() => {
 }, [API]);
 
 const KPIS = [
-  { num: stats.activeJobs, label: "משרות ויוזמות פעילות" },
-  { num: stats.organizations, label: "ארגונים שותפים" },
-  { num: stats.registeredUsers, label: "משתמשים רשומים" },
-  { num: stats.applications, label: "מועמדויות שהוגשו" },
+  { num: stats.activeJobs, label: "משרות ויוזמות פעילות", icon: "💼" },
+  { num: stats.organizations, label: "ארגונים שותפים", icon: "🤝" },
+  { num: stats.registeredUsers, label: "משתמשים רשומים", icon: "👥" },
+  { num: stats.applications, label: "מועמדויות שהוגשו", icon: "📝" },
 ];
   return (
     <div dir="rtl" className="min-h-screen bg-white text-right text-gray-800 font-sans">
@@ -139,12 +139,21 @@ const KPIS = [
           {KPIS.map((k) => (
             <div
               key={k.label}
-              className="bg-[#f9f8f4] rounded-2xl p-8 text-center border border-gray-100"
-            >
-                  <p className="text-4xl font-extrabold text-[#2f6b46] mb-2">
-                      {Number(k.num).toLocaleString("he-IL")}
-                  </p>              
-          <p className="text-sm text-gray-500 font-medium">{k.label}</p>
+  className="group relative overflow-hidden rounded-3xl border border-[#dfe9df] bg-white px-8 py-8 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+>
+  <div className="absolute inset-x-0 top-0 h-1 bg-[#2f6b46]" />
+
+  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eef7f0] text-2xl">
+    {k.icon}
+  </div>
+
+  <p className="mb-2 text-5xl font-extrabold text-[#2f6b46]">
+    {Number(k.num).toLocaleString("he-IL")}
+  </p>
+
+  <p className="text-sm font-bold text-gray-700">
+    {k.label}
+  </p>
             </div>
           ))}
         </div>
