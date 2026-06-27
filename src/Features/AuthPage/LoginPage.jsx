@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useAuth } from "../../Context/AuthContext";
 import logoImg from "../../assets/logo.png";
 import heroIllustration from "../../assets/hero-illustration.png";
-
+import { useLanguage } from "../../Context/LanguageContext";
 // ── טאב: מחפש עבודה ──────────────────────────────────────────────────────────
 function UserPanel({ onSuccess, onClose }) {
   const { loginUser, registerUser } = useAuth();
+  const { t } = useLanguage();
   const [mode,  setMode]  = useState("login"); // "login" | "register"
   const [form,  setForm]  = useState({ email: "", password: "", name: "", phone: "" });
   const [error, setError] = useState("");
@@ -22,7 +23,7 @@ function UserPanel({ onSuccess, onClose }) {
       if (mode === "login") {
         await loginUser(form.email, form.password);
       } else {
-        if (!form.name) { setError("שם מלא הוא שדה חובה"); setLoading(false); return; }
+        if (!form.name) { setError(t.auth.fullNameRequired); setLoading(false); return; }
         await registerUser(form.email, form.password, form.name, form.phone);
       }
       onSuccess("user");
@@ -38,25 +39,27 @@ function UserPanel({ onSuccess, onClose }) {
       {mode === "register" && (
         <>
           <div>
-            <label className="text-xs font-semibold text-gray-500 mb-1 block">שם מלא *</label>
+            <label className="text-xs font-semibold text-gray-500 mb-1 block">
+              {t.auth.fullName}
+            </label>
             <input
               type="text" value={form.name} onChange={e => update("name", e.target.value)}
-              placeholder="ישראל ישראלי"
+              placeholder={t.auth.fullNamePlaceholder}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#2f6b46]"
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-gray-500 mb-1 block">טלפון</label>
+            <label className="text-xs font-semibold text-gray-500 mb-1 block">{t.auth.phone}</label>
             <input
               type="tel" value={form.phone} onChange={e => update("phone", e.target.value)}
-              placeholder="050-0000000"
+              placeholder={t.auth.phonePlaceholder}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#2f6b46]"
             />
           </div>
         </>
       )}
       <div>
-        <label className="text-xs font-semibold text-gray-500 mb-1 block">דוא"ל</label>
+        <label className="text-xs font-semibold text-gray-500 mb-1 block">{t.auth.email}</label>
         <input
           type="email" value={form.email} onChange={e => update("email", e.target.value)}
           placeholder="your@email.com" required
@@ -64,7 +67,7 @@ function UserPanel({ onSuccess, onClose }) {
         />
       </div>
       <div>
-        <label className="text-xs font-semibold text-gray-500 mb-1 block">סיסמה</label>
+        <label className="text-xs font-semibold text-gray-500 mb-1 block">{t.auth.password}</label>
         <div className="relative">
           <input
             type={showPw ? "text" : "password"} value={form.password}
@@ -103,14 +106,14 @@ function UserPanel({ onSuccess, onClose }) {
 
       <button type="submit" disabled={loading}
         className="w-full bg-[#2f6b46] text-white font-bold py-3 rounded-xl hover:bg-[#245539] transition disabled:opacity-60 text-sm mt-1">
-        {loading ? "..." : mode === "login" ? "התחבר" : "הירשם"}
+        {loading ? "..." : mode === "login" ? t.auth.login : t.auth.register}
       </button>
 
       <p className="text-center text-sm text-gray-500">
-        {mode === "login" ? "אין לך חשבון?" : "כבר רשום?"}{" "}
+        {mode === "login" ? t.auth.noAccount : t.auth.alreadyRegistered}{" "}
         <button type="button" onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}
           className="text-[#2f6b46] font-semibold hover:underline">
-          {mode === "login" ? "הירשם כאן" : "התחבר"}
+          {mode === "login" ? t.auth.registerHere : t.auth.login}
         </button>
       </p>
     </form>
@@ -120,6 +123,7 @@ function UserPanel({ onSuccess, onClose }) {
 // ── טאב: מנהל ────────────────────────────────────────────────────────────────
 function AdminPanel({ onSuccess }) {
   const { loginAdmin } = useAuth();
+  const { t } = useLanguage();
   const [form,  setForm]  = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -143,15 +147,15 @@ function AdminPanel({ onSuccess }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div>
-        <label className="text-xs font-semibold text-gray-500 mb-1 block">שם משתמש</label>
+        <label className="text-xs font-semibold text-gray-500 mb-1 block">{t.auth.username}</label>
         <input
           type="text" value={form.username} onChange={e => update("username", e.target.value)}
-          placeholder="שם המשתמש שלך" required
+          placeholder={t.auth.usernamePlaceholder} required
           className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#4f46e5]"
         />
       </div>
       <div>
-        <label className="text-xs font-semibold text-gray-500 mb-1 block">סיסמה</label>
+        <label className="text-xs font-semibold text-gray-500 mb-1 block">{t.auth.password}</label>
         <div className="relative">
           <input
             type={showPw ? "text" : "password"} value={form.password}
@@ -170,7 +174,7 @@ function AdminPanel({ onSuccess }) {
 
       <button type="submit" disabled={loading}
         className="w-full bg-[#4f46e5] text-white font-bold py-3 rounded-xl hover:bg-[#4338ca] transition disabled:opacity-60 text-sm mt-1">
-        {loading ? "..." : "כניסה כמנהל"}
+        {loading ? "..." : t.auth.adminLogin}
       </button>
     </form>
   );
@@ -179,6 +183,7 @@ function AdminPanel({ onSuccess }) {
 // ── דף ראשי ───────────────────────────────────────────────────────────────────
 function LoginPage({ onSuccess, onClose, onHome }) {
   const [tab, setTab] = useState("user"); // "user" | "admin"
+  const { t } = useLanguage();
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#f9f8f4] flex">
@@ -196,11 +201,16 @@ function LoginPage({ onSuccess, onClose, onHome }) {
 
   <div className="px-10 pt-4 relative z-10 text-right">
     <h2 className="text-white text-4xl font-extrabold leading-tight mb-4">
-      יחד מחזקים<br />את החינוך<br />בקהילה שלנו
+      {t.auth.sideTitle.split("\n").map((line) => (
+  <span key={line}>
+    {line}
+    <br />
+  </span>
+))}
     </h2>
 
     <p className="text-white/80 text-base leading-relaxed max-w-md">
-      הזדמנויות לחיים, פלטפורמת משרות בחינוך, נוער וקהילה באזור בית הכרם.
+      {t.auth.sideSubtitle}
     </p>
   </div>
         <div className="absolute bottom-0 left-0 right-0 h-48 overflow-hidden opacity-20">
@@ -219,7 +229,7 @@ function LoginPage({ onSuccess, onClose, onHome }) {
         className="inline-flex items-center justify-center gap-2 bg-[#2f6b46] text-white font-bold px-4 py-2 rounded-xl hover:bg-[#245539] transition shadow-md text-xs"
       >
         <span>🏠</span>
-        <span>חזרה לדף הבית</span>
+        <span>{t.auth.backHome}</span>
       </button>
     </div>
 
@@ -227,11 +237,11 @@ function LoginPage({ onSuccess, onClose, onHome }) {
     <div className="bg-white border border-gray-100 rounded-3xl shadow-xl px-8 py-9">
 
       <h1 className="text-3xl font-extrabold text-gray-900 mb-1 text-center">
-        ברוכים הבאים
+        {t.auth.welcome}
       </h1>
 
       <p className="text-gray-400 text-sm mb-7 text-center">
-        התחברו כדי להמשיך
+        {t.auth.continueLogin}
       </p>
 
       {/* טאבים */}
@@ -244,7 +254,7 @@ function LoginPage({ onSuccess, onClose, onHome }) {
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
-          מחפש/ת עבודה
+          {t.auth.jobSeeker} 
         </button>
 
         <button
@@ -255,7 +265,7 @@ function LoginPage({ onSuccess, onClose, onHome }) {
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
-          מנהל/ת
+          {t.auth.admin}
         </button>
       </div>
 

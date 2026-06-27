@@ -9,6 +9,7 @@ import icon2 from "../../assets/icon2.png";
 import icon3 from "../../assets/icon3.png";
 import icon4 from "../../assets/icon4.png";
 import icon5 from "../../assets/icon5.png";
+import { useLanguage } from "../../Context/LanguageContext";
 
 /* אייקון SVG למנהל/ת */
 function ManagerIcon() {
@@ -23,12 +24,12 @@ function ManagerIcon() {
 }
 
 const CATEGORIES = [
-  { label: "רכז/ת נוער",    value: "רכז",           icon: icon1 },
-  { label: "מדריך/ה",        value: "מדריך",          icon: icon2 },
-  { label: "עובד/ת קהילה",   value: "עובד קהילה",     icon: icon3 },
-  { label: "מנהל/ת תוכנית", value: "מנהל תוכנית",   icon: icon4 },
-  { label: "חונך/ת חברתי",  value: "חונך",           icon: icon5 },
-  { label: "מנהל/ת",         value: "מנהל",           icon: null  }, // SVG
+  { labelKey: "youthCoordinator", value: "רכז", icon: icon1 },
+  { labelKey: "guide", value: "מדריך", icon: icon2 },
+  { labelKey: "communityWorker", value: "עובד קהילה", icon: icon3 },
+  { labelKey: "programManager", value: "מנהל תוכנית", icon: icon4 },
+  { labelKey: "socialMentor", value: "חונך", icon: icon5 },
+  { labelKey: "manager", value: "מנהל", icon: null },
 ];
 
 const NAV_LINKS = [
@@ -39,6 +40,7 @@ const NAV_LINKS = [
 ];
 
 function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDashboard, onAIChat }) {
+  const { t } = useLanguage();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -103,7 +105,7 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
   const visibleJobs = filterJobs(jobs, filters);
 
   return (
-    <div dir="rtl" className="min-h-screen bg-white text-right text-gray-800 font-sans">
+    <div dir="rtl" className="min-h-screen bg-white text-right text-gray-800">
 
       <NavBar activePage="home" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} onDashboard={onDashboard} onAIChat={onAIChat} />
 
@@ -120,11 +122,11 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
         {/* טקסט — גבוה ומרכזי */}
         <div className="flex-1 flex items-start justify-center px-6 pt-10">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900 mb-3 drop-shadow-sm">
-              הזדמנויות לחיים
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight text-gray-900 mb-3">
+              {t.home.heroTitle}
             </h1>
-            <p className="text-2xl md:text-3xl font-bold text-[#2f6b46] drop-shadow-sm">
-              פלטפורמת משרות בחינוך, נוער וקהילה
+            <p className="text-2xl md:text-3xl font-semibold text-[#2f6b46]">
+              {t.home.heroSubtitle}
             </p>
           </div>
         </div>
@@ -136,7 +138,7 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
               type="text"
               value={filters.searchText}
               onChange={(e) => updateFilter("searchText", e.target.value)}
-              placeholder="מה אתם מחפשים?"
+              placeholder={t.home.searchPlaceholder}
               className="flex-1 px-4 py-3 text-right text-gray-800 bg-white border border-gray-200 rounded-xl focus:outline-none placeholder-gray-400"
             />
             <select
@@ -144,7 +146,7 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
               onChange={(e) => updateFilter("city", e.target.value)}
               className="px-3 py-3 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl focus:outline-none"
             >
-              <option value="all">כל הישובים</option>
+              <option value="all">{t.home.allTowns}</option>
               {cities.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
             <select
@@ -152,14 +154,14 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
               onChange={(e) => updateFilter("jobType", e.target.value)}
               className="px-3 py-3 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl focus:outline-none"
             >
-              <option value="all">כל התפקידים</option>
+              <option value="all">{t.home.allRoles}</option>
               {jobTypes.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
             <button
               onClick={() => document.getElementById("jobs-section")?.scrollIntoView({ behavior: "smooth" })}
               className="bg-[#2f6b46] text-white px-8 py-3 rounded-xl text-sm font-bold hover:bg-[#245539] transition whitespace-nowrap"
             >
-              חפש משרות
+              {t.home.searchJobs}
             </button>
           </div>
         </div>
@@ -168,12 +170,12 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
       {/* ───── CATEGORIES ───── */}
       <section className="max-w-7xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-800">קטגוריות מובילות</h2>
+          <h2 className="text-xl font-bold text-gray-800">{t.home.topCategories}</h2>
           <button
             onClick={resetCategory}
             className="bg-[#2f6b46] text-white text-sm font-bold px-5 py-2 rounded-xl hover:bg-[#245539] transition"
           >
-            לכל הקטגוריות
+            {t.home.allCategories}
           </button>
         </div>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
@@ -191,12 +193,16 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
               >
                 <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center overflow-hidden">
                   {cat.icon
-                    ? <img src={cat.icon} alt={cat.label} className="w-10 h-10 object-contain" />
+                    ? <img
+                        src={cat.icon}
+                        alt={t.home.categories[cat.labelKey]}
+                        className="w-10 h-10 object-contain"
+                      />
                     : <ManagerIcon />
                   }
                 </div>
                 <span className="text-xs font-semibold text-gray-700 text-center leading-tight">
-                  {cat.label}
+                  {t.home.categories[cat.labelKey]}
                 </span>
               </button>
             );
@@ -207,21 +213,21 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
       {/* ───── JOBS ───── */}
       <section id="jobs-section" className="max-w-7xl mx-auto px-6 pb-16">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-800">משרות אחרונות</h2>
+          <h2 className="text-xl font-bold text-gray-800">{t.home.latestJobs}</h2>
           {!loading && !error && (
-            <span className="text-sm text-gray-400">{visibleJobs.length} משרות נמצאו</span>
+            <span className="text-sm text-gray-400">{t.home.jobsFound(visibleJobs.length)}</span>
           )}
         </div>
         {loading && (
           <div className="text-center py-16 text-gray-400">
             <div className="text-4xl mb-3">⏳</div>
-            <p>טוען משרות...</p>
+            <p>{t.home.loadingJobs}</p>
           </div>
         )}
         {error && (
           <div className="text-center py-16 text-gray-400">
             <div className="text-4xl mb-3">⚠️</div>
-            <p>לא נמצאו משרות להצגה כרגע.</p>
+            <p>{t.home.noJobs}</p>
           </div>
         )}
         {!loading && !error && <JobList jobs={visibleJobs} onSelectJob={onSelectJob} />}
@@ -229,7 +235,7 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
 
       {/* ───── FOOTER ───── */}
       <footer className="bg-gray-50 border-t border-gray-100 text-center text-xs text-gray-400 py-6">
-        הזדמנויות לחיים | משרות בחינוך, נוער וקהילה
+        {t.home.footer}
       </footer>
     </div>
   );

@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&family=Noto+Sans+Hebrew:wght@300;400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -7,11 +8,149 @@
   --cream: #f6f5ef;        /* רקע חמים */
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  font-family: "Noto Sans Hebrew", "Noto Sans Arabic", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Light / Dark Mode */
+
+:root {
+  --app-bg: #f6f5ef;
+  --card-bg: #ffffff;
+  --soft-bg: #f9fafb;
+  --app-text: #1f2937;
+  --muted-text: #4b5563;
+  --app-border: #e5e7eb;
+}
+
+[data-theme="dark"] {
+  --brand: #7dd3a4;
+  --brand-dark: #5bbd87;
+  --brand-light: #173625;
+  --cream: #111827;
+
+  --app-bg: #111827;
+  --card-bg: #1f2937;
+  --soft-bg: #273449;
+  --app-text: #f9fafb;
+  --muted-text: #d1d5db;
+  --app-border: #374151;
+
+  color-scheme: dark;
+}
 
 body {
-  margin: 0;
-  font-family: system-ui, "Segoe UI", "Heebo", Arial, sans-serif;
-  background: var(--cream);
-  color: #1f2937;
+  background: var(--app-bg);
+  color: var(--app-text);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+[data-theme="dark"] .app-header,
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .bg-white\/90 {
+  background-color: var(--card-bg) !important;
+  color: var(--app-text) !important;
+}
+
+[data-theme="dark"] .bg-gray-50,
+[data-theme="dark"] .bg-gray-100,
+[data-theme="dark"] .bg-stone-50,
+[data-theme="dark"] .bg-stone-100,
+[data-theme="dark"] .bg-\[\#f9f8f4\],
+[data-theme="dark"] .bg-\[\#f6f5ef\],
+[data-theme="dark"] .bg-\[\#f7f8f5\],
+[data-theme="dark"] .bg-\[\#e9f1ea\],
+[data-theme="dark"] .bg-\[\#e9f5ef\],
+[data-theme="dark"] .bg-\[\#f0faf4\],
+[data-theme="dark"] .bg-\[\#e8f3ec\] {
+  background-color: var(--soft-bg) !important;
+  color: var(--app-text) !important;
+}
+
+[data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .text-gray-800,
+[data-theme="dark"] .text-gray-700,
+[data-theme="dark"] .text-gray-600,
+[data-theme="dark"] .text-gray-500,
+[data-theme="dark"] .text-gray-400 {
+  color: var(--muted-text) !important;
+}
+
+[data-theme="dark"] .text-\[\#2f6b46\],
+[data-theme="dark"] .text-\[\#4f46e5\],
+[data-theme="dark"] .text-green-600,
+[data-theme="dark"] .text-blue-600 {
+  color: var(--brand) !important;
+}
+
+[data-theme="dark"] .border-gray-50,
+[data-theme="dark"] .border-gray-100,
+[data-theme="dark"] .border-gray-200,
+[data-theme="dark"] .border-gray-300,
+[data-theme="dark"] .border-stone-200,
+[data-theme="dark"] .border-\[\#2f6b46\],
+[data-theme="dark"] .border-\[\#4f46e5\],
+[data-theme="dark"] .border-\[\#c3e6d3\] {
+  border-color: var(--app-border) !important;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background-color: #111827 !important;
+  color: var(--app-text) !important;
+  border-color: var(--app-border) !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+[data-theme="dark"] .theme-toggle {
+  background-color: #111827 !important;
+  color: #f9fafb !important;
+  border-color: #4b5563 !important;
+}
+
+[data-theme="dark"] .shadow-sm,
+[data-theme="dark"] .shadow-md,
+[data-theme="dark"] .shadow-lg,
+[data-theme="dark"] .shadow-xl {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Global font override - Hebrew / Arabic / English */
+:root {
+  --main-font: "Noto Sans Hebrew", "Noto Sans Arabic", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+html,
+body,
+#root,
+#root * {
+  font-family: var(--main-font) !important;
+}
+
+button,
+input,
+textarea,
+select,
+option {
+  font-family: var(--main-font) !important;
 }
