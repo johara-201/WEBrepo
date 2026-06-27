@@ -1,95 +1,229 @@
 import { useState } from "react";
 import { submitApplication } from "../../Services/ApplicationsService";
+import { useLanguage } from "../../Context/LanguageContext";
+
+const APPLICATION_FORM_TEXT = {
+  he: {
+    title: "הגשת מועמדות",
+    successTitle: "המועמדות נשלחה!",
+    successMessageStart: "תודה",
+    successMessageMiddle: "קיבלנו את המועמדות שלך למשרת",
+    close: "סגירה",
+
+    labels: {
+      fullName: "שם מלא *",
+      email: "אימייל *",
+      phone: "טלפון",
+      message: "מסר / מכתב מוטיבציה",
+    },
+
+    placeholders: {
+      message: "ספר/י קצת על עצמך ומדוע את/ה מתאים/ה לתפקיד...",
+    },
+
+    buttons: {
+      cancel: "ביטול",
+      submit: "שליחת מועמדות",
+      submitting: "שולח...",
+    },
+
+    error: "אירעה שגיאה בשליחת הטופס. נסה שוב.",
+  },
+
+  ar: {
+    title: "تقديم طلب",
+    successTitle: "تم إرسال طلب التقديم!",
+    successMessageStart: "شكرًا",
+    successMessageMiddle: "استلمنا طلب تقديمك لوظيفة",
+    close: "إغلاق",
+
+    labels: {
+      fullName: "الاسم الكامل *",
+      email: "البريد الإلكتروني *",
+      phone: "رقم الهاتف",
+      message: "رسالة / خطاب دافع",
+    },
+
+    placeholders: {
+      message: "اكتب/ي قليلًا عن نفسك ولماذا أنت مناسب/ة لهذه الوظيفة...",
+    },
+
+    buttons: {
+      cancel: "إلغاء",
+      submit: "إرسال الطلب",
+      submitting: "جارٍ الإرسال...",
+    },
+
+    error: "حدث خطأ أثناء إرسال النموذج. حاول/ي مرة أخرى.",
+  },
+};
 
 function ApplicationForm({ job, onClose }) {
+  const { language } = useLanguage();
+  const text = APPLICATION_FORM_TEXT[language] || APPLICATION_FORM_TEXT.he;
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     phone: "",
     message: "",
   });
+
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setSubmitting(true);
+
     try {
       await submitApplication({
         ...formData,
         jobId: job._id,
         jobTitle: job.title,
       });
+
       setSubmitted(true);
     } catch (err) {
       console.error(err);
-      alert("אירעה שגיאה בשליחת הטופס. נסה שוב.");
+      alert(text.error);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" dir="rtl">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      dir="rtl"
+    >
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         {submitted ? (
-          <div className="text-center py-6">
-            <div className="text-5xl mb-4">✅</div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">המועמדות נשלחה!</h2>
-            <p className="text-gray-600 mb-6">
-              תודה {formData.fullName}! קיבלנו את המועמדות שלך למשרת <strong>{job.title}</strong>.
+          <div className="py-6 text-center">
+            <div className="mb-4 text-5xl">✅</div>
+
+            <h2 className="mb-2 text-xl font-bold text-gray-800">
+              {text.successTitle}
+            </h2>
+
+            <p className="mb-6 text-gray-600">
+              {text.successMessageStart} {formData.fullName}!{" "}
+              {text.successMessageMiddle}{" "}
+              <strong>{job.title}</strong>.
             </p>
-            <button onClick={onClose}
-              className="rounded-lg bg-[#2f6b46] px-6 py-2 font-medium text-white hover:bg-[#245539]">
-              סגירה
+
+            <button
+              onClick={onClose}
+              className="rounded-lg bg-[#2f6b46] px-6 py-2 font-medium text-white hover:bg-[#245539]"
+            >
+              {text.close}
             </button>
           </div>
         ) : (
           <>
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-800">הגשת מועמדות</h2>
-                <p className="text-sm text-[#2f6b46]">{job.title} · {job.organization}</p>
+                <h2 className="text-xl font-bold text-gray-800">
+                  {text.title}
+                </h2>
+
+                <p className="text-sm text-[#2f6b46]">
+                  {job.title} · {job.organization}
+                </p>
               </div>
-              <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+
+              <button
+                onClick={onClose}
+                className="text-xl text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm text-gray-600">שם מלא *</label>
-                <input name="fullName" value={formData.fullName} onChange={handleChange} required
-                  className="w-full rounded-lg border border-gray-300 p-3 focus:border-[#2f6b46] focus:outline-none" />
+                <label className="mb-1 block text-sm text-gray-600">
+                  {text.labels.fullName}
+                </label>
+
+                <input
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-lg border border-gray-300 p-3 focus:border-[#2f6b46] focus:outline-none"
+                />
               </div>
+
               <div>
-                <label className="mb-1 block text-sm text-gray-600">אימייל *</label>
-                <input name="email" type="email" value={formData.email} onChange={handleChange} required
-                  className="w-full rounded-lg border border-gray-300 p-3 focus:border-[#2f6b46] focus:outline-none" />
+                <label className="mb-1 block text-sm text-gray-600">
+                  {text.labels.email}
+                </label>
+
+                <input
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-lg border border-gray-300 p-3 focus:border-[#2f6b46] focus:outline-none"
+                />
               </div>
+
               <div>
-                <label className="mb-1 block text-sm text-gray-600">טלפון</label>
-                <input name="phone" type="tel" value={formData.phone} onChange={handleChange}
-                  className="w-full rounded-lg border border-gray-300 p-3 focus:border-[#2f6b46] focus:outline-none" />
+                <label className="mb-1 block text-sm text-gray-600">
+                  {text.labels.phone}
+                </label>
+
+                <input
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-gray-300 p-3 focus:border-[#2f6b46] focus:outline-none"
+                />
               </div>
+
               <div>
-                <label className="mb-1 block text-sm text-gray-600">מסר / מכתב מוטיבציה</label>
-                <textarea name="message" value={formData.message} onChange={handleChange} rows={4}
-                  placeholder="ספר/י קצת על עצמך ומדוע את/ה מתאים/ה לתפקיד..."
-                  className="w-full rounded-lg border border-gray-300 p-3 focus:border-[#2f6b46] focus:outline-none" />
+                <label className="mb-1 block text-sm text-gray-600">
+                  {text.labels.message}
+                </label>
+
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows={4}
+                  placeholder={text.placeholders.message}
+                  className="w-full rounded-lg border border-gray-300 p-3 focus:border-[#2f6b46] focus:outline-none"
+                />
               </div>
 
               <div className="flex justify-end gap-3 pt-1">
-                <button type="button" onClick={onClose}
-                  className="rounded-lg border px-5 py-2 text-sm text-gray-600 hover:bg-gray-50">
-                  ביטול
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-lg border px-5 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                >
+                  {text.buttons.cancel}
                 </button>
-                <button type="submit" disabled={submitting}
-                  className="rounded-lg bg-[#2f6b46] px-5 py-2 text-sm font-medium text-white hover:bg-[#245539] disabled:opacity-60">
-                  {submitting ? "שולח..." : "שליחת מועמדות"}
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="rounded-lg bg-[#2f6b46] px-5 py-2 text-sm font-medium text-white hover:bg-[#245539] disabled:opacity-60"
+                >
+                  {submitting ? text.buttons.submitting : text.buttons.submit}
                 </button>
               </div>
             </form>

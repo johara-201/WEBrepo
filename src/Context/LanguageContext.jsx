@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const LanguageContext = createContext(null);
 
@@ -71,6 +71,13 @@ const translations = {
         manager: "מנהל/ת",
       },
     },
+    ai: {
+      initial: "שלום! אני עוזר AI לחיפוש משרות בחינוך, נוער וקהילה. איך אפשר לעזור?",
+      title: "צ׳אט AI לחיפוש משרות",
+      subtitle: "עוזר למשתמשים להבין איך למצוא משרה מתאימה באתר",
+      placeholder: "כתבי שאלה על חיפוש משרה...",
+      thinking: "חושב..."
+    }
   },
 
   ar: {
@@ -141,9 +148,132 @@ const translations = {
   emailAlreadyRegistered: "البريد الإلكتروني مسجّل مسبقًا",
   emailAlreadyRegisteredText: "هذا البريد الإلكتروني موجود في النظام. يمكن تسجيل الدخول للحساب الحالي أو استخدام بريد آخر.",
   fullNameRequired: "الاسم الكامل مطلوب",
+},
+ai: {
+  initial: "مرحبًا! أنا مساعد AI للبحث عن وظائف في التربية، الشباب والمجتمع. كيف يمكنني المساعدة؟",
+  title: "دردشة AI للبحث عن وظائف",
+  subtitle: "يساعد المستخدمين على فهم كيفية العثور على وظيفة مناسبة في الموقع",
+  placeholder: "اكتبي سؤالًا حول البحث عن وظيفة...",
+  thinking: "يفكّر..."
 }
   },
 };
+
+
+const uiDictionaryAr = {
+  "ניהול משרות": "إدارة الوظائف",
+  "מועמדויות": "طلبات التقديم",
+  "משרה חדשה": "وظيفة جديدة",
+  "פרסום משרה": "نشر وظيفة",
+  "פרסום משרה חדשה": "نشر وظيفة جديدة",
+  "שם משרה": "اسم الوظيفة",
+  "שם המשרה": "اسم الوظيفة",
+  "יישוב": "البلدة",
+  "ארגון": "الجهة",
+  "ארגון מגייס": "الجهة المشغّلة",
+  "סוג תפקיד": "نوع الوظيفة",
+  "אחוז משרה": "نسبة الوظيفة",
+  "היקף משרה": "نسبة الوظيفة",
+  "פעולות": "إجراءات",
+  "עריכה": "تعديل",
+  "מחיקה": "حذف",
+  "שמור": "حفظ",
+  "שומר...": "جارٍ الحفظ...",
+  "ביטול": "إلغاء",
+  "עדכון": "تحديث",
+  "טוען נתונים...": "جارٍ تحميل البيانات...",
+  "טוען...": "جارٍ التحميل...",
+  "אין נתונים": "لا توجد بيانات",
+  "אין עדיין משרות במערכת.": "لا توجد وظائف في النظام بعد.",
+  "כן": "نعم",
+  "לא": "لا",
+
+  "לוח בקרה": "لوحة التحكم",
+  "הפרטים שלי": "بياناتي",
+  "פרטים אישיים": "بيانات شخصية",
+  "שינוי סיסמה": "تغيير كلمة المرور",
+  "קורות חיים": "السيرة الذاتية",
+  "המשרות שהגשתי": "الوظائف التي تقدمت لها",
+  "הפרטים האישיים שלי": "بياناتي الشخصية",
+  "קורות החיים שלי": "سيرتي الذاتية",
+  "לא הוזן": "لم يتم إدخال قيمة",
+  "עיר מגורים": "بلدة السكن",
+  "תחום עיסוק": "المجال المهني",
+  "קצת עליי": "نبذة عني",
+  "כמה מילים על עצמך...": "اكتب/ي بضع كلمات عن نفسك...",
+  "פרטים עודכנו בהצלחה ✓": "تم تحديث البيانات بنجاح ✓",
+  "שגיאה בעדכון פרטים": "حدث خطأ أثناء تحديث البيانات",
+
+  "סיסמה נוכחית": "كلمة المرور الحالية",
+  "סיסמה חדשה": "كلمة مرور جديدة",
+  "אימות סיסמה חדשה": "تأكيد كلمة المرور الجديدة",
+  "עדכן סיסמה": "تحديث كلمة المرور",
+  "מעדכן...": "جارٍ التحديث...",
+  "הסיסמה עודכנה בהצלחה ✓": "تم تحديث كلمة المرور بنجاح ✓",
+
+  "הגשת מועמדות": "تقديم طلب",
+  "שליחת מועמדות": "إرسال الطلب",
+  "שולח...": "جارٍ الإرسال...",
+  "המועמדות נשלחה!": "تم إرسال الطلب!",
+  "שם מלא": "الاسم الكامل",
+  "אימייל": "البريد الإلكتروني",
+  "טלפון": "رقم الهاتف",
+  "מסר / מכתב מוטיבציה": "رسالة / خطاب دافع",
+
+  "חיפוש": "بحث",
+  "חיפוש משרות": "البحث عن وظائف",
+  "חפש משרות": "ابحث عن وظائف",
+  "מה אתם מחפשים?": "ما الذي تبحثون عنه؟",
+  "כל הישובים": "كل البلدات",
+  "כל התפקידים": "كل الوظائف",
+  "כל הארגונים": "كل الجهات",
+  "כל האחוזים": "كل النسب",
+  "סינון תוצאות": "تصفية النتائج",
+  "נקה סינון": "مسح التصفية",
+  "הצג תוצאות": "عرض النتائج",
+  "לא נמצאו משרות התואמות את החיפוש.": "لم يتم العثور على وظائف تطابق البحث.",
+  "לא נמצאו משרות התואמות את הסינון.": "لم يتم العثور على وظائف تطابق التصفية.",
+
+  "צ׳אט AI לחיפוש משרות": "دردشة AI للبحث عن وظائف",
+  "עוזר למשתמשים להבין איך למצוא משרה מתאימה באתר": "يساعد المستخدمين على فهم كيفية العثور على وظيفة مناسبة في الموقع",
+  "חושב...": "يفكّر...",
+  "כתבי שאלה על חיפוש משרה...": "اكتبي سؤالًا حول البحث عن وظيفة...",
+  "כל יישוב": "كل البلدات",
+"כל ארגון": "كل الجهات",
+"כל היקף": "كل النسب",
+"סוג משרה": "نوع الوظيفة",
+"מיין: חדש ← ישן": "ترتيب: الأحدث ← الأقدم",
+"מיין: ישן ← חדש": "ترتيب: الأقدم ← الأحدث",
+"לפרטים": "للتفاصيل",
+"פורסם": "نُشر",
+"תיאור התפקיד": "وصف الوظيفة",
+"פרטי המשרה": "تفاصيل الوظيفة",
+"חזרה לכל המשרות": "الرجوع إلى كل الوظائف",
+"הגשה באתר המקור": "التقديم في موقع المصدر",
+"הגשת מועמדות דרך המערכת": "تقديم طلب عبر النظام",
+};
+
+
+const uiDictionaryHe = Object.fromEntries(
+  Object.entries(uiDictionaryAr).map(([he, ar]) => [ar, he])
+);
+
+function normalizeText(text) {
+  return String(text || "").replace(/\s+/g, " ").trim();
+}
+
+function translateDynamicText(text, language) {
+  const trimmed = normalizeText(text);
+  if (!trimmed) return text;
+
+  const dict = language === "ar" ? uiDictionaryAr : uiDictionaryHe;
+
+  if (dict[trimmed]) {
+    return String(text).replace(trimmed, dict[trimmed]);
+  }
+
+  return text;
+}
 
 function getInitialLanguage() {
   const savedLanguage = localStorage.getItem("language");
@@ -159,19 +289,102 @@ export function LanguageProvider({ children }) {
     localStorage.setItem("language", language);
   }, [language]);
 
+  useEffect(() => {
+    const root = document.getElementById("root");
+    if (!root) return undefined;
+
+    let frame = null;
+
+    const runTranslation = () => {
+      if (frame) cancelAnimationFrame(frame);
+
+      frame = requestAnimationFrame(() => {
+        translateElementTree(root, language);
+      });
+    };
+
+    runTranslation();
+
+    const observer = new MutationObserver(runTranslation);
+
+    observer.observe(root, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["placeholder", "title", "alt", "aria-label"],
+    });
+
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [language]);
+
   const toggleLanguage = () => {
     setLanguage((current) => (current === "he" ? "ar" : "he"));
   };
 
-  const t = translations[language];
+  const value = useMemo(
+    () => ({
+      language,
+      setLanguage,
+      toggleLanguage,
+      t: translations[language],
+      translateText: (text) => translateDynamicText(text, language),
+    }),
+    [language]
+  );
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage, t }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );
 }
-
 export function useLanguage() {
   return useContext(LanguageContext);
+}
+function translateElementTree(root, language) {
+  if (!root) return;
+
+  const attributes = ["placeholder", "title", "alt", "aria-label"];
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parent = node.parentElement;
+      if (!parent || ["SCRIPT", "STYLE", "TEXTAREA"].includes(parent.tagName)) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      return normalizeText(node.nodeValue)
+        ? NodeFilter.FILTER_ACCEPT
+        : NodeFilter.FILTER_REJECT;
+    },
+  });
+
+  const textNodes = [];
+
+  while (walker.nextNode()) {
+    textNodes.push(walker.currentNode);
+  }
+
+  textNodes.forEach((node) => {
+    const next = translateDynamicText(node.nodeValue, language);
+    if (next !== node.nodeValue) {
+      node.nodeValue = next;
+    }
+  });
+
+  root.querySelectorAll("*").forEach((el) => {
+    attributes.forEach((attr) => {
+      if (!el.hasAttribute(attr)) return;
+
+      const current = el.getAttribute(attr);
+      const next = translateDynamicText(current, language);
+
+      if (next !== current) {
+        el.setAttribute(attr, next);
+      }
+    });
+  });
 }

@@ -1,7 +1,59 @@
 import { useEffect, useState } from "react";
 import { getAllApplications } from "./adminService";
+import { useLanguage } from "../../Context/LanguageContext";
+
+const APPLICATIONS_TEXT = {
+  he: {
+    title: "מועמדויות שהתקבלו",
+    cancelledCount: "בוטלו",
+    removedCount: "נמחקו",
+
+    filters: {
+      all: "הכל",
+      active: "פעילות",
+      cancelled: "בוטלו",
+      removed: "משרות שנמחקו",
+    },
+
+    loading: "טוען מועמדויות...",
+    empty: "אין מועמדויות להצגה בסינון הנוכחי.",
+
+    cancelledBadge: "ביטל מועמדות",
+    removedBadge: "משרה נמחקה",
+    removedMessage: "המשרה נמחקה ואינה זמינה יותר באתר.",
+    cancelledAt: "בוטל ב־",
+
+    locale: "he-IL",
+  },
+
+  ar: {
+    title: "طلبات التقديم التي وصلت",
+    cancelledCount: "أُلغيت",
+    removedCount: "حُذفت",
+
+    filters: {
+      all: "الكل",
+      active: "فعّالة",
+      cancelled: "أُلغيت",
+      removed: "وظائف محذوفة",
+    },
+
+    loading: "جارٍ تحميل طلبات التقديم...",
+    empty: "لا توجد طلبات تقديم للعرض حسب التصفية الحالية.",
+
+    cancelledBadge: "ألغى الطلب",
+    removedBadge: "تم حذف الوظيفة",
+    removedMessage: "تم حذف الوظيفة ولم تعد متاحة في الموقع.",
+    cancelledAt: "أُلغي في ",
+
+    locale: "ar",
+  },
+};
 
 function ViewApplications({ onClose }) {
+  const { language } = useLanguage();
+  const text = APPLICATIONS_TEXT[language] || APPLICATIONS_TEXT.he;
+
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -17,6 +69,7 @@ function ViewApplications({ onClose }) {
         setLoading(false);
       }
     };
+
     load();
   }, []);
 
@@ -40,10 +93,26 @@ function ViewApplications({ onClose }) {
   });
 
   const filterButtons = [
-    { key: "all", label: "הכל", count: applications.length },
-    { key: "active", label: "פעילות", count: activeApplications.length },
-    { key: "cancelled", label: "בוטלו", count: cancelledApplications.length },
-    { key: "removed", label: "משרות שנמחקו", count: removedApplications.length },
+    {
+      key: "all",
+      label: text.filters.all,
+      count: applications.length,
+    },
+    {
+      key: "active",
+      label: text.filters.active,
+      count: activeApplications.length,
+    },
+    {
+      key: "cancelled",
+      label: text.filters.cancelled,
+      count: cancelledApplications.length,
+    },
+    {
+      key: "removed",
+      label: text.filters.removed,
+      count: removedApplications.length,
+    },
   ];
 
   return (
@@ -54,17 +123,17 @@ function ViewApplications({ onClose }) {
       <div className="mb-12 w-full max-w-3xl rounded-2xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-800">
-            מועמדויות שהתקבלו ({applications.length})
+            {text.title} ({applications.length})
 
             {cancelledApplications.length > 0 && (
               <span className="mr-2 text-sm font-normal text-red-400">
-                {cancelledApplications.length} בוטלו
+                {cancelledApplications.length} {text.cancelledCount}
               </span>
             )}
 
             {removedApplications.length > 0 && (
               <span className="mr-2 text-sm font-normal text-orange-500">
-                {removedApplications.length} נמחקו
+                {removedApplications.length} {text.removedCount}
               </span>
             )}
           </h2>
@@ -96,13 +165,13 @@ function ViewApplications({ onClose }) {
 
         {loading && (
           <p className="py-8 text-center text-gray-500">
-            טוען מועמדויות...
+            {text.loading}
           </p>
         )}
 
         {!loading && filteredApplications.length === 0 && (
           <p className="py-8 text-center text-gray-500">
-            אין מועמדויות להצגה בסינון הנוכחי.
+            {text.empty}
           </p>
         )}
 
@@ -133,19 +202,19 @@ function ViewApplications({ onClose }) {
 
                     {app.cancelledByUser && (
                       <span className="rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-600">
-                        ביטל מועמדות
+                        {text.cancelledBadge}
                       </span>
                     )}
 
                     {app.jobRemoved && (
                       <span className="rounded-full border border-orange-200 bg-orange-100 px-2 py-0.5 text-[11px] font-bold text-orange-700">
-                        משרה נמחקה
+                        {text.removedBadge}
                       </span>
                     )}
                   </div>
 
                   <span className="text-xs text-gray-400">
-                    {new Date(app.submittedAt).toLocaleDateString("he-IL")}
+                    {new Date(app.submittedAt).toLocaleDateString(text.locale)}
                   </span>
                 </div>
 
@@ -163,7 +232,7 @@ function ViewApplications({ onClose }) {
 
                 {app.jobRemoved && (
                   <p className="mb-2 text-xs font-semibold text-orange-700">
-                    המשרה נמחקה ואינה זמינה יותר באתר.
+                    {text.removedMessage}
                   </p>
                 )}
 
@@ -174,8 +243,8 @@ function ViewApplications({ onClose }) {
 
                 {app.cancelledByUser && app.cancelledAt && (
                   <p className="mt-1 text-xs text-red-400">
-                    בוטל ב־
-                    {new Date(app.cancelledAt).toLocaleDateString("he-IL")}
+                    {text.cancelledAt}
+                    {new Date(app.cancelledAt).toLocaleDateString(text.locale)}
                   </p>
                 )}
 

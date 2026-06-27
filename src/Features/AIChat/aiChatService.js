@@ -1,14 +1,46 @@
 /**
  * Returns a predefined response if the server AI request fails.
  */
-export function getDemoResponse(userInput) {
+export function getDemoResponse(userInput, language = "he") {
   const text = userInput.toLowerCase();
+
+  if (language === "ar") {
+    if (
+      text.includes("وظيفة") ||
+      text.includes("وظائف") ||
+      text.includes("عمل") ||
+      text.includes("شغل")
+    ) {
+      return "يمكنني مساعدتك في العثور على وظائف حسب المجال، البلدة، نسبة الوظيفة ونوع الوظيفة.";
+    }
+
+    if (
+      text.includes("طالب") ||
+      text.includes("طالبة") ||
+      text.includes("طلاب") ||
+      text.includes("طالبات")
+    ) {
+      return "يمكن البحث عن وظائف مناسبة للطلاب من خلال التصفية في الموقع.";
+    }
+
+    if (
+      text.includes("مرحبا") ||
+      text.includes("مرحبًا") ||
+      text.includes("اهلا") ||
+      text.includes("أهلا") ||
+      text.includes("السلام")
+    ) {
+      return "مرحبًا! كيف يمكنني مساعدتك في البحث عن وظيفة؟";
+    }
+
+    return `استلمت سؤالك: "${userInput}". خدمة الـ AI غير متاحة حاليًا، حاولي مرة أخرى بعد قليل.`;
+  }
 
   if (text.includes("משרה") || text.includes("עבודה")) {
     return "אני יכולה לעזור לך למצוא משרות לפי תחום, יישוב, אחוז משרה וסוג תפקיד.";
   }
 
-  if (text.includes("סטודנט")) {
+  if (text.includes("סטודנט") || text.includes("סטודנטית") || text.includes("סטודנטים")) {
     return "אפשר לחפש משרות שמתאימות לסטודנטים דרך הסינון באתר.";
   }
 

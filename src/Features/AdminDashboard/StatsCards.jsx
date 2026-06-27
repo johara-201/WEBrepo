@@ -1,14 +1,35 @@
+import { useLanguage } from "../../Context/LanguageContext";
+
+const STATS_TEXT = {
+  he: {
+    totalJobs: "סה״כ משרות",
+    manualJobs: "פרסומים עצמאיים",
+    externalJobs: "משרות חיצוניות",
+    studentJobs: "מתאימות לסטודנטים",
+  },
+
+  ar: {
+    totalJobs: "إجمالي الوظائف",
+    manualJobs: "منشورات ذاتية",
+    externalJobs: "وظائف خارجية",
+    studentJobs: "مناسبة للطلاب",
+  },
+};
+
 function StatsCards({ jobs }) {
+  const { language } = useLanguage();
+  const text = STATS_TEXT[language] || STATS_TEXT.he;
+
   const totalJobs = jobs.length;
   const manualJobs = jobs.filter((job) => job.source === "manual").length;
   const externalJobs = jobs.filter((job) => job.isExternal).length;
   const studentJobs = jobs.filter((job) => job.suitableForStudents).length;
 
   const cards = [
-    { title: "סה״כ משרות", value: totalJobs },
-    { title: "פרסומים עצמאיים", value: manualJobs },
-    { title: "משרות חיצוניות", value: externalJobs },
-    { title: "מתאימות לסטודנטים", value: studentJobs },
+    { title: text.totalJobs, value: totalJobs },
+    { title: text.manualJobs, value: manualJobs },
+    { title: text.externalJobs, value: externalJobs },
+    { title: text.studentJobs, value: studentJobs },
   ];
 
   return (
@@ -19,7 +40,9 @@ function StatsCards({ jobs }) {
           className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
         >
           <p className="text-sm text-gray-500">{card.title}</p>
-          <p className="mt-2 text-3xl font-bold text-blue-600">{card.value}</p>
+          <p className="mt-2 text-3xl font-bold text-blue-600">
+            {card.value}
+          </p>
         </div>
       ))}
     </div>
