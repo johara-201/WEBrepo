@@ -132,7 +132,7 @@ function AIChat({ onHome, onSearch, onAbout, onFaq, onAdmin, onDashboard, onAICh
             </p>
           </div>
 
-          <div className="h-[430px] overflow-y-auto p-5 space-y-4">
+          <div className="h-107.5 overflow-y-auto p-5 space-y-4">
             {messages.map((msg, index) => (
               <div
                 key={index}
