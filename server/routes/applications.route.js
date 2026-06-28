@@ -30,19 +30,13 @@ router.post("/", upload.single("resumeFile"), async (req, res) => {
       }
     }
 
-    if (req.file && data.userId) {
-      const cvData = {
+    if (req.file) {
+        data.cvSnapshot = {
         data: req.file.buffer,
         filename: req.file.originalname,
         mimetype: req.file.mimetype,
         uploadedAt: new Date(),
       };
-
-      await User.findByIdAndUpdate(data.userId, {
-        $set: { cv: cvData },
-      });
-
-      data.cvSnapshot = cvData;
     }
 
     if (!req.file && data.userId) {
@@ -131,33 +125,6 @@ router.get("/job/:jobId", requireAdmin, async (req, res) => {
   }
 });
 
-router.get("/:id/cv", requireUser, async (req, res) => {
-  try {
-    const application = await Application.findById(req.params.id);
-
-    if (!application) {
-      return res.status(404).json({ error: "המועמדות לא נמצאה" });
-    }
-
-    if (String(application.userId) !== String(req.userId)) {
-      return res.status(403).json({ error: "אין הרשאה" });
-    }
-
-    if (!application.cvSnapshot?.data) {
-      return res.status(404).json({ error: "לא נמצאו קורות חיים למועמדות זו" });
-    }
-
-    res.set("Content-Type", application.cvSnapshot.mimetype);
-    res.set(
-      "Content-Disposition",
-      `inline; filename="${application.cvSnapshot.filename}"`
-    );
-
-    res.send(application.cvSnapshot.data);
-  } catch (error) {
-    res.status(500).json({ error: "שגיאה בטעינת קורות החיים" });
-  }
-});
 
 router.get("/:id/cv", requireUser, async (req, res) => {
   try {
@@ -187,8 +154,17 @@ router.get("/:id/cv", requireUser, async (req, res) => {
   }
 });
 
-router.put("/:id", upload.single("resumeFile"), async (req, res) => {
+router.put("/:id", requireUser, upload.single("resumeFile"), async (req, res) => {
   try {
+    const existingApplication = await Application.findById(req.params.id);
+
+    if (!existingApplication) {
+        return res.status(404).json({ error: "המועמדות לא נמצאה" });
+    }
+
+    if (String(existingApplication.userId) !== String(req.userId)) {
+        return res.status(403).json({ error: "אין הרשאה לעדכן מועמדות זו" });
+    }
     const updateData = {
       fullName: req.body.fullName,
       email: req.body.email?.trim().toLowerCase(),
@@ -198,22 +174,12 @@ router.put("/:id", upload.single("resumeFile"), async (req, res) => {
     };
 
     if (req.file) {
-      const cvData = {
-        data: req.file.buffer,
-        filename: req.file.originalname,
-        mimetype: req.file.mimetype,
-        uploadedAt: new Date(),
-      };
-
-      updateData.cvSnapshot = cvData;
-
-      const existingApplication = await Application.findById(req.params.id);
-
-      if (existingApplication?.userId) {
-        await User.findByIdAndUpdate(existingApplication.userId, {
-          $set: { cv: cvData },
-        });
-      }
+        updateData.cvSnapshot = {
+          data: req.file.buffer,
+          filename: req.file.originalname,
+          mimetype: req.file.mimetype,
+          uploadedAt: new Date(),
+        };
     }
 
     const updatedApplication = await Application.findByIdAndUpdate(

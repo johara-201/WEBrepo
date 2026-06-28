@@ -80,3 +80,28 @@ export async function changePassword(token, data) {
 
   return result;
 }
+
+export function getApplicationCVUrl(appId) {
+  return `${API}/api/applications/${appId}/cv`;
+}
+
+export async function updateApplicationCV(token, appId, file) {
+  const form = new FormData();
+  form.append("resumeFile", file);
+
+  const res = await fetch(`${API}/api/applications/${appId}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: form,
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(data.error || "שגיאה בעדכון קורות החיים למשרה");
+  }
+
+  return data;
+}

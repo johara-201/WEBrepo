@@ -10,6 +10,8 @@ import {
   getMyApplications,
   withdrawApplication,
   changePassword,
+  getApplicationCVUrl,
+  updateApplicationCV,
 } from "./jobSeekerService";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -109,6 +111,12 @@ const DASHBOARD_TEXT = {
       removedMessage: "המשרה נמחקה על ידי המנהל ולכן כבר לא זמינה באתר.",
       removeFromList: "הסרה מהרשימה",
       remove: "הסרה",
+      viewCv: "צפייה ב־CV", 
+      updateCv: "עדכון CV", 
+      updatingCv: "מעדכן...", 
+      cvUpdated: "קורות החיים למשרה עודכנו בהצלחה ✓", 
+      cvLoadError: "שגיאה בטעינת קורות החיים", 
+      cvNotFound: "לא נמצאו קורות חיים למועמדות זו",
     },
   },
 
@@ -206,11 +214,17 @@ const DASHBOARD_TEXT = {
       removedMessage: "تم حذف الوظيفة من قبل المدير، لذلك لم تعد متاحة في الموقع.",
       removeFromList: "إزالة من القائمة",
       remove: "إزالة",
+      viewCv: "عرض السيرة الذاتية", 
+      updateCv: "تحديث السيرة الذاتية", 
+      updatingCv: "جارٍ التحديث...", 
+      cvUpdated: "تم تحديث السيرة الذاتية الخاصة بالوظيفة بنجاح ✓", 
+      cvLoadError: "حدث خطأ أثناء تحميل السيرة الذاتية", 
+      cvNotFound: "لم يتم العثور على سيرة ذاتية لهذا الطلب",
     },
   },
 };
 
-// ── פאנל: פרטים אישיים ───────────────────────────────────────────────────────
+//פאנל: פרטים אישיים 
 function ProfilePanel({ token }) {
   const { language } = useLanguage();
   const text = DASHBOARD_TEXT[language] || DASHBOARD_TEXT.he;
@@ -382,7 +396,7 @@ function ProfilePanel({ token }) {
   );
 }
 
-// ── פאנל: שינוי סיסמה ───────────────────────────────────────────────────────
+//פאנל: שינוי סיסמה 
 function PasswordPanel({ token }) {
   const { language } = useLanguage();
   const text = DASHBOARD_TEXT[language] || DASHBOARD_TEXT.he;
@@ -537,7 +551,7 @@ function PasswordPanel({ token }) {
   );
 }
 
-// ── פאנל: קורות חיים ─────────────────────────────────────────────────────────
+//פאנל: קורות חיים 
 function CVPanel({ token }) {
   const { language } = useLanguage();
   const text = DASHBOARD_TEXT[language] || DASHBOARD_TEXT.he;
@@ -701,7 +715,7 @@ function CVPanel({ token }) {
   );
 }
 
-// ── פאנל: מועמדויות ───────────────────────────────────────────────────────────
+//פאנל: מועמדויות 
 function ApplicationsPanel({ token, onViewJob }) {
   const { language } = useLanguage();
   const text = DASHBOARD_TEXT[language] || DASHBOARD_TEXT.he;
@@ -709,6 +723,8 @@ function ApplicationsPanel({ token, onViewJob }) {
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
+  const fileRefs = useRef({});
+  const [uploadingAppId, setUploadingAppId] = useState(null);
 
   useEffect(() => {
     getMyApplications(token)
@@ -731,6 +747,49 @@ function ApplicationsPanel({ token, onViewJob }) {
       setMsg(text.applications.errorWithdraw);
     }
   }
+  
+  async function viewApplicationCV(appId) {
+  try {
+    const response = await fetch(getApplicationCVUrl(appId), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      setMsg(text.applications.cvNotFound);
+      return;
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+  } catch {
+    setMsg(text.applications.cvLoadError);
+  }
+}
+
+async function handleApplicationCVUpload(appId, e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  setUploadingAppId(appId);
+
+  try {
+    const updated = await updateApplicationCV(token, appId, file);
+
+    setApps((prev) =>
+      prev.map((app) => (app._id === appId ? updated : app))
+    );
+
+    setMsg(text.applications.cvUpdated);
+  } catch (err) {
+    setMsg(err.message);
+  } finally {
+    setUploadingAppId(null);
+    e.target.value = "";
+  }
+}
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
@@ -810,6 +869,34 @@ function ApplicationsPanel({ token, onViewJob }) {
                   </p>
                 )}
               </div>
+
+              <div className="flex shrink-0 gap-2">
+  <button
+    onClick={() => viewApplicationCV(app._id)}
+    className="rounded-xl border border-[#2f6b46] px-3 py-1.5 text-xs font-semibold text-[#2f6b46] transition hover:bg-[#2f6b46] hover:text-white"
+  >
+   {text.applications.viewCv}
+  </button>
+
+  <button
+    onClick={() => fileRefs.current[app._id]?.click()}
+    className="rounded-xl border border-gray-300 px-3 py-1.5 text-xs text-gray-600 transition hover:bg-gray-50"
+  >
+    {uploadingAppId === app._id
+  ? text.applications.updatingCv
+  : text.applications.updateCv}
+  </button>
+
+  <input
+    ref={(el) => {
+      fileRefs.current[app._id] = el;
+    }}
+    type="file"
+    accept=".pdf,.doc,.docx"
+    className="hidden"
+    onChange={(e) => handleApplicationCVUpload(app._id, e)}
+  />
+</div>
 
               <button
                 onClick={() => withdraw(app._id)}
