@@ -136,11 +136,8 @@ function ApplicationForm({ job, onClose }) {
 };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-      dir="rtl"
-    >
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 px-4 py-6">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         {submitted ? (
           <div className="py-6 text-center">
             <div className="mb-4 text-5xl">✅</div>
