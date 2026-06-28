@@ -165,13 +165,25 @@ router.put("/:id", requireUser, upload.single("resumeFile"), async (req, res) =>
     if (String(existingApplication.userId) !== String(req.userId)) {
         return res.status(403).json({ error: "אין הרשאה לעדכן מועמדות זו" });
     }
-    const updateData = {
-      fullName: req.body.fullName,
-      email: req.body.email?.trim().toLowerCase(),
-      phone: req.body.phone,
-      message: req.body.message,
-      updatedAt: new Date(),
-    };
+   const updateData = {
+  updatedAt: new Date(),
+};
+
+if (req.body.fullName !== undefined) {
+  updateData.fullName = req.body.fullName;
+}
+
+if (req.body.email !== undefined) {
+  updateData.email = req.body.email.trim().toLowerCase();
+}
+
+if (req.body.phone !== undefined) {
+  updateData.phone = req.body.phone;
+}
+
+if (req.body.message !== undefined) {
+  updateData.message = req.body.message;
+}
 
     if (req.file) {
         updateData.cvSnapshot = {
