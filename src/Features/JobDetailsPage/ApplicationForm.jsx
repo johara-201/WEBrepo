@@ -192,7 +192,7 @@ function ApplicationForm({ job, onClose }) {
         onClick={() => setExistingApplication(null)}
         className="rounded-lg border px-4 py-2 text-sm hover:bg-white"
       >
-        ביטול
+        {text.buttons.cancel}
       </button>
 
       <button
@@ -207,7 +207,6 @@ function ApplicationForm({ job, onClose }) {
           });
 
           setIsUpdateMode(true);
-          setExistingApplication(null); 
         }}
         className="rounded-lg bg-[#2f6b46] px-4 py-2 text-sm font-medium text-white hover:bg-[#245539]"
       >
