@@ -75,8 +75,7 @@ function AIChat({ onHome, onSearch, onAbout, onFaq, onAdmin, onDashboard, onAICh
     setLoading(true);
 
     try {
-      const aiResponse = await callGeminiAPI(currentInput);
-
+      const aiResponse = await callGeminiAPI(currentInput, language);
       // Add AI response to chat
       setMessages((prev) => [
         ...prev,

@@ -55,14 +55,17 @@ export function getDemoResponse(userInput, language = "he") {
  * Sends the user message to our backend server.
  * The backend calls Gemini securely using the API key from .env.
  */
-export async function callGeminiAPI(userInput) {
-  const response = await fetch("http://localhost:3000/api/ai/chat", {
+const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+export async function callGeminiAPI(userInput, language = "he") {
+  const response = await fetch(`${API}/api/ai/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       message: userInput,
+      language,
     }),
   });
 

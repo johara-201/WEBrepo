@@ -1,34 +1,62 @@
 const express = require("express");
+const Job = require("../models/jobSchema");
 
 const router = express.Router();
 
 router.post("/chat", async (req, res) => {
   try {
-    const { message } = req.body;
-    console.log("AI route received:", message);
-    console.log("Gemini key exists:", !!process.env.GEMINI_API_KEY);
+    const { message, language = "he" } = req.body;
 
     if (!message || !message.trim()) {
       return res.status(400).json({ error: "Message is required" });
     }
 
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "Missing Gemini API key" });
+    }
+
+    const jobs = await Job.find({})
+      .sort({ publishDate: -1, _id: -1 })
+      .limit(25)
+      .lean();
+
+    const jobsText = jobs.length
+      ? jobs
+          .map(
+            (job, index) => `
+${index + 1}.
+שם המשרה: ${job.title || "לא צוין"}
+ארגון: ${job.organization || "לא צוין"}
+יישוב: ${job.city || "לא צוין"}
+סוג משרה: ${job.jobType || "לא צוין"}
+אחוז משרה: ${job.employmentPercent || "לא צוין"}
+מתאים לסטודנטים: ${job.suitableForStudents ? "כן" : "לא"}
+תיאור: ${job.description || "לא צוין"}
+`
+          )
+          .join("\n")
+      : "אין כרגע משרות במערכת.";
+
+    const answerLanguage = language === "ar" ? "Arabic" : "Hebrew";
+
     const prompt = `
-אתה עוזר AI באתר משרות לחינוך, נוער וקהילה.
+You are an AI job-search assistant for a regional jobs website.
 
-ענה בעברית.
+Answer in ${answerLanguage}.
 
-אם המשתמש שואל על חיפוש עבודה:
-- הסבר כיצד להשתמש באתר.
-- עזור להבין אילו משרות יכולות להתאים לו.
-- הצע דרכי חיפוש לפי יישוב, תפקיד ואחוז משרה.
+Important rules:
+1. Recommend ONLY jobs that appear in the jobs list below.
+2. Do NOT invent jobs, organizations, cities, or details.
+3. If no job fits the user request exactly, say that clearly and suggest how to search.
+4. Prefer matching by city, role, job type, education, youth, community, students, and employment percent.
+5. Keep the answer friendly, short, and practical.
+6. Mention the job title and city when recommending a job.
 
-אם המשתמש שואל שאלה כללית שאינה קשורה למשרות:
-ענה בקצרה ובנימוס.
-
-אל תמציא משרות שאינן קיימות במערכת.
-
-שאלת המשתמש:
+User question:
 ${message}
+
+Real jobs currently in the system:
+${jobsText}
 `;
 
     const response = await fetch(

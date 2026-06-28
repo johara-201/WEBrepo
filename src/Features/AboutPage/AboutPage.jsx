@@ -281,9 +281,6 @@ function AboutPage({ onHome, onAdmin, onSearch, onAbout, onFaq, onDashboard, onA
             >
               <div className="absolute inset-x-0 top-0 h-1 bg-[#2f6b46]" />
 
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eef7f0] text-2xl">
-              </div>
-
               <p className="mb-2 text-5xl font-extrabold text-[#2f6b46]">
                 {Number(kpi.num).toLocaleString(numberLocale)}
                 <span className="text-3xl text-[#2f6b46]">{kpi.suffix}</span>
