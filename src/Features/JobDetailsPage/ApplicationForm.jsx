@@ -10,6 +10,10 @@ const APPLICATION_FORM_TEXT = {
     successMessageMiddle: "קיבלנו את המועמדות שלך למשרת",
     close: "סגירה",
 
+    duplicateMessage: "כבר הגשת מועמדות למשרה הזו. אפשר לעדכן את הפרטים או קורות החיים במקום לשלוח שוב.",
+    updateDetails: "עדכון פרטים",
+    cvLabel: "קורות חיים",
+
     labels: {
       fullName: "שם מלא *",
       email: "אימייל *",
@@ -36,6 +40,10 @@ const APPLICATION_FORM_TEXT = {
     successMessageStart: "شكرًا",
     successMessageMiddle: "استلمنا طلب تقديمك لوظيفة",
     close: "إغلاق",
+
+    duplicateMessage: "لقد قدمت طلبًا لهذه الوظيفة من قبل. يمكنك تحديث التفاصيل أو السيرة الذاتية بدلًا من إرسال طلب جديد.",
+    updateDetails: "تحديث التفاصيل",
+    cvLabel: "السيرة الذاتية",
 
     labels: {
       fullName: "الاسم الكامل *",
@@ -178,7 +186,7 @@ function ApplicationForm({ job, onClose }) {
             {existingApplication && !isUpdateMode && (
   <div className="mb-4 rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
     <p className="mb-3 font-medium">
-      כבר הגשת מועמדות למשרה הזו. האם תרצה/י לעדכן את הפרטים?
+        {text.duplicateMessage}   
     </p>
 
     <div className="flex justify-end gap-2">
@@ -206,7 +214,7 @@ function ApplicationForm({ job, onClose }) {
         }}
         className="rounded-lg bg-[#2f6b46] px-4 py-2 text-sm font-medium text-white hover:bg-[#245539]"
       >
-        עדכון פרטים
+        {text.updateDetails}
       </button>
     </div>
   </div>
@@ -258,7 +266,7 @@ function ApplicationForm({ job, onClose }) {
 
               <div>
   <label className="mb-1 block text-sm text-gray-600">
-    קורות חיים
+      {text.cvLabel}  
   </label>
 
   <input
@@ -299,7 +307,11 @@ function ApplicationForm({ job, onClose }) {
                   disabled={submitting}
                   className="rounded-lg bg-[#2f6b46] px-5 py-2 text-sm font-medium text-white hover:bg-[#245539] disabled:opacity-60"
                 >
-                  {submitting? text.buttons.submitting: isUpdateMode ? "עדכון פרטים": text.buttons.submit}
+                  {submitting ? text.buttons.submitting
+                    : isUpdateMode
+                    ? text.updateDetails
+                    : text.buttons.submit
+                  }
                 </button>
               </div>
             </form>
