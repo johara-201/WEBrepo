@@ -316,7 +316,6 @@ function FAQPage({ onHome, onAdmin, onSearch, onAbout, onFaq, onDashboard, onAIC
         {displayed.map((section) => (
           <div key={section.id} className="mb-8">
             <h2 className="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
-              <span>{section.emoji}</span>
               {section.category}
             </h2>
 

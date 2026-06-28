@@ -160,10 +160,10 @@ function AboutPage({ onHome, onAdmin, onSearch, onAbout, onFaq, onDashboard, onA
   }, [API]);
 
   const KPIS = [
-    { num: stats.activeJobs, label: content.kpis.activeJobs, icon: "💼", suffix: "+" },
-    { num: stats.organizations, label: content.kpis.organizations, icon: "🤝", suffix: "+" },
-    { num: stats.registeredUsers, label: content.kpis.registeredUsers, icon: "👥", suffix: "+" },
-    { num: stats.applications, label: content.kpis.applications, icon: "📝", suffix: "+" },
+    { num: stats.activeJobs, label: content.kpis.activeJobs, suffix: "+" },
+    { num: stats.organizations, label: content.kpis.organizations, suffix: "+" },
+    { num: stats.registeredUsers, label: content.kpis.registeredUsers, suffix: "+" },
+    { num: stats.applications, label: content.kpis.applications, suffix: "+" },
   ];
 
   const numberLocale = language === "ar" ? "ar" : "he-IL";
@@ -282,7 +282,6 @@ function AboutPage({ onHome, onAdmin, onSearch, onAbout, onFaq, onDashboard, onA
               <div className="absolute inset-x-0 top-0 h-1 bg-[#2f6b46]" />
 
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eef7f0] text-2xl">
-                {kpi.icon}
               </div>
 
               <p className="mb-2 text-5xl font-extrabold text-[#2f6b46]">

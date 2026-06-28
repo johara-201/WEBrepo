@@ -4,9 +4,6 @@ import { filterJobs } from "../../Services/JobsService";
 import NavBar from "../../Components/NavBar";
 import { useLanguage } from "../../Context/LanguageContext";
 
-const CATEGORY_ICONS = ["👥", "🌱", "🧭", "📋", "🤝", "🏢", "❤️", "🌟", "🎯", "💼"];
-const ICON_COLORS = ["#E8F5E9", "#FFF3E0", "#E3F2FD", "#FCE4EC", "#EDE7F6", "#FFF8E1", "#E0F7FA", "#F3E5F5"];
-
 const SEARCH_TEXT = {
   he: {
     filtersTitle: "סינון תוצאות",
@@ -214,7 +211,6 @@ function JobRow({ job, onSelect, idx }) {
         className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0"
         style={{ backgroundColor: bg }}
       >
-        {icon}
       </div>
     </div>
   );

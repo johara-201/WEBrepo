@@ -44,7 +44,7 @@ function NavBar({
       onClick={toggleTheme}
       className="theme-toggle text-xs font-semibold border border-gray-300 text-gray-600 bg-white px-3 py-1.5 rounded-xl hover:bg-gray-50 transition shadow-sm"
     >
-      {theme === "dark" ? `☀️ ${t.nav.light}` : `🌙 ${t.nav.dark}`}
+        {theme === "dark" ? t.nav.light : t.nav.dark}
     </button>
   );
 
@@ -54,7 +54,7 @@ function NavBar({
       onClick={toggleLanguage}
       className="text-xs font-semibold border border-gray-300 text-gray-600 bg-white px-3 py-1.5 rounded-xl hover:bg-gray-50 transition shadow-sm"
     >
-      🌐 {t.nav.switchLanguage}
+       {t.nav.switchLanguage}
     </button>
   );
 
