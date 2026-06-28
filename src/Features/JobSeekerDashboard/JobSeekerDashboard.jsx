@@ -31,7 +31,7 @@ const DASHBOARD_TEXT = {
       profile: "פרטים אישיים",
       password: "שינוי סיסמה",
       cv: "קורות חיים",
-      applications: "המשרות שלי",
+      applications: "המועמדיות שלי",
     },
 
     pageTitles: {

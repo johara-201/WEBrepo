@@ -11,7 +11,7 @@ const applicationSchema = new mongoose.Schema(
     phone: { type: String },
     message: { type: String },
     submittedAt: { type: Date, default: Date.now },
-    resumeFile: {type: String ,trim: true},
+    cvSnapshot: {data: { type: Buffer }, filename: { type: String }, mimetype: { type: String }, uploadedAt: { type: Date }},
     jobRemoved: {
       type: Boolean,
       default: false,

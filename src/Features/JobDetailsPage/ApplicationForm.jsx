@@ -194,10 +194,11 @@ function ApplicationForm({ job, onClose }) {
         type="button"
         onClick={() => {
           setFormData({
-            fullName: existingApplication.fullName || "",
-            email: existingApplication.email || "",
-            phone: existingApplication.phone || "",
-            message: existingApplication.message || "",
+                    fullName: existingApplication.fullName || "",
+                    email: existingApplication.email || "",
+                    phone: existingApplication.phone || "",
+                    message: existingApplication.message || "",
+                    resumeFile: null,
           });
 
           setIsUpdateMode(true);
