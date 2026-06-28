@@ -2,26 +2,68 @@ const express     = require("express");
 const router      = express.Router();
 const Application = require("../models/applicationSchema");
 const { requireUser, requireAdmin } = require("../middleware/authMiddleware");
+const Job = require("../models/jobSchema");
 
-// ─── POST - הגשת מועמדות (עם או בלי כניסה) ──────────────────────────────────
 router.post("/", async (req, res) => {
   try {
     const data = { ...req.body };
-    // אם יש Authorization header של משתמש רשום, נשמור userId
+
     const auth = req.headers.authorization;
+
     if (auth?.startsWith("Bearer ")) {
       try {
         const jwt = require("jsonwebtoken");
         const JWT_SECRET = process.env.JWT_SECRET || "beit-hakerem-secret-2024";
         const decoded = jwt.verify(auth.split(" ")[1], JWT_SECRET);
-        if (decoded.type === "user") data.userId = decoded.id;
-      } catch {} // token לא חובה
+
+        if (decoded.type === "user") {
+          data.userId = decoded.id;
+        }
+      } catch {
+        // משתמש לא מחובר עדיין יכול להגיש מועמדות
+      }
     }
+
+    const job = await Job.findById(data.jobId);
+
+    if (!job) {
+      return res.status(404).json({
+        error: "המשרה לא קיימת או נמחקה",
+      });
+    }
+
+    data.jobTitle = job.title;
+    data.postedBy = job.postedBy;
+    data.email = data.email?.trim().toLowerCase();
+
+    const duplicateQuery = data.userId
+      ? { jobId: data.jobId, userId: data.userId, cancelledByUser: { $ne: true } }
+      : { jobId: data.jobId, email: data.email, cancelledByUser: { $ne: true } };
+
+    const existingApplication = await Application.findOne(duplicateQuery);
+
+    if (existingApplication) {
+      return res.status(409).json({
+        error: "כבר הגשת מועמדות למשרה הזו. ניתן לעדכן פרטים במקום לשלוח שוב.",
+        application: existingApplication,
+      });
+    }
+
     const application = new Application(data);
     await application.save();
+
     res.status(201).send(application);
   } catch (error) {
-    res.status(500).send(error);
+    if (error.code === 11000) {
+      return res.status(409).json({
+        error: "כבר קיימת מועמדות למשרה הזו.",
+      });
+    }
+
+    res.status(500).json({
+      error: "שגיאה בשליחת מועמדות",
+      details: error.message,
+    });
   }
 });
 

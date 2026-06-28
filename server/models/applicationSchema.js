@@ -7,7 +7,7 @@ const applicationSchema = new mongoose.Schema(
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // מחפש עבודה מחובר (אופציונלי)
     postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" }, // מנהל שפרסם את המשרה
     fullName: { type: String, required: true },
-    email: { type: String, required: true },
+    email: { type: String, required: true, lowercase: true, trim: true },
     phone: { type: String },
     message: { type: String },
     submittedAt: { type: Date, default: Date.now },
@@ -40,6 +40,16 @@ const applicationSchema = new mongoose.Schema(
     },
   },
   { collection: "Applications", versionKey: false }
+);
+
+applicationSchema.index(
+  { jobId: 1, userId: 1 },
+  { unique: true, sparse: true }
+);
+
+applicationSchema.index(
+  { jobId: 1, email: 1 },
+  { unique: true }
 );
 
 module.exports = mongoose.model("Applications", applicationSchema);
