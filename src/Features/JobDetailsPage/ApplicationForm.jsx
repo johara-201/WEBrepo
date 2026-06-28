@@ -95,9 +95,19 @@ function ApplicationForm({ job, onClose }) {
 
       setSubmitted(true);
     } catch (err) {
-      console.error(err);
-      alert(text.error);
-    } finally {
+  console.error(err);
+
+  if (err.response?.status === 409) {
+    const message =
+      err.response.data?.error ||
+    "כבר הגשת מועמדות למשרה הזו. ניתן לעדכן פרטים";
+
+    alert(message);
+    return;
+  }
+
+  alert(text.error);
+} finally {
       setSubmitting(false);
     }
   };
