@@ -101,11 +101,10 @@ const handleFileChange = (e) => {
   if (!file) return;
 
   const maxSize = 5 * 1024 * 1024;
-  const allowedTypes = [
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ];
+  const allowedExtensions = [".pdf", ".doc", ".docx"];
+
+  const fileName = file.name.toLowerCase();
+  const isAllowed = allowedExtensions.some((ext) => fileName.endsWith(ext));
 
   if (file.size > maxSize) {
     setSelectedResumeName("");
@@ -114,7 +113,7 @@ const handleFileChange = (e) => {
     return;
   }
 
-  if (!allowedTypes.includes(file.type)) {
+  if (!isAllowed) {
     setSelectedResumeName("");
     e.target.value = "";
     alert("אפשר להעלות רק קובץ PDF / DOC / DOCX.");
