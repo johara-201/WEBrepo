@@ -15,13 +15,13 @@ async function claimGuestApplications(userId, email) {
 const router    = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "beit-hakerem-secret-2024";
 
-// ─── בדיקה אם צריך הגדרה ראשונית ────────────────────────────────────────────
+//בדיקה אם צריך הגדרה ראשונית 
 router.get("/admin/needs-setup", async (req, res) => {
   const count = await Admin.countDocuments();
   res.json({ needsSetup: count === 0 });
 });
 
-// ─── רישום מחפש עבודה ───────────────────────────────────────────────────────
+//רישום מחפש עבודה 
 router.post("/register", async (req, res) => {
   try {
     const { email, password, name, phone } = req.body;
@@ -39,14 +39,26 @@ router.post("/register", async (req, res) => {
     const user   = await User.create({ email, password: hashed, name, phone });
     const token  = jwt.sign({ id: user._id, type: "user" }, JWT_SECRET, { expiresIn: "7d" });
     await claimGuestApplications(user._id, user.email);
-    res.status(201).json({ token, user: { _id: user._id, name: user.name, email: user.email } });
+    res.status(201).json({
+  token,
+  user: {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone || "",
+    city: user.city || "",
+    profession: user.profession || "",
+    bio: user.bio || "",
+    hasCv: !!user.cv?.filename,
+  },
+});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "שגיאה בשרת" });
   }
 });
 
-// ─── כניסה מחפש עבודה ───────────────────────────────────────────────────────
+//כניסה מחפש עבודה 
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -58,14 +70,25 @@ router.post("/login", async (req, res) => {
 
     const token = jwt.sign({ id: user._id, type: "user" }, JWT_SECRET, { expiresIn: "7d" });
     await claimGuestApplications(user._id, user.email);
-    res.json({ token, user: { _id: user._id, name: user.name, email: user.email } });
-  } catch (err) {
+    res.json({
+      token,
+      user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone || "",
+      city: user.city || "",
+      profession: user.profession || "",
+      bio: user.bio || "",
+      hasCv: !!user.cv?.filename,
+  },
+});  } catch (err) {
     console.error(err);
     res.status(500).json({ error: "שגיאה בשרת" });
   }
 });
 
-// ─── כניסה מנהל ─────────────────────────────────────────────────────────────
+//כניסה מנהל 
 router.post("/admin/login", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -96,7 +119,7 @@ router.post("/admin/login", async (req, res) => {
   }
 });
 
-// ─── הגדרת מנהל ראשי (רק אם אין מנהלים ב-DB) ──────────────────────────────
+// הגדרת מנהל ראשי (רק אם אין מנהלים ב-DB) 
 router.post("/admin/setup", async (req, res) => {
   try {
     const count = await Admin.countDocuments();
