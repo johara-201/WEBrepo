@@ -100,6 +100,27 @@ const handleFileChange = (e) => {
 
   if (!file) return;
 
+  const maxSize = 5 * 1024 * 1024;
+  const allowedTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
+
+  if (file.size > maxSize) {
+    setSelectedResumeName("");
+    e.target.value = "";
+    alert("הקובץ גדול מדי. אפשר להעלות קובץ עד 5MB.");
+    return;
+  }
+
+  if (!allowedTypes.includes(file.type)) {
+    setSelectedResumeName("");
+    e.target.value = "";
+    alert("אפשר להעלות רק קובץ PDF / DOC / DOCX.");
+    return;
+  }
+
   setFormData((prev) => ({
     ...prev,
     resumeFile: file,
