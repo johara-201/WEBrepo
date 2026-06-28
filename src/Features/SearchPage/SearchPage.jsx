@@ -157,8 +157,6 @@ function JobRow({ job, onSelect, idx }) {
   const text = SEARCH_TEXT[language] || SEARCH_TEXT.he;
 
   const ago = timeAgo(job.publishDate, language);
-  const icon = CATEGORY_ICONS[idx % CATEGORY_ICONS.length];
-  const bg = ICON_COLORS[idx % ICON_COLORS.length];
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition p-5 flex gap-4 items-start">
@@ -205,12 +203,6 @@ function JobRow({ job, onSelect, idx }) {
             </span>
           )}
         </div>
-      </div>
-
-      <div
-        className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0"
-        style={{ backgroundColor: bg }}
-      >
       </div>
     </div>
   );
