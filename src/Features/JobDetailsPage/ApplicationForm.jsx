@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {submitApplication, updateApplication} from "../../Services/ApplicationsService";
 import { useLanguage } from "../../Context/LanguageContext";
 import { useAuth } from "../../Context/AuthContext";
@@ -14,6 +14,7 @@ const APPLICATION_FORM_TEXT = {
     duplicateMessage: "כבר הגשת מועמדות למשרה הזו. אפשר לעדכן את הפרטים או קורות החיים במקום לשלוח שוב.",
     updateDetails: "עדכון פרטים",
     cvLabel: "קורות חיים",
+    cvFromProfile: "אם לא תבחרי קובץ חדש, נשתמש בקורות החיים ששמורים באזור האישי שלך.",
 
     labels: {
       fullName: "שם מלא *",
@@ -45,6 +46,7 @@ const APPLICATION_FORM_TEXT = {
     duplicateMessage: "لقد قدمت طلبًا لهذه الوظيفة من قبل. يمكنك تحديث التفاصيل أو السيرة الذاتية بدلًا من إرسال طلب جديد.",
     updateDetails: "تحديث التفاصيل",
     cvLabel: "السيرة الذاتية",
+    cvFromProfile: "إذا لم تختاري ملفًا جديدًا، سنستخدم السيرة الذاتية المحفوظة في حسابك الشخصي.",
 
     labels: {
       fullName: "الاسم الكامل *",
@@ -69,9 +71,8 @@ const APPLICATION_FORM_TEXT = {
 
 function ApplicationForm({ job, onClose }) {
   const { language } = useLanguage();
-  const { token } = useAuth();
+  const { token, user } = useAuth();  
   const text = APPLICATION_FORM_TEXT[language] || APPLICATION_FORM_TEXT.he;
-
   const [formData, setFormData] = useState({
   fullName: "",
   email: "",
@@ -79,6 +80,16 @@ function ApplicationForm({ job, onClose }) {
   message: "",
   resumeFile: null,
 });
+useEffect(() => {
+  if (!user) return;
+
+  setFormData((prev) => ({
+    ...prev,
+    fullName: prev.fullName || user.name || "",
+    email: prev.email || user.email || "",
+    phone: prev.phone || user.phone || "",
+  }));
+}, [user]);
 
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -298,32 +309,38 @@ const handleFileChange = (e) => {
               </div>
 
               <div>
-  <label className="mb-1 block text-sm text-gray-600">
-    {text.cvLabel}
-  </label>
+                <label className="mb-1 block text-sm text-gray-600">
+                  {text.cvLabel}
+                </label>
 
-  <input
-    id="resumeFileInput"
-    name="resumeFile"
-    type="file"
-    accept=".pdf,.doc,.docx"
-    onChange={handleFileChange}
-    className="hidden"
-  />
+                <input
+                  id="resumeFileInput"
+                  name="resumeFile"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
 
-  <label
-    htmlFor="resumeFileInput"
-    className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-gray-300 bg-white p-3 text-sm transition hover:border-[#2f6b46] hover:bg-gray-50"
-  >
-    <span className="truncate text-gray-700">
-      {selectedResumeName || "בחרי קובץ קורות חיים"}
-    </span>
+                <label
+                  htmlFor="resumeFileInput"
+                  className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-gray-300 bg-white p-3 text-sm transition hover:border-[#2f6b46] hover:bg-gray-50"
+                  >
+                  <span className="truncate text-gray-700">
+                    {selectedResumeName || "בחרי קובץ קורות חיים"}
+                  </span>
 
-    <span className="shrink-0 rounded-md bg-[#e9f5ef] px-3 py-1 text-xs font-semibold text-[#2f6b46]">
-      בחירת קובץ
-    </span>
-  </label>
-</div>
+                  <span className="shrink-0 rounded-md bg-[#e9f5ef] px-3 py-1 text-xs font-semibold text-[#2f6b46]">
+                     בחירת קובץ
+                  </span>
+                </label>
+
+                {user && (
+                  <p className="mt-2 text-xs text-gray-500">
+                      {text.cvFromProfile}
+                  </p>
+                )}
+              </div>
 
               <div>
                 <label className="mb-1 block text-sm text-gray-600">
