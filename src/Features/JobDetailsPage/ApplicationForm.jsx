@@ -84,6 +84,7 @@ function ApplicationForm({ job, onClose }) {
   const [submitted, setSubmitted] = useState(false);
   const [existingApplication, setExistingApplication] = useState(null);
   const [isUpdateMode, setIsUpdateMode] = useState(false);
+  const [selectedResumeName, setSelectedResumeName] = useState("");
 
   const handleChange = (e) => {
   const { name, value, files, type } = e.target;
@@ -92,6 +93,19 @@ function ApplicationForm({ job, onClose }) {
     ...prev,
     [name]: type === "file" ? files[0] : value,
   }));
+};
+
+const handleFileChange = (e) => {
+  const file = e.target.files?.[0];
+
+  if (!file) return;
+
+  setFormData((prev) => ({
+    ...prev,
+    resumeFile: file,
+  }));
+
+  setSelectedResumeName(file.name);
 };
 
   const handleSubmit = async (e) => {
@@ -208,6 +222,7 @@ function ApplicationForm({ job, onClose }) {
                     resumeFile: null,
           });
 
+          setSelectedResumeName("");
           setIsUpdateMode(true);
         }}
         className="rounded-lg bg-[#2f6b46] px-4 py-2 text-sm font-medium text-white hover:bg-[#245539]"
@@ -264,34 +279,30 @@ function ApplicationForm({ job, onClose }) {
 
               <div>
   <label className="mb-1 block text-sm text-gray-600">
-      {text.cvLabel}  
+    {text.cvLabel}
   </label>
 
   <input
-  id="resumeFile"
-  name="resumeFile"
-  type="file"
-  accept=".pdf,.doc,.docx"
-  onChange={handleChange}
-  className="hidden"
-/>
+    id="resumeFileInput"
+    name="resumeFile"
+    type="file"
+    accept=".pdf,.doc,.docx"
+    onChange={handleFileChange}
+    className="hidden"
+  />
 
-<label
-  htmlFor="resumeFile"
-  className="flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white p-3 text-sm transition hover:border-[#2f6b46] hover:bg-gray-50"
->
-  <span className="truncate text-gray-600">
-    {formData.resumeFile
-      ? formData.resumeFile.name
-      : language === "ar"
-      ? "اختاري ملف السيرة الذاتية"
-      : "בחרי קובץ קורות חיים"}
-  </span>
+  <label
+    htmlFor="resumeFileInput"
+    className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-gray-300 bg-white p-3 text-sm transition hover:border-[#2f6b46] hover:bg-gray-50"
+  >
+    <span className="truncate text-gray-700">
+      {selectedResumeName || "בחרי קובץ קורות חיים"}
+    </span>
 
-  <span className="rounded-md bg-[#e9f5ef] px-3 py-1 text-xs font-semibold text-[#2f6b46]">
-    {language === "ar" ? "اختيار ملف" : "בחירת קובץ"}
-  </span>
-</label>
+    <span className="shrink-0 rounded-md bg-[#e9f5ef] px-3 py-1 text-xs font-semibold text-[#2f6b46]">
+      בחירת קובץ
+    </span>
+  </label>
 </div>
 
               <div>
