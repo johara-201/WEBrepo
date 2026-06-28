@@ -16,6 +16,11 @@ const APPLICATION_FORM_TEXT = {
     cvLabel: "קורות חיים",
     cvFromProfile: "אם לא תבחרי קובץ חדש, נשתמש בקורות החיים ששמורים באזור האישי שלך.",
 
+    missingDetailsTitle: "חסרים פרטים לפני שליחת המועמדות:",
+    missingFullName: "שם מלא",
+    missingEmail: "אימייל",
+    missingCv: "קורות חיים — העלי קובץ או עדכני קורות חיים באזור האישי",
+
     labels: {
       fullName: "שם מלא *",
       email: "אימייל *",
@@ -47,6 +52,11 @@ const APPLICATION_FORM_TEXT = {
     updateDetails: "تحديث التفاصيل",
     cvLabel: "السيرة الذاتية",
     cvFromProfile: "إذا لم تختاري ملفًا جديدًا، سنستخدم السيرة الذاتية المحفوظة في حسابك الشخصي.",
+
+    missingDetailsTitle: "تنقص بعض التفاصيل قبل إرسال الطلب:",
+    missingFullName: "الاسم الكامل",
+    missingEmail: "البريد الإلكتروني",
+    missingCv: "السيرة الذاتية — ارفعي ملفًا أو حدّثي السيرة الذاتية في الحساب الشخصي",
 
     labels: {
       fullName: "الاسم الكامل *",
@@ -96,6 +106,7 @@ useEffect(() => {
   const [existingApplication, setExistingApplication] = useState(null);
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [selectedResumeName, setSelectedResumeName] = useState("");
+  const [missingFields, setMissingFields] = useState([]);
 
   const handleChange = (e) => {
   const { name, value, files, type } = e.target;
@@ -141,6 +152,31 @@ const handleFileChange = (e) => {
 
   const handleSubmit = async (e) => {
   e.preventDefault();
+  const missing = [];
+
+if (!formData.fullName?.trim()) {
+  missing.push(text.missingFullName);
+}
+
+if (!formData.email?.trim()) {
+  missing.push(text.missingEmail);
+}
+
+const hasResume =
+  !!formData.resumeFile ||
+  !!user?.hasCv ||
+  (isUpdateMode && !!existingApplication?.resumeFile);
+
+if (!hasResume) {
+  missing.push(text.missingCv);
+}
+
+if (missing.length > 0) {
+  setMissingFields(missing);
+  return;
+}
+
+setMissingFields([]);
 
   setSubmitting(true);
 
@@ -264,6 +300,17 @@ const handleFileChange = (e) => {
   </div>
 )}
 
+{missingFields.length > 0 && (
+  <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+    <p className="mb-2 font-semibold">{text.missingDetailsTitle}</p>
+
+    <ul className="list-disc space-y-1 pr-5">
+      {missingFields.map((field) => (
+        <li key={field}>{field}</li>
+      ))}
+    </ul>
+  </div>
+)}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="mb-1 block text-sm text-gray-600">
