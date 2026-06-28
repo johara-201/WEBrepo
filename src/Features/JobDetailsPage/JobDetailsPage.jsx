@@ -2,6 +2,7 @@ import { useState } from "react";
 import ApplicationForm from "./ApplicationForm";
 import NavBar from "../../Components/NavBar";
 import { useLanguage } from "../../Context/LanguageContext";
+import { updateApplication } from "./jobDetailsService";
 
 const JOB_DETAILS_TEXT = {
   he: {

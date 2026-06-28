@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {submitApplication, updateApplication} from "../../Services/ApplicationsService";
 import { useLanguage } from "../../Context/LanguageContext";
+import { useAuth } from "../../Context/AuthContext";
 
 const APPLICATION_FORM_TEXT = {
   he: {
@@ -68,6 +69,7 @@ const APPLICATION_FORM_TEXT = {
 
 function ApplicationForm({ job, onClose }) {
   const { language } = useLanguage();
+  const { token } = useAuth();
   const text = APPLICATION_FORM_TEXT[language] || APPLICATION_FORM_TEXT.he;
 
   const [formData, setFormData] = useState({
@@ -99,7 +101,7 @@ function ApplicationForm({ job, onClose }) {
 
   try {
     if (isUpdateMode && existingApplication?._id) {
-      await updateApplication(existingApplication._id, formData);
+      await updateApplication(existingApplication._id, formData, token);      
       setSubmitted(true);
       return;
     }
