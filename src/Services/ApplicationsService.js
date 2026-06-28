@@ -15,10 +15,24 @@ const authConfig = () => {
 };
 
 export const submitApplication = async (applicationData) => {
+  const formData = new FormData();
+
+  Object.keys(applicationData).forEach((key) => {
+    if (applicationData[key] !== null && applicationData[key] !== undefined) {
+      formData.append(key, applicationData[key]);
+    }
+  });
+
   const response = await axios.post(
     `${BASE_URL}/api/applications`,
-    applicationData,
-    authConfig()
+    formData,
+    {
+      ...authConfig(),
+      headers: {
+        ...authConfig().headers,
+        "Content-Type": "multipart/form-data",
+      },
+    }
   );
 
   return response.data;
@@ -52,10 +66,24 @@ export const deleteApplication = async (id) => {
 };
 
 export const updateApplication = async (id, applicationData) => {
+  const formData = new FormData();
+
+  Object.keys(applicationData).forEach((key) => {
+    if (applicationData[key] !== null && applicationData[key] !== undefined) {
+      formData.append(key, applicationData[key]);
+    }
+  });
+
   const response = await axios.put(
     `${BASE_URL}/api/applications/${id}`,
-    applicationData,
-    authConfig()
+    formData,
+    {
+      ...authConfig(),
+      headers: {
+        ...authConfig().headers,
+        "Content-Type": "multipart/form-data",
+      },
+    }
   );
 
   return response.data;

@@ -3,10 +3,32 @@ const router      = express.Router();
 const Application = require("../models/applicationSchema");
 const { requireUser, requireAdmin } = require("../middleware/authMiddleware");
 const Job = require("../models/jobSchema");
+const multer = require("multer");
+const path = require("path");
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
 
-router.post("/", async (req, res) => {
+  filename: (req, file, cb) => {
+    const uniqueName =
+      Date.now() +
+      "-" +
+      Math.round(Math.random() * 1e9) +
+      path.extname(file.originalname);
+
+    cb(null, uniqueName);
+  },
+});
+
+const upload = multer({ storage });
+
+router.post("/", upload.single("resumeFile"), async (req, res) => {
   try {
     const data = { ...req.body };
+    if (req.file) {
+  data.resumeFile = req.file.filename;
+}
 
     const auth = req.headers.authorization;
 
@@ -100,7 +122,7 @@ router.get("/job/:jobId", requireAdmin, async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", upload.single("resumeFile"), async (req, res) => {
   try {
     const updatedApplication = await Application.findByIdAndUpdate(
       req.params.id,
@@ -109,6 +131,7 @@ router.put("/:id", async (req, res) => {
         email: req.body.email?.trim().toLowerCase(),
         phone: req.body.phone,
         message: req.body.message,
+        ...(req.file && { resumeFile: req.file.filename }),
         updatedAt: new Date(),
       },
       { new: true, runValidators: true }

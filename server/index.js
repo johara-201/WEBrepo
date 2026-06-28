@@ -48,6 +48,7 @@ mongoose
 
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
+app.use("/uploads", express.static("uploads"));
 
 app.use("/api/jobs",         jobsRouter);
 app.use("/api/applications", applicationsRouter);

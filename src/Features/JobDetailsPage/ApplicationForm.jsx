@@ -63,11 +63,12 @@ function ApplicationForm({ job, onClose }) {
   const text = APPLICATION_FORM_TEXT[language] || APPLICATION_FORM_TEXT.he;
 
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    message: "",
-  });
+  fullName: "",
+  email: "",
+  phone: "",
+  message: "",
+  resumeFile: null,
+});
 
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -75,13 +76,13 @@ function ApplicationForm({ job, onClose }) {
   const [isUpdateMode, setIsUpdateMode] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+  const { name, value, files, type } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  setFormData((prev) => ({
+    ...prev,
+    [name]: type === "file" ? files[0] : value,
+  }));
+};
 
   const handleSubmit = async (e) => {
   e.preventDefault();
@@ -110,22 +111,6 @@ function ApplicationForm({ job, onClose }) {
 
       if (existing) {
         setExistingApplication(existing);
-
-        const wantsUpdate = window.confirm(
-          "כבר הגשת מועמדות למשרה הזו.\nהאם תרצה/י לעדכן את הפרטים?"
-        );
-
-        if (wantsUpdate) {
-          setFormData({
-            fullName: existing.fullName || "",
-            email: existing.email || "",
-            phone: existing.phone || "",
-            message: existing.message || "",
-          });
-
-          setIsUpdateMode(true);
-        }
-
         return;
       }
 
@@ -137,7 +122,7 @@ function ApplicationForm({ job, onClose }) {
     }
 
     alert(text.error);
-  } finally {
+   } finally {
     setSubmitting(false);
   }
 };
@@ -190,6 +175,42 @@ function ApplicationForm({ job, onClose }) {
               </button>
             </div>
 
+            {existingApplication && !isUpdateMode && (
+  <div className="mb-4 rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
+    <p className="mb-3 font-medium">
+      כבר הגשת מועמדות למשרה הזו. האם תרצה/י לעדכן את הפרטים?
+    </p>
+
+    <div className="flex justify-end gap-2">
+      <button
+        type="button"
+        onClick={() => setExistingApplication(null)}
+        className="rounded-lg border px-4 py-2 text-sm hover:bg-white"
+      >
+        ביטול
+      </button>
+
+      <button
+        type="button"
+        onClick={() => {
+          setFormData({
+            fullName: existingApplication.fullName || "",
+            email: existingApplication.email || "",
+            phone: existingApplication.phone || "",
+            message: existingApplication.message || "",
+          });
+
+          setIsUpdateMode(true);
+          setExistingApplication(null); 
+        }}
+        className="rounded-lg bg-[#2f6b46] px-4 py-2 text-sm font-medium text-white hover:bg-[#245539]"
+      >
+        עדכון פרטים
+      </button>
+    </div>
+  </div>
+)}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="mb-1 block text-sm text-gray-600">
@@ -233,6 +254,20 @@ function ApplicationForm({ job, onClose }) {
                   className="w-full rounded-lg border border-gray-300 p-3 focus:border-[#2f6b46] focus:outline-none"
                 />
               </div>
+
+              <div>
+  <label className="mb-1 block text-sm text-gray-600">
+    קורות חיים
+  </label>
+
+  <input
+    name="resumeFile"
+    type="file"
+    accept=".pdf,.doc,.docx"
+    onChange={handleChange}
+    className="w-full rounded-lg border border-gray-300 p-3 focus:border-[#2f6b46] focus:outline-none"
+  />
+</div>
 
               <div>
                 <label className="mb-1 block text-sm text-gray-600">
