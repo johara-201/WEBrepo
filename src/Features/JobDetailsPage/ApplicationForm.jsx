@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { submitApplication } from "../../Services/ApplicationsService";
+import {submitApplication, updateApplication} from "../../Services/ApplicationsService";
 import { useLanguage } from "../../Context/LanguageContext";
 
 const APPLICATION_FORM_TEXT = {
@@ -71,6 +71,8 @@ function ApplicationForm({ job, onClose }) {
 
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [existingApplication, setExistingApplication] = useState(null);
+  const [isUpdateMode, setIsUpdateMode] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -82,35 +84,63 @@ function ApplicationForm({ job, onClose }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    setSubmitting(true);
+  setSubmitting(true);
 
-    try {
-      await submitApplication({
-        ...formData,
-        jobId: job._id,
-        jobTitle: job.title,
-      });
-
+  try {
+    if (isUpdateMode && existingApplication?._id) {
+      await updateApplication(existingApplication._id, formData);
       setSubmitted(true);
-    } catch (err) {
-  console.error(err);
-
-  if (err.response?.status === 409) {
-    const message =
-      err.response.data?.error ||
-    "כבר הגשת מועמדות למשרה הזו. ניתן לעדכן פרטים";
-
-    alert(message);
-    return;
-  }
-
-  alert(text.error);
-} finally {
-      setSubmitting(false);
+      return;
     }
-  };
+
+    await submitApplication({
+      ...formData,
+      jobId: job._id,
+      jobTitle: job.title,
+    });
+
+    setSubmitted(true);
+  } catch (err) {
+    console.error(err);
+
+    if (err.response?.status === 409) {
+      const existing = err.response.data?.application;
+
+      if (existing) {
+        setExistingApplication(existing);
+
+        const wantsUpdate = window.confirm(
+          "כבר הגשת מועמדות למשרה הזו.\nהאם תרצה/י לעדכן את הפרטים?"
+        );
+
+        if (wantsUpdate) {
+          setFormData({
+            fullName: existing.fullName || "",
+            email: existing.email || "",
+            phone: existing.phone || "",
+            message: existing.message || "",
+          });
+
+          setIsUpdateMode(true);
+        }
+
+        return;
+      }
+
+      alert(
+        err.response.data?.error ||
+          "כבר הגשת מועמדות למשרה הזו. ניתן לעדכן פרטים במקום לשלוח שוב."
+      );
+      return;
+    }
+
+    alert(text.error);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <div
@@ -233,7 +263,7 @@ function ApplicationForm({ job, onClose }) {
                   disabled={submitting}
                   className="rounded-lg bg-[#2f6b46] px-5 py-2 text-sm font-medium text-white hover:bg-[#245539] disabled:opacity-60"
                 >
-                  {submitting ? text.buttons.submitting : text.buttons.submit}
+                  {submitting? text.buttons.submitting: isUpdateMode ? "עדכון פרטים": text.buttons.submit}
                 </button>
               </div>
             </form>

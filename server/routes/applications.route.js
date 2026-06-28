@@ -100,6 +100,33 @@ router.get("/job/:jobId", requireAdmin, async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const updatedApplication = await Application.findByIdAndUpdate(
+      req.params.id,
+      {
+        fullName: req.body.fullName,
+        email: req.body.email?.trim().toLowerCase(),
+        phone: req.body.phone,
+        message: req.body.message,
+        updatedAt: new Date(),
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedApplication) {
+      return res.status(404).json({ error: "המועמדות לא נמצאה" });
+    }
+
+    res.status(200).json(updatedApplication);
+  } catch (error) {
+    res.status(500).json({
+      error: "שגיאה בעדכון המועמדות",
+      details: error.message,
+    });
+  }
+});
+
 // ─── DELETE - הסרת מועמדות ───────────────────────────────────────────────────
 // משתמש רשום מוחק מועמדות שלו עצמו
 router.delete("/:id", async (req, res) => {

@@ -50,3 +50,13 @@ export const deleteApplication = async (id) => {
 
   return response.data;
 };
+
+export const updateApplication = async (id, applicationData) => {
+  const response = await axios.put(
+    `${BASE_URL}/api/applications/${id}`,
+    applicationData,
+    authConfig()
+  );
+
+  return response.data;
+};
