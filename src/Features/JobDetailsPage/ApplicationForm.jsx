@@ -3,6 +3,8 @@ import {submitApplication, updateApplication} from "../../Services/ApplicationsS
 import { useLanguage } from "../../Context/LanguageContext";
 import { useAuth } from "../../Context/AuthContext";
 
+const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const APPLICATION_FORM_TEXT = {
   he: {
     title: "הגשת מועמדות",
@@ -101,12 +103,36 @@ useEffect(() => {
   }));
 }, [user]);
 
+useEffect(() => {
+  if (!token) return;
+
+  const loadProfileCvStatus = async () => {
+    try {
+      const res = await fetch(`${API}/api/users/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) return;
+
+      const profile = await res.json();
+      setProfileHasCv(!!profile?.cv?.filename);
+    } catch (err) {
+      console.error("Error loading profile CV status:", err);
+    }
+  };
+
+  loadProfileCvStatus();
+}, [token]);
+
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [existingApplication, setExistingApplication] = useState(null);
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [selectedResumeName, setSelectedResumeName] = useState("");
   const [missingFields, setMissingFields] = useState([]);
+  const [profileHasCv, setProfileHasCv] = useState(false);
 
   const handleChange = (e) => {
   const { name, value, files, type } = e.target;
@@ -164,8 +190,9 @@ if (!formData.email?.trim()) {
 
 const hasResume =
   !!formData.resumeFile ||
+  profileHasCv ||
   !!user?.hasCv ||
-  (isUpdateMode && !!existingApplication?.resumeFile);
+  (isUpdateMode && !!existingApplication?.cvSnapshot?.filename);
 
 if (!hasResume) {
   missing.push(text.missingCv);
