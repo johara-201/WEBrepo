@@ -1,3 +1,5 @@
+//This file decides which page to show in the application
+
 import { useState } from "react";
 import { useAuth } from "../Context/AuthContext";
 
@@ -13,24 +15,31 @@ import JobSeekerDashboard from "../Features/JobSeekerDashboard/JobSeekerDashboar
 import AIChat from "../Features/AIChat/AIChat";
 
 function ComponentSwitcher() {
+  //Check if the current logged-in account is a user or an admin
   const { isUser, isAdmin } = useAuth();
 
+  //Save the page that is currently shown
   const [activePage, setActivePage] = useState("home");
+
+  //Save the selected job for the details page
   const [selectedJob, setSelectedJob] = useState(null);
 
   const goHome = () => setActivePage("home");
 
   const goAdmin = () => {
+    //Admins go to the admin dashboard
     if (isAdmin) {
       setActivePage("admin");
       return;
     }
 
+    //Regular users go to their personal dashboard
     if (isUser) {
       setActivePage("dashboard");
       return;
     }
 
+    //Guests must login first
     setActivePage("login");
   };
 
@@ -41,6 +50,7 @@ function ComponentSwitcher() {
   const goDashboard = () => setActivePage("dashboard");
   const goAIChat = () => setActivePage("aiChat");
 
+  //Navigation functions that are passed to pages
   const nav = {
     onHome: goHome,
     onSearch: goSearch,
@@ -51,11 +61,13 @@ function ComponentSwitcher() {
     onAIChat: goAIChat,
   };
 
+  //Open the details page for a selected job
   const openJobDetails = (job) => {
     setSelectedJob(job);
     setActivePage("details");
   };
 
+  //Decide where to go after successful login
   const handleAuthSuccess = (type) => {
     if (type === "admin") {
       setActivePage("admin");

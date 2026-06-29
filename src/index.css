@@ -2,10 +2,10 @@
 @import "tailwindcss";
 
 :root {
-  --brand: #2f6b46;        /* ירוק ראשי */
+  --brand: #2f6b46;        
   --brand-dark: #245539;
   --brand-light: #e9f1ea;
-  --cream: #f6f5ef;        /* רקע חמים */
+  --cream: #f6f5ef;        
 }
 
 * {
@@ -27,7 +27,6 @@ select {
   font: inherit;
 }
 
-/* Light / Dark Mode */
 
 :root {
   --app-bg: #f6f5ef;
@@ -135,7 +134,6 @@ body {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35) !important;
 }
 
-/* Global font override - Hebrew / Arabic / English */
 :root {
   --main-font: "Noto Sans Hebrew", "Noto Sans Arabic", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
 }

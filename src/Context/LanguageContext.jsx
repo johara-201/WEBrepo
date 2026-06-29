@@ -1,7 +1,10 @@
+//This file manages the website language
+
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const LanguageContext = createContext(null);
 
+//Static translations for main texts in the website.
 const translations = {
   he: {
     nav: {
@@ -17,36 +20,36 @@ const translations = {
       switchLanguage: "العربية",
     },
     auth: {
-        backHome: "חזרה לדף הבית",
-        welcome: "ברוכים הבאים",
-        continueLogin: "התחברו כדי להמשיך",
-        jobSeeker: "מחפש/ת עבודה",
-        admin: "מנהל/ת",
+      backHome: "חזרה לדף הבית",
+      welcome: "ברוכים הבאים",
+      continueLogin: "התחברו כדי להמשיך",
+      jobSeeker: "מחפש/ת עבודה",
+      admin: "מנהל/ת",
 
-        sideTitle: "יחד מחזקים\nאת החינוך\nבקהילה שלנו",
-        sideSubtitle: "הזדמנויות לחיים, פלטפורמת משרות בחינוך, נוער וקהילה באזור בית הכרם.",
+      sideTitle: "יחד מחזקים\nאת החינוך\nבקהילה שלנו",
+      sideSubtitle: "הזדמנויות לחיים, פלטפורמת משרות בחינוך, נוער וקהילה באזור בית הכרם.",
 
-        fullName: "שם מלא *",
-        fullNamePlaceholder: "ישראל ישראלי",
-        phone: "טלפון",
-        phonePlaceholder: "050-0000000",
-        email: "דוא״ל",
-        password: "סיסמה",
-        username: "שם משתמש",
-        usernamePlaceholder: "שם המשתמש שלך",
+      fullName: "שם מלא *",
+      fullNamePlaceholder: "ישראל ישראלי",
+      phone: "טלפון",
+      phonePlaceholder: "050-0000000",
+      email: "דוא״ל",
+      password: "סיסמה",
+      username: "שם משתמש",
+      usernamePlaceholder: "שם המשתמש שלך",
 
-        login: "התחבר",
-        register: "הירשם",
-        adminLogin: "כניסה כמנהל",
+      login: "התחבר",
+      register: "הירשם",
+      adminLogin: "כניסה כמנהל",
 
-        noAccount: "אין לך חשבון?",
-        alreadyRegistered: "כבר רשום?",
-        registerHere: "הירשם כאן",
+      noAccount: "אין לך חשבון?",
+      alreadyRegistered: "כבר רשום?",
+      registerHere: "הירשם כאן",
 
-        error: "שגיאה",
-        emailAlreadyRegistered: "האימייל כבר רשום",
-        emailAlreadyRegisteredText: "האימייל הזה כבר קיים במערכת. אפשר להתחבר לחשבון הקיים או להשתמש באימייל אחר.",
-        fullNameRequired: "שם מלא הוא שדה חובה",
+      error: "שגיאה",
+      emailAlreadyRegistered: "האימייל כבר רשום",
+      emailAlreadyRegisteredText: "האימייל הזה כבר קיים במערכת. אפשר להתחבר לחשבון הקיים או להשתמש באימייל אחר.",
+      fullNameRequired: "שם מלא הוא שדה חובה",
     },
     home: {
       heroTitle: "הזדמנויות לחיים",
@@ -118,48 +121,48 @@ const translations = {
       },
     },
     auth: {
-  backHome: "العودة إلى الصفحة الرئيسية",
-  welcome: "أهلًا وسهلًا",
-  continueLogin: "سجّلوا الدخول للمتابعة",
-  jobSeeker: "باحث/ة عن عمل",
-  admin: "مدير/ة",
+      backHome: "العودة إلى الصفحة الرئيسية",
+      welcome: "أهلًا وسهلًا",
+      continueLogin: "سجّلوا الدخول للمتابعة",
+      jobSeeker: "باحث/ة عن عمل",
+      admin: "مدير/ة",
 
-  sideTitle: "معًا نقوّي\nالتعليم\nفي مجتمعنا",
-  sideSubtitle: "فرص للحياة، منصة وظائف في التربية، الشباب والمجتمع في منطقة بيت الكرم.",
+      sideTitle: "معًا نقوّي\nالتعليم\nفي مجتمعنا",
+      sideSubtitle: "فرص للحياة، منصة وظائف في التربية، الشباب والمجتمع في منطقة بيت الكرم.",
 
-  fullName: "الاسم الكامل *",
-  fullNamePlaceholder: "مثال: أحمد محمد",
-  phone: "رقم الهاتف",
-  phonePlaceholder: "050-0000000",
-  email: "البريد الإلكتروني",
-  password: "كلمة المرور",
-  username: "اسم المستخدم",
-  usernamePlaceholder: "اسم المستخدم الخاص بك",
+      fullName: "الاسم الكامل *",
+      fullNamePlaceholder: "مثال: أحمد محمد",
+      phone: "رقم الهاتف",
+      phonePlaceholder: "050-0000000",
+      email: "البريد الإلكتروني",
+      password: "كلمة المرور",
+      username: "اسم المستخدم",
+      usernamePlaceholder: "اسم المستخدم الخاص بك",
 
-  login: "تسجيل الدخول",
-  register: "إنشاء حساب",
-  adminLogin: "الدخول كمدير",
+      login: "تسجيل الدخول",
+      register: "إنشاء حساب",
+      adminLogin: "الدخول كمدير",
 
-  noAccount: "ليس لديك حساب؟",
-  alreadyRegistered: "هل لديك حساب؟",
-  registerHere: "سجّل هنا",
+      noAccount: "ليس لديك حساب؟",
+      alreadyRegistered: "هل لديك حساب؟",
+      registerHere: "سجّل هنا",
 
-  error: "خطأ",
-  emailAlreadyRegistered: "البريد الإلكتروني مسجّل مسبقًا",
-  emailAlreadyRegisteredText: "هذا البريد الإلكتروني موجود في النظام. يمكن تسجيل الدخول للحساب الحالي أو استخدام بريد آخر.",
-  fullNameRequired: "الاسم الكامل مطلوب",
-},
-ai: {
-  initial: "مرحبًا! أنا مساعد AI للبحث عن وظائف في التربية، الشباب والمجتمع. كيف يمكنني المساعدة؟",
-  title: "دردشة AI للبحث عن وظائف",
-  subtitle: "يساعد المستخدمين على فهم كيفية العثور على وظيفة مناسبة في الموقع",
-  placeholder: "اكتبي سؤالًا حول البحث عن وظيفة...",
-  thinking: "يفكّر..."
-}
+      error: "خطأ",
+      emailAlreadyRegistered: "البريد الإلكتروني مسجّل مسبقًا",
+      emailAlreadyRegisteredText: "هذا البريد الإلكتروني موجود في النظام. يمكن تسجيل الدخول للحساب الحالي أو استخدام بريد آخر.",
+      fullNameRequired: "الاسم الكامل مطلوب",
+    },
+    ai: {
+      initial: "مرحبًا! أنا مساعد AI للبحث عن وظائف في التربية، الشباب والمجتمع. كيف يمكنني المساعدة؟",
+      title: "دردشة AI للبحث عن وظائف",
+      subtitle: "يساعد المستخدمين على فهم كيفية العثور على وظيفة مناسبة في الموقع",
+      placeholder: "اكتبي سؤالًا حول البحث عن وظيفة...",
+      thinking: "يفكّر..."
+    }
   },
 };
 
-
+//Dictionary for translating dynamic Hebrew UI texts to Arabic
 const uiDictionaryAr = {
   "ניהול משרות": "إدارة الوظائف",
   "מועמדויות": "طلبات التقديم",
@@ -239,58 +242,68 @@ const uiDictionaryAr = {
   "חושב...": "يفكّر...",
   "כתבי שאלה על חיפוש משרה...": "اكتبي سؤالًا حول البحث عن وظيفة...",
   "כל יישוב": "كل البلدات",
-"כל ארגון": "كل الجهات",
-"כל היקף": "كل النسب",
-"סוג משרה": "نوع الوظيفة",
-"מיין: חדש ← ישן": "ترتيب: الأحدث ← الأقدم",
-"מיין: ישן ← חדש": "ترتيب: الأقدم ← الأحدث",
-"לפרטים": "للتفاصيل",
-"פורסם": "نُشر",
-"תיאור התפקיד": "وصف الوظيفة",
-"פרטי המשרה": "تفاصيل الوظيفة",
-"חזרה לכל המשרות": "الرجوع إلى كل الوظائف",
-"הגשה באתר המקור": "التقديم في موقع المصدر",
-"הגשת מועמדות דרך המערכת": "تقديم طلب عبر النظام",
+  "כל ארגון": "كل الجهات",
+  "כל היקף": "كل النسب",
+  "סוג משרה": "نوع الوظيفة",
+  "מיין: חדש ← ישן": "ترتيب: الأحدث ← الأقدم",
+  "מיין: ישן ← חדש": "ترتيب: الأقدم ← الأحدث",
+  "לפרטים": "للتفاصيل",
+  "פורסם": "نُشر",
+  "תיאור התפקיד": "وصف الوظيفة",
+  "פרטי המשרה": "تفاصيل الوظيفة",
+  "חזרה לכל המשרות": "الرجوع إلى كل الوظائف",
+  "הגשה באתר המקור": "التقديم في موقع المصدر",
+  "הגשת מועמדות דרך המערכת": "تقديم طلب عبر النظام",
 };
 
-
+//Create the opposite dictionary, from Arabic back to Hebrew
 const uiDictionaryHe = Object.fromEntries(
   Object.entries(uiDictionaryAr).map(([he, ar]) => [ar, he])
 );
 
+//Make text cleaner before comparing it with the dictionary
 function normalizeText(text) {
   return String(text || "").replace(/\s+/g, " ").trim();
 }
 
+//Translate text only if it exists in the dynamic dictionary
 function translateDynamicText(text, language) {
   const trimmed = normalizeText(text);
+
   if (!trimmed) return text;
 
+  //Choose the correct dictionary according to the selected language
   const dict = language === "ar" ? uiDictionaryAr : uiDictionaryHe;
 
   if (dict[trimmed]) {
+    //Replace only the normalized part and keep the original text structure
     return String(text).replace(trimmed, dict[trimmed]);
   }
 
   return text;
 }
 
+//Get the saved language from localStorage
 function getInitialLanguage() {
   const savedLanguage = localStorage.getItem("language");
+
   return savedLanguage === "ar" ? "ar" : "he";
 }
 
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(getInitialLanguage);
 
+  //Update the HTML language settings and save the selected language
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = "rtl";
     localStorage.setItem("language", language);
   }, [language]);
 
+  //Watch the page and translate dynamic texts when the language changes
   useEffect(() => {
     const root = document.getElementById("root");
+
     if (!root) return undefined;
 
     let frame = null;
@@ -298,6 +311,7 @@ export function LanguageProvider({ children }) {
     const runTranslation = () => {
       if (frame) cancelAnimationFrame(frame);
 
+      //Wait for React to finish updating the page before translating
       frame = requestAnimationFrame(() => {
         translateElementTree(root, language);
       });
@@ -305,6 +319,7 @@ export function LanguageProvider({ children }) {
 
     runTranslation();
 
+    //Watch changes in the page content
     const observer = new MutationObserver(runTranslation);
 
     observer.observe(root, {
@@ -321,10 +336,12 @@ export function LanguageProvider({ children }) {
     };
   }, [language]);
 
+  //Switch between Hebrew and Arabic
   const toggleLanguage = () => {
     setLanguage((current) => (current === "he" ? "ar" : "he"));
   };
 
+  //Save the context value and update it only when language changes
   const value = useMemo(
     () => ({
       language,
@@ -342,20 +359,30 @@ export function LanguageProvider({ children }) {
     </LanguageContext.Provider>
   );
 }
+
+//Hook for using the language context in components
 export function useLanguage() {
   return useContext(LanguageContext);
 }
+
+//Translate text that already exists inside the page
 function translateElementTree(root, language) {
   if (!root) return;
 
+  //Attributes that may also contain visible text
   const attributes = ["placeholder", "title", "alt", "aria-label"];
 
+  //Find all text nodes inside the page
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       const parent = node.parentElement;
+
+      //Do not translate code, style, or textarea content
       if (!parent || ["SCRIPT", "STYLE", "TEXTAREA"].includes(parent.tagName)) {
         return NodeFilter.FILTER_REJECT;
       }
+
+      //Translate only real text, not empty spaces
       return normalizeText(node.nodeValue)
         ? NodeFilter.FILTER_ACCEPT
         : NodeFilter.FILTER_REJECT;
@@ -364,17 +391,21 @@ function translateElementTree(root, language) {
 
   const textNodes = [];
 
+  //Save all text nodes before changing them
   while (walker.nextNode()) {
     textNodes.push(walker.currentNode);
   }
 
+  //Translate every text node if it exists in the dictionary
   textNodes.forEach((node) => {
     const next = translateDynamicText(node.nodeValue, language);
+
     if (next !== node.nodeValue) {
       node.nodeValue = next;
     }
   });
 
+  //Translate text inside important HTML attributes
   root.querySelectorAll("*").forEach((el) => {
     attributes.forEach((attr) => {
       if (!el.hasAttribute(attr)) return;
