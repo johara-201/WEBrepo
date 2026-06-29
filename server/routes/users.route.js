@@ -1,102 +1,153 @@
-const express  = require("express");
-const bcrypt   = require("bcryptjs");
-const multer   = require("multer");
-const User     = require("../models/userSchema");
+//This file handles user profile and CV management
+
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const multer = require("multer");
+
+const User = require("../models/userSchema");
 const { requireUser } = require("../middleware/authMiddleware");
 
-const router  = express.Router();
-const storage = multer.memoryStorage(); // שמירה בזיכרון ואז העברה ל-DB
-const upload  = multer({
+const router = express.Router();
+
+//Store uploaded files in memory before saving them to the database
+const storage = multer.memoryStorage();
+
+const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+
+  //Limit uploaded file size to 5MB
+  limits: { fileSize: 5 * 1024 * 1024 },
+
+  //Allow only PDF and Word files
   fileFilter: (req, file, cb) => {
-    const allowed = ["application/pdf", "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    const allowed = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+
     if (allowed.includes(file.mimetype)) cb(null, true);
     else cb(new Error("קובץ חייב להיות PDF או Word"));
   },
 });
 
-// ─── קבלת פרופיל ────────────────────────────────────────────────────────────
+//Get the logged-in user's profile
 router.get("/me", requireUser, async (req, res) => {
   try {
+    //Do not return the password or CV file
     const user = await User.findById(req.userId).select("-password -cv.data");
-    if (!user) return res.status(404).json({ error: "משתמש לא נמצא" });
+
+    if (!user)
+      return res.status(404).json({ error: "משתמש לא נמצא" });
+
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: "שגיאה בשרת" });
   }
 });
 
-// ─── עדכון פרופיל ────────────────────────────────────────────────────────────
+//Update the logged-in user's profile
 router.put("/me", requireUser, async (req, res) => {
   try {
     const { name, phone, city, profession, bio } = req.body;
+
     const user = await User.findByIdAndUpdate(
       req.userId,
       { $set: { name, phone, city, profession, bio } },
       { new: true, select: "-password -cv.data" }
     );
+
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: "שגיאה בשרת" });
   }
 });
 
-// ─── שינוי סיסמה ─────────────────────────────────────────────────────────────
+//Change the user's password
 router.put("/me/password", requireUser, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
+
     const user = await User.findById(req.userId);
+
+    //Check that the current password is correct
     const match = await bcrypt.compare(currentPassword, user.password);
-    if (!match) return res.status(400).json({ error: "סיסמה נוכחית שגויה" });
+
+    if (!match)
+      return res.status(400).json({ error: "סיסמה נוכחית שגויה" });
+
+    //Encrypt the new password before saving it
     user.password = await bcrypt.hash(newPassword, 10);
+
     await user.save();
+
     res.json({ message: "סיסמה עודכנה בהצלחה" });
   } catch (err) {
     res.status(500).json({ error: "שגיאה בשרת" });
   }
 });
 
-// ─── העלאת קורות חיים ────────────────────────────────────────────────────────
+//Upload a new CV
 router.post("/me/cv", requireUser, upload.single("cv"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "קובץ לא הועלה" });
+    if (!req.file)
+      return res.status(400).json({ error: "קובץ לא הועלה" });
+
+    //Save the uploaded CV in the user's profile
     await User.findByIdAndUpdate(req.userId, {
       $set: {
-        "cv.data":       req.file.buffer,
-        "cv.filename":   req.file.originalname,
-        "cv.mimetype":   req.file.mimetype,
+        "cv.data": req.file.buffer,
+        "cv.filename": req.file.originalname,
+        "cv.mimetype": req.file.mimetype,
         "cv.uploadedAt": new Date(),
       },
     });
-    res.json({ message: "קורות חיים הועלו בהצלחה", filename: req.file.originalname });
+
+    res.json({
+      message: "קורות חיים הועלו בהצלחה",
+      filename: req.file.originalname,
+    });
   } catch (err) {
     res.status(500).json({ error: "שגיאה בשרת" });
   }
 });
 
-// ─── הורדת קורות חיים ────────────────────────────────────────────────────────
+//Download the user's CV
 router.get("/me/cv", requireUser, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
-    if (!user?.cv?.data) return res.status(404).json({ error: "לא נמצאו קורות חיים" });
+
+    if (!user?.cv?.data)
+      return res.status(404).json({ error: "לא נמצאו קורות חיים" });
+
+    //Set the file type before sending it
     res.set("Content-Type", user.cv.mimetype);
-    res.set("Content-Disposition", `inline; filename="${user.cv.filename}"`);
+
+    //Open the file in the browser
+    res.set(
+      "Content-Disposition",
+      `inline; filename="${user.cv.filename}"`
+    );
+
     res.send(user.cv.data);
   } catch (err) {
     res.status(500).json({ error: "שגיאה בשרת" });
   }
 });
 
-// ─── מחיקת קורות חיים ────────────────────────────────────────────────────────
+//Delete the user's CV
 router.delete("/me/cv", requireUser, async (req, res) => {
   try {
-    await User.findByIdAndUpdate(req.userId, { $unset: { cv: 1 } });
+    //Remove the CV from the user's profile
+    await User.findByIdAndUpdate(req.userId, {
+      $unset: { cv: 1 },
+    });
+
     res.json({ message: "קורות חיים נמחקו" });
   } catch (err) {
     res.status(500).json({ error: "שגיאה בשרת" });
   }
 });
 
+//Export the users router
 module.exports = router;

@@ -1,7 +1,13 @@
+//This file adds sample jobs to the database
+
 require("dotenv").config();
+
 const mongoose = require("mongoose");
+
+//Import the Job model
 const Job = require("./models/jobSchema");
 
+//Sample jobs that will be added to the database
 const jobs = [
   {
     title: "רכז/ת נוער קהילתי",
@@ -57,12 +63,20 @@ const jobs = [
   },
 ];
 
+//Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(async () => {
-    await Job.deleteMany({});           // ניקוי קודם
-    await Job.insertMany(jobs);          // הכנסת הנתונים
+
+    //Remove all old jobs before adding new ones
+    await Job.deleteMany({});
+
+    //Add all sample jobs to the database
+    await Job.insertMany(jobs);
+
     console.log(`✅ הוכנסו ${jobs.length} משרות`);
+
+    //Close the database connection
     await mongoose.disconnect();
   })
   .catch((err) => console.error("שגיאה:", err));

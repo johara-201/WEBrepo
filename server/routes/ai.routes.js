@@ -1,25 +1,33 @@
+//This file handles the AI chat requests
+
 const express = require("express");
 const Job = require("../models/jobSchema");
 
 const router = express.Router();
 
+//Send the user's message to Gemini and return an answer
 router.post("/chat", async (req, res) => {
   try {
+    //Get the user's message and selected language
     const { message, language = "he" } = req.body;
 
+    //Make sure a message was sent
     if (!message || !message.trim()) {
       return res.status(400).json({ error: "Message is required" });
     }
 
+    //Make sure the Gemini API key exists
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: "Missing Gemini API key" });
     }
 
+    //Get the latest jobs from the database
     const jobs = await Job.find({})
       .sort({ publishDate: -1, _id: -1 })
       .limit(25)
       .lean();
 
+    //Convert the jobs into text so the AI can read them
     const jobsText = jobs.length
       ? jobs
           .map(
@@ -37,8 +45,10 @@ ${index + 1}.
           .join("\n")
       : "אין כרגע משרות במערכת.";
 
+    //Choose the language for the AI response
     const answerLanguage = language === "ar" ? "Arabic" : "Hebrew";
 
+    //Build the prompt that will be sent to Gemini
     const prompt = `
 You are an AI job-search assistant for a regional jobs website.
 
@@ -59,6 +69,7 @@ Real jobs currently in the system:
 ${jobsText}
 `;
 
+    //Send the prompt to Gemini
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
@@ -76,6 +87,7 @@ ${jobsText}
       }
     );
 
+    //Handle API errors
     if (!response.ok) {
       const errorData = await response.json();
       console.error("Gemini API error:", errorData);
@@ -87,6 +99,7 @@ ${jobsText}
 
     const data = await response.json();
 
+    //Get the AI answer from the response
     const answer =
       data.candidates?.[0]?.content?.parts?.[0]?.text ||
       "לא התקבלה תשובה מה-AI.";
@@ -101,4 +114,5 @@ ${jobsText}
   }
 });
 
+//Export the AI router
 module.exports = router;

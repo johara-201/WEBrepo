@@ -1,15 +1,19 @@
+//This file handles jobs, job statistics, and job import actions
+
 const express = require("express");
 const router = express.Router();
-const fs   = require("fs");
+
+const fs = require("fs");
 const path = require("path");
 
 const Job = require("../models/jobSchema");
 const Application = require("../models/applicationSchema");
 const User = require("../models/userSchema");
 
+//Default URL for the curated local jobs feed
 const CURATED_LOCAL_FEED_URL = process.env.CURATED_LOCAL_FEED_URL || "http://localhost:3000/api/jobs/curated-feed-data";
 
-// GET all jobs
+//Get all jobs from the database
 router.get("/", async (req, res) => {
   try {
     const jobs = await Job.find({});
@@ -19,25 +23,22 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET curated local feed — חייב להיות לפני /:id
-router.get("/curated-feed-data", async (req, res) => {
-  try {
-    const filePath = path.join(__dirname, "../data/beit-hakerem-jobs.json");
-    const raw      = await fs.promises.readFile(filePath, "utf-8");
-    const jobs     = JSON.parse(raw);
-    res.json(jobs);
-  } catch (error) {
-    res.status(500).send({ error: "שגיאה בקריאת קובץ המשרות" });
-  }
-});
-
-// GET site statistics for About page
+//Get site statistics for the About page
 router.get("/stats/summary", async (req, res) => {
   try {
+    //Count all jobs in the database
     const activeJobs = await Job.countDocuments({});
+
+    //Count registered users
     const registeredUsers = await User.countDocuments({});
+
+    //Count all applications
     const applications = await Application.countDocuments({});
+
+    //Get all unique organizations
     const organizations = await Job.distinct("organization");
+
+    //Get all unique cities
     const cities = await Job.distinct("city");
 
     res.status(200).json({
@@ -52,7 +53,93 @@ router.get("/stats/summary", async (req, res) => {
   }
 });
 
-// GET job by id — חייב להיות אחרי כל ה-routes הספציפיים כי /:id תופס הכל
+//Get curated local jobs from a JSON file
+router.get("/curated-feed-data", async (req, res) => {
+  try {
+    //Build the path to the local JSON file
+    const filePath = path.join(__dirname, "../data/beit-hakerem-jobs.json");
+
+    //Read the JSON file as text
+    const raw = await fs.promises.readFile(filePath, "utf-8");
+
+    //Convert the JSON text into JavaScript data
+    const jobs = JSON.parse(raw);
+
+    res.json(jobs);
+  } catch (error) {
+    res.status(500).send({ error: "שגיאה בקריאת קובץ המשרות" });
+  }
+});
+
+//Create a new job
+router.post("/", async (req, res) => {
+  try {
+    //Create a new job from the request body
+    const job = new Job(req.body);
+
+    //Save the job in the database
+    await job.save();
+
+    //Notify connected clients that statistics changed
+    req.app.get("broadcastStatsUpdate")?.();
+
+    res.status(201).send(job);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+//Update an existing job
+router.put("/:id", async (req, res) => {
+  try {
+    //Update the job and return the new version
+    const job = await Job.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+    //Notify connected clients that statistics changed
+    req.app.get("broadcastStatsUpdate")?.();
+
+    res.status(200).send(job);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+//Delete a job
+router.delete("/:id", async (req, res) => {
+  try {
+    //Delete the selected job from the database
+    const job = await Job.findByIdAndDelete(req.params.id);
+
+    if (!job) {
+      return res.status(404).send("Job not found");
+    }
+
+    //Do not delete applications, so users can still see that the job was removed
+    await Application.updateMany(
+      { jobId: req.params.id },
+      {
+        $set: {
+          jobRemoved: true,
+          removedJobTitle: job.title,
+          removedJobAt: new Date(),
+        },
+      }
+    );
+
+    //Notify connected clients that statistics changed
+    req.app.get("broadcastStatsUpdate")?.();
+
+    res.status(200).send("Job deleted");
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+//Get one job by ID
 router.get("/:id", async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
@@ -67,89 +154,30 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST create new job
-router.post("/", async (req, res) => {
-  try {
-    const job = new Job(req.body);
-
-    await job.save();
-    req.app.get("broadcastStatsUpdate")?.();
-
-    res.status(201).send(job);
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
-
-// PUT update job
-router.put("/:id", async (req, res) => {
-  try {
-    const job = await Job.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-
-    req.app.get("broadcastStatsUpdate")?.();
-
-    res.status(200).send(job);
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
-
-// DELETE job
-router.delete("/:id", async (req, res) => {
-  try {
-    const job = await Job.findByIdAndDelete(req.params.id);
-
-    if (!job) {
-      return res.status(404).send("Job not found");
-    }
-
-    // לא מוחקים מועמדויות כדי שהמשתמש יראה שהמשרה הוסרה
-    await Application.updateMany(
-      { jobId: req.params.id },
-      {
-        $set: {
-          jobRemoved: true,
-          removedJobTitle: job.title,
-          removedJobAt: new Date(),
-        },
-      }
-    );
-
-    req.app.get("broadcastStatsUpdate")?.();
-
-    res.status(200).send("Job deleted");
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
-
-// ---------- מקורות משרות ----------
+//List of job sources that the system can check
 const JOB_SOURCES = [
-  // רשויות מקומיות (HTML, לבדיקה ידנית)
-  { sourceName: "עיריית כרמיאל",     organizationType: "רשות מקומית", city: "כרמיאל",      url: "https://www.karmiel.muni.il",  isDirectFetchSupported: false },
-  { sourceName: "עיריית סח'נין",     organizationType: "רשות מקומית", city: "סח'נין",      url: "https://www.sakhnin.muni.il",  isDirectFetchSupported: false },
-  { sourceName: "מג'ד אלכרום",       organizationType: "רשות מקומית", city: "מג'ד אלכרום", url: "",                             isDirectFetchSupported: false },
-  { sourceName: "דיר אל אסד",        organizationType: "רשות מקומית", city: "דיר אל אסד",  url: "",                             isDirectFetchSupported: false },
-  { sourceName: "בענה",              organizationType: "רשות מקומית", city: "בענה",        url: "",                             isDirectFetchSupported: false },
-  { sourceName: "נחף",               organizationType: "רשות מקומית", city: "נחף",         url: "",                             isDirectFetchSupported: false },
-  { sourceName: "ראמה",              organizationType: "רשות מקומית", city: "ראמה",        url: "",                             isDirectFetchSupported: false },
-  { sourceName: "סאג'ור",            organizationType: "רשות מקומית", city: "סאג'ור",      url: "",                             isDirectFetchSupported: false },
-  { sourceName: "שעב",               organizationType: "רשות מקומית", city: "שעב",         url: "",                             isDirectFetchSupported: false },
-  { sourceName: "מועצה אזורית משגב", organizationType: "רשות מקומית", city: "משגב",        url: "https://www.misgav.org.il",    isDirectFetchSupported: false },
-  // גופים ממשלתיים / ארגונים (HTML, לבדיקה ידנית)
-  { sourceName: "נציבות שירות המדינה", organizationType: "ממשלתי",    region: "ארצי", url: "https://ejobs.gov.il",          isDirectFetchSupported: false },
-  { sourceName: 'החברה למתנ"סים',      organizationType: 'מתנ"ס',     region: "ארצי", url: "https://www.matnasim.org.il",   isDirectFetchSupported: false },
-  { sourceName: "AllJobs",             organizationType: "לוח דרושים", region: "ארצי", url: "https://www.alljobs.co.il",     isDirectFetchSupported: false },
-  // Remotive — מקור API חיצוני אמיתי להדגמת הצינור; region: "global" → סינון אזור מושבת
+  //Local authorities
+  { sourceName: "עיריית כרמיאל", organizationType: "רשות מקומית", city: "כרמיאל", url: "https://www.karmiel.muni.il", isDirectFetchSupported: false },
+  { sourceName: "עיריית סח'נין", organizationType: "רשות מקומית", city: "סח'נין", url: "https://www.sakhnin.muni.il", isDirectFetchSupported: false },
+  { sourceName: "מג'ד אלכרום", organizationType: "רשות מקומית", city: "מג'ד אלכרום", url: "", isDirectFetchSupported: false },
+  { sourceName: "דיר אל אסד", organizationType: "רשות מקומית", city: "דיר אל אסד", url: "", isDirectFetchSupported: false },
+  { sourceName: "בענה", organizationType: "רשות מקומית", city: "בענה", url: "", isDirectFetchSupported: false },
+  { sourceName: "נחף", organizationType: "רשות מקומית", city: "נחף", url: "", isDirectFetchSupported: false },
+  { sourceName: "ראמה", organizationType: "רשות מקומית", city: "ראמה", url: "", isDirectFetchSupported: false },
+  { sourceName: "סאג'ור", organizationType: "רשות מקומית", city: "סאג'ור", url: "", isDirectFetchSupported: false },
+  { sourceName: "שעב", organizationType: "רשות מקומית", city: "שעב", url: "", isDirectFetchSupported: false },
+  { sourceName: "מועצה אזורית משגב", organizationType: "רשות מקומית", city: "משגב", url: "https://www.misgav.org.il", isDirectFetchSupported: false },
+
+  //Government and organization sources
+  { sourceName: "נציבות שירות המדינה", organizationType: "ממשלתי", region: "ארצי", url: "https://ejobs.gov.il", isDirectFetchSupported: false },
+  { sourceName: 'החברה למתנ"סים', organizationType: 'מתנ"ס', region: "ארצי", url: "https://www.matnasim.org.il", isDirectFetchSupported: false },
+  { sourceName: "AllJobs", organizationType: "לוח דרושים", region: "ארצי", url: "https://www.alljobs.co.il", isDirectFetchSupported: false },
+
+  //Remotive is a real external API used to show the import flow
   { sourceName: "Remotive", organizationType: "API חיצוני להדגמה", region: "global", url: "https://remotive.com/api/remote-jobs?limit=50", isDirectFetchSupported: true },
 ];
 
-// ---------- סינון רלוונטיות ----------
-// קטגוריות Remotive שאינן רלוונטיות — ייחסמו מיד
+//Categories that are not relevant to this project
 const BLOCKED_CATEGORIES = new Set([
   "software development", "data", "data and analytics", "sales", "marketing",
   "design", "devops / sysadmin", "product management", "finance / legal",
@@ -157,25 +185,27 @@ const BLOCKED_CATEGORIES = new Set([
   "all others", "medical", "accounting", "hr",
 ]);
 
+//Check if a job is relevant to education, youth, or community
 function isRelevantJob(titleAndCategory) {
   if (!titleAndCategory) return false;
+
+  //Convert the text to lowercase to make the search easier
   const t = String(titleAndCategory).toLowerCase();
 
+  //Block jobs from categories that are not relevant
   for (const cat of BLOCKED_CATEGORIES) {
     if (t.includes(cat)) return false;
   }
 
+  //Keywords that match the project topic
   const keywords = [
-    // עברית — תפקידים
     "מדריך", "מדריכה", "רכז", "רכזת", "מנחה",
     "מנהל תוכנית", "מנהלת תוכנית", "מנהל תכנית", "מנהלת תכנית",
     "עובד נוער", "עובדת נוער", "קידום נוער",
-    // עברית — תחומים / ארגונים
     "נוער", "חינוך", "חינוכי", "חינוך בלתי פורמלי", "הדרכה",
     "קהילה", "קהילתי", 'מתנ"ס', "מרכז קהילתי", "מרכז קהילה",
     "עמותה", "מנהיגות", "מעורבות חברתית", "רווחה", "ילדים", "צעירים",
     "מחלקת נוער", "תנועת נוער", "ארגון נוער",
-    // אנגלית — ביטויים מורכבים
     "youth worker", "youth coordinator", "youth program", "youth leader",
     "youth development", "youth educator", "youth outreach",
     "community coordinator", "community outreach", "community educator",
@@ -185,95 +215,114 @@ function isRelevantJob(titleAndCategory) {
     "program coordinator", "program educator", "program facilitator",
     "education coordinator", "education specialist", "education program",
     "informal education", "non-profit", "welfare worker", "civic engagement",
-    // אנגלית — מילות מפתח בודדות (רחבות יותר לצורך הדגמה עם Remotive)
     "education", "teaching", "teacher", "tutor", "instructor",
     "training", "learning", "community", "social", "nonprofit",
     "ngo", "youth", "children", "coordinator", "program",
     "content", "writing",
   ];
+
+  //Return true if at least one keyword appears in the job text
   return keywords.some(k => t.includes(k));
 }
 
+//Decide if the source should be filtered by area
 function shouldFilterArea(source) {
   return source.region !== "global";
 }
 
+//Check if the job location is relevant to the project area
 function isRelevantArea(text) {
-  if (!text) return true; // אם אין מידע אזור — לא לפסול
+  //If there is no area data, do not block the job
+  if (!text) return true;
+
   const t = String(text).toLowerCase();
+
+  //Areas that are relevant to Beit HaKerem and the north
   const areas = [
     "כרמיאל", "סחנין", "סח'נין", "מג'ד אלכרום", "מגד אלכרום",
     "דיר אל אסד", "דיר אלאסד", "בענה", "נחף", "ראמה",
     "סאגור", "סאג'ור", "שעב", "משגב", "צפון", "גליל",
     "בית הכרם", "אשכול בית הכרם",
-    // עבור מקור ה-API שמחזיר אזורים באנגלית
     "worldwide", "anywhere", "global", "remote", "israel",
   ];
+
+  //Return true if the area text contains one of the allowed areas
   return areas.some(a => t.includes(a.toLowerCase()));
 }
 
+//Remove HTML tags from text
 function stripHtml(html) {
   if (!html) return "";
+
   return String(html).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+//Convert a Remotive job into our Job structure
 function mapRemotiveJob(job) {
   return {
-    title:            job.title,
-    organization:     job.company_name,
-    city:             job.candidate_required_location || "לא צוין",
-    jobType:          job.category,
-    description:      stripHtml(job.description).slice(0, 1000),
-    source:           "external-local",
-    sourceName:       "Remotive - API demo",
+    title: job.title,
+    organization: job.company_name,
+    city: job.candidate_required_location || "לא צוין",
+    jobType: job.category,
+    description: stripHtml(job.description).slice(0, 1000),
+    source: "external-local",
+    sourceName: "Remotive - API demo",
     organizationType: "API חיצוני להדגמה",
-    applyUrl:         job.url,
-    publishDate:      job.publication_date ? new Date(job.publication_date) : new Date(),
-    isExternal:       true,
+    applyUrl: job.url,
+    publishDate: job.publication_date ? new Date(job.publication_date) : new Date(),
+    isExternal: true,
   };
 }
 
-// ---------- POST /import-local-sources ----------
+//Import jobs from external sources that support direct fetch
 router.post("/import-local-sources", async (req, res) => {
-  const jobsToSave    = [];
+  const jobsToSave = [];
   const skippedSources = [];
-  let checkedSources  = 0;
+  let checkedSources = 0;
 
+  //Go over all defined job sources
   for (const source of JOB_SOURCES) {
-    // מקור שלא תומך בשליפה ישירה → לבדיקה ידנית
+    //Sources without API support are skipped and saved for the response
     if (!source.isDirectFetchSupported || !source.url) {
       skippedSources.push({
         sourceName: source.sourceName,
-        url:        source.url,
-        reason:     "דורש בדיקה ידנית (אין API)",
+        url: source.url,
+        reason: "דורש בדיקה ידנית (אין API)",
       });
       continue;
     }
 
-    // כל מקור עטוף ב-try/catch נפרד כדי שכשל אחד לא יפיל את השאר
     try {
       checkedSources++;
+
+      //Fetch jobs from the source URL
       const response = await fetch(source.url);
 
+      //Skip the source if the response failed
       if (!response.ok) {
         skippedSources.push({ sourceName: source.sourceName, url: source.url, reason: `סטטוס ${response.status}` });
         continue;
       }
 
+      //Make sure the response is JSON
       const contentType = response.headers.get("content-type") || "";
       if (!contentType.includes("application/json")) {
         skippedSources.push({ sourceName: source.sourceName, url: source.url, reason: "התשובה אינה JSON (כנראה דף HTML)" });
         continue;
       }
 
-      const data    = await response.json();
+      //Read the jobs from the response
+      const data = await response.json();
       const rawJobs = data.jobs || data.data || [];
 
+      //Map and filter jobs before saving them
       for (const j of rawJobs) {
         if (jobsToSave.length >= 10) break;
-        const mapped      = mapRemotiveJob(j);
-        const haystack    = `${mapped.title} ${mapped.jobType}`;
-        const passesArea  = shouldFilterArea(source) ? isRelevantArea(mapped.city) : true;
+
+        const mapped = mapRemotiveJob(j);
+        const haystack = `${mapped.title} ${mapped.jobType}`;
+        const passesArea = shouldFilterArea(source) ? isRelevantArea(mapped.city) : true;
+
         if (isRelevantJob(haystack) && passesArea) {
           jobsToSave.push(mapped);
         }
@@ -284,55 +333,69 @@ router.post("/import-local-sources", async (req, res) => {
   }
 
   try {
+    //Remove old imported jobs from this source
     await Job.deleteMany({ source: "external-local" });
+
+    //Save the new imported jobs
     const saved = await Job.insertMany(jobsToSave);
+
+    //Notify connected clients that statistics changed
     req.app.get("broadcastStatsUpdate")?.();
+
     res.status(200).send({
-      imported:       saved.length,
+      imported: saved.length,
       checkedSources,
       skippedSources,
-      jobs:           saved,
+      jobs: saved,
     });
   } catch (error) {
     res.status(500).send(error);
   }
 });
 
-// ---------- POST /import-curated-local-feed ----------
+//Import jobs from the curated local feed
 router.post("/import-curated-local-feed", async (req, res) => {
   try {
+    //Fetch jobs from the curated feed URL
     const response = await fetch(CURATED_LOCAL_FEED_URL);
 
     if (!response.ok) {
       return res.status(502).send({ error: `שגיאה בשליפה ממאגר החיצוני: סטטוס ${response.status}` });
     }
 
+    //Read the jobs from the response
     const rawJobs = await response.json();
 
     if (!Array.isArray(rawJobs)) {
       return res.status(502).send({ error: "המאגר החיצוני לא החזיר מערך משרות תקין" });
     }
 
+    //Convert the feed jobs into the project Job structure
     const mappedJobs = rawJobs
       .filter(job => job.title || job.organization || job.city || job.description || job.applyUrl)
       .map(job => ({
-        title:            job.title            || "",
-        organization:     job.organization     || "",
-        city:             job.city             || "",
-        jobType:          job.jobType          || "",
+        title: job.title || "",
+        organization: job.organization || "",
+        city: job.city || "",
+        jobType: job.jobType || "",
         employmentPercent: parseInt(job.positionPercent) || null,
         suitableForStudents: job.studentFriendly || false,
-        description:      job.description      || "",
-        applyUrl:         job.applyUrl         || "",
-        source:           "curated-local-feed",
-        sourceName:       job.sourceName       || "מאגר חיצוני - משרות בית הכרם",
+        description: job.description || "",
+        applyUrl: job.applyUrl || "",
+        source: "curated-local-feed",
+        sourceName: job.sourceName || "מאגר חיצוני - משרות בית הכרם",
         organizationType: job.organizationType || "מקור מקומי",
-        isExternal:       true,
-        publishDate:      job.publishDate ? new Date(job.publishDate) : new Date(),
+        isExternal: true,
+        publishDate: job.publishDate ? new Date(job.publishDate) : new Date(),
       }));
 
+    //Remove old curated feed jobs before inserting the new ones
     await Job.deleteMany({ source: "curated-local-feed" });
+
+    //Save the curated feed jobs
     const saved = await Job.insertMany(mappedJobs);
+
+    //Notify connected clients that statistics changed
     req.app.get("broadcastStatsUpdate")?.();
 
     res.status(200).send({ imported: saved.length, jobs: saved });
