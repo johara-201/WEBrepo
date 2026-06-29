@@ -16,13 +16,13 @@ createRoot(document.getElementById('root')).render(
   //Enable extra checks during development
   <StrictMode>
 
-    //Make the selected language available to all components
+    {/*Make the selected language available to all components*/}
     <LanguageProvider>
 
-      //Make the selected theme available to all components
+      {/*Make the selected theme available to all components*/}
       <ThemeProvider>
 
-        //Make the logged-in user data available to all components
+        {/*Make the logged-in user data available to all components*/}
         <AuthProvider>
 
           <App />
