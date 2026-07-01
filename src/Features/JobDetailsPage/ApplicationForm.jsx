@@ -209,7 +209,14 @@ setMissingFields([]);
 
   try {
     if (isUpdateMode && existingApplication?._id) {
-      await updateApplication(existingApplication._id, formData, token);      
+      await updateApplication(
+        existingApplication._id,
+        {
+          ...formData,
+          preferredLanguage: language,
+        },
+      token
+    );     
       setSubmitted(true);
       return;
     }
@@ -218,6 +225,7 @@ setMissingFields([]);
       ...formData,
       jobId: job._id,
       jobTitle: job.title,
+      preferredLanguage: language,
     });
 
     setSubmitted(true);

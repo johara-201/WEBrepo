@@ -73,10 +73,21 @@ router.post("/", upload.single("resumeFile"), async (req, res) => {
     data.postedBy = job.postedBy;
     data.email = data.email?.trim().toLowerCase();
 
+    //Save the preferred language for future email notifications
+    data.preferredLanguage = data.preferredLanguage === "ar" ? "ar" : "he";
+
     //Check duplicates by user ID if logged in, or by email if guest
     const duplicateQuery = data.userId
-      ? { jobId: data.jobId, userId: data.userId, cancelledByUser: { $ne: true } }
-      : { jobId: data.jobId, email: data.email, cancelledByUser: { $ne: true } };
+      ? {
+          jobId: data.jobId,
+          userId: data.userId,
+          cancelledByUser: { $ne: true },
+        }
+      : {
+          jobId: data.jobId,
+          email: data.email,
+          cancelledByUser: { $ne: true },
+        };
 
     //Check if this user or email already applied to this job
     const existingApplication = await Application.findOne(duplicateQuery);
@@ -108,13 +119,136 @@ router.post("/", upload.single("resumeFile"), async (req, res) => {
   }
 });
 
+//Create a new application automatically from the logged-in user's profile
+router.post("/auto/:jobId", requireUser, async (req, res) => {
+  try {
+    const jobId = req.params.jobId;
+
+    //Save the preferred language for future email notifications
+    const preferredLanguage = req.body.preferredLanguage === "ar" ? "ar" : "he";
+
+    //Find the logged-in user
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        error:
+          preferredLanguage === "ar"
+            ? "لم يتم العثور على المستخدم"
+            : "משתמש לא נמצא",
+      });
+    }
+
+    //Auto apply requires a CV saved in the user's profile
+    if (!user.cv?.data) {
+      return res.status(400).json({
+        error:
+          preferredLanguage === "ar"
+            ? "لاستخدام التقديم التلقائي يجب رفع السيرة الذاتية في الحساب الشخصي."
+            : "כדי להשתמש בהגשה אוטומטית צריך להעלות קורות חיים באזור האישי.",
+      });
+    }
+
+    //Make sure the user has basic profile details
+    if (!user.name || !user.email) {
+      return res.status(400).json({
+        error:
+          preferredLanguage === "ar"
+            ? "تنقص بعض التفاصيل في الحساب الشخصي. تأكدي من وجود الاسم الكامل والبريد الإلكتروني."
+            : "חסרים פרטים בפרופיל. ודאי שיש שם מלא ואימייל באזור האישי.",
+      });
+    }
+
+    //Find the selected job
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+      return res.status(404).json({
+        error:
+          preferredLanguage === "ar"
+            ? "الوظيفة غير موجودة أو تم حذفها"
+            : "המשרה לא קיימת או נמחקה",
+      });
+    }
+
+    const email = user.email.trim().toLowerCase();
+
+    //Prevent duplicate application for the same job
+    const existingApplication = await Application.findOne({
+      jobId,
+      cancelledByUser: { $ne: true },
+      $or: [{ userId: req.userId }, { email }],
+    }).select("-cvSnapshot.data");
+
+    if (existingApplication) {
+      return res.status(409).json({
+        error:
+          preferredLanguage === "ar"
+            ? "لقد قمتِ/قمتَ بالتقديم لهذه الوظيفة مسبقًا."
+            : "כבר הגשת מועמדות למשרה הזו.",
+        application: existingApplication,
+      });
+    }
+
+    //Create application automatically from user profile
+    const application = new Application({
+      jobId,
+      jobTitle: job.title,
+      postedBy: job.postedBy,
+
+      userId: req.userId,
+      fullName: user.name,
+      email,
+      phone: user.phone || "",
+
+      preferredLanguage,
+
+      message:
+        preferredLanguage === "ar"
+          ? "تقديم تلقائي عبر النظام"
+          : "הגשה אוטומטית דרך המערכת",
+
+      cvSnapshot: {
+        data: user.cv.data,
+        filename: user.cv.filename,
+        mimetype: user.cv.mimetype,
+        uploadedAt: user.cv.uploadedAt || new Date(),
+      },
+    });
+
+    await application.save();
+
+    const result = application.toObject();
+
+    //Do not send the CV file data back to the frontend
+    if (result.cvSnapshot) {
+      delete result.cvSnapshot.data;
+    }
+
+    res.status(201).json(result);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({
+        error: "כבר קיימת מועמדות למשרה הזו.",
+      });
+    }
+
+    res.status(500).json({
+      error: "שגיאה בהגשה האוטומטית",
+      details: error.message,
+    });
+  }
+});
+
 //Get applications for admins
 router.get("/", requireAdmin, async (req, res) => {
   try {
     //Super admins see all applications, regular admins see only their own
     const query = req.canSeeAll ? {} : { postedBy: req.adminId };
 
-    const applications = await Application.find(query).sort({ submittedAt: -1 });
+    const applications = await Application.find(query).sort({
+      submittedAt: -1,
+    });
 
     res.status(200).send(applications);
   } catch (error) {
@@ -139,7 +273,9 @@ router.get("/my", requireUser, async (req, res) => {
 //Get all applications for a specific job
 router.get("/job/:jobId", requireAdmin, async (req, res) => {
   try {
-    const applications = await Application.find({ jobId: req.params.jobId }).sort({
+    const applications = await Application.find({
+      jobId: req.params.jobId,
+    }).sort({
       submittedAt: -1,
     });
 
@@ -164,7 +300,9 @@ router.get("/:id/cv", requireUser, async (req, res) => {
     }
 
     if (!application.cvSnapshot?.data) {
-      return res.status(404).json({ error: "לא נמצאו קורות חיים למועמדות זו" });
+      return res.status(404).json({
+        error: "לא נמצאו קורות חיים למועמדות זו",
+      });
     }
 
     //Set the file type before sending the CV
@@ -221,6 +359,12 @@ router.put("/:id", requireUser, upload.single("resumeFile"), async (req, res) =>
       updateData.message = req.body.message;
     }
 
+    //Update preferred language only if it was sent
+    if (req.body.preferredLanguage !== undefined) {
+      updateData.preferredLanguage =
+        req.body.preferredLanguage === "ar" ? "ar" : "he";
+    }
+
     //Replace the CV if a new file was uploaded
     if (req.file) {
       updateData.cvSnapshot = {
@@ -262,15 +406,24 @@ router.delete("/:id", async (req, res) => {
         const jwt = require("jsonwebtoken");
         const JWT_SECRET = process.env.JWT_SECRET || "beit-hakerem-secret-2024";
         const decoded = jwt.verify(auth.split(" ")[1], JWT_SECRET);
-        if (decoded.type === "user") userId = decoded.id;
-      } catch {}
+
+        if (decoded.type === "user") {
+          userId = decoded.id;
+        }
+      } catch {
+      }
     }
 
-    if (!userId) return res.status(401).send("אין הרשאה");
+    if (!userId) {
+      return res.status(401).send("אין הרשאה");
+    }
 
     //Find the application that should be cancelled
     const app = await Application.findById(req.params.id);
-    if (!app) return res.status(404).send("לא נמצא");
+
+    if (!app) {
+      return res.status(404).send("לא נמצא");
+    }
 
     //Make sure the logged-in user owns this application
     if (String(app.userId) !== String(userId)) {

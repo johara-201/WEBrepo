@@ -23,6 +23,13 @@ const applicationSchema = new mongoose.Schema(
     //Applicant email
     email: { type: String, required: true, lowercase: true, trim: true },
 
+    //Preferred language for email notifications
+    preferredLanguage: {
+      type: String,
+      enum: ["he", "ar"],
+      default: "he",
+    },
+
     //Applicant phone number
     phone: { type: String },
 

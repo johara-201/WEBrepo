@@ -88,3 +88,13 @@ export const updateApplication = async (id, applicationData) => {
 
   return response.data;
 };
+
+export const autoApplyToJob = async (jobId, preferredLanguage = "he") => {
+  const response = await axios.post(
+    `${BASE_URL}/api/applications/auto/${jobId}`,
+    { preferredLanguage },
+    authConfig()
+  );
+
+  return response.data;
+};

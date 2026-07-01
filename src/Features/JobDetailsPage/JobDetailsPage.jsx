@@ -2,7 +2,8 @@ import { useState } from "react";
 import ApplicationForm from "./ApplicationForm";
 import NavBar from "../../Components/NavBar";
 import { useLanguage } from "../../Context/LanguageContext";
-import { updateApplication } from "./jobDetailsService";
+import { useAuth } from "../../Context/AuthContext";
+import { autoApplyToJob } from "../../Services/ApplicationsService";
 
 const JOB_DETAILS_TEXT = {
   he: {
@@ -18,6 +19,11 @@ const JOB_DETAILS_TEXT = {
     openOriginalSource: "פתיחת המקור המקורי ↗",
     applyExternal: "הגשה באתר המקור",
     applySystem: "הגשת מועמדות דרך המערכת",
+    autoApply: "הגשה אוטומטית",
+    autoApplying: "מגיש אוטומטית...",
+    autoApplySuccess: "המועמדות נשלחה אוטומטית בהצלחה!",
+    loginRequiredAuto: "כדי להשתמש בהגשה אוטומטית צריך להתחבר למערכת.",
+    autoApplyError: "לא ניתן לבצע הגשה אוטומטית כרגע.",
   },
 
   ar: {
@@ -33,23 +39,28 @@ const JOB_DETAILS_TEXT = {
     openOriginalSource: "فتح المصدر الأصلي ↗",
     applyExternal: "التقديم في موقع المصدر",
     applySystem: "تقديم طلب عبر النظام",
+    autoApply: "تقديم تلقائي",
+    autoApplying: "جارٍ التقديم تلقائيًا...",
+    autoApplySuccess: "تم إرسال الطلب تلقائيًا بنجاح!",
+    loginRequiredAuto: "لاستخدام التقديم التلقائي يجب تسجيل الدخول.",
+    autoApplyError: "لا يمكن تنفيذ التقديم التلقائي الآن.",
   },
 };
 
 const VALUE_TRANSLATIONS = {
   ar: {
-    "מדריך": "مرشد",
-    "מדריכה": "مرشدة",
+    מדריך: "مرشد",
+    מדריכה: "مرشدة",
     "מדריך/ה": "مرشد/ة",
-    "רכז": "مركّز",
-    "רכזת": "مركّزة",
+    רכז: "مركّز",
+    רכזת: "مركّزة",
     "רכז/ת": "مركّز/ة",
     "רכז/ת נוער": "مركّز/ة شباب",
     "רכז/ת קהילה": "مركّز/ة مجتمع",
     "עובד קהילה": "عامل مجتمعي",
     "עובדת קהילה": "عاملة مجتمعية",
     "עובד/ת קהילה": "عامل/ة مجتمع",
-    "חינוך": "تربية",
+    חינוך: "تربية",
     "חינוך והדרכה": "تربية وإرشاد",
     "ליווי משפחות": "مرافقة عائلات",
     "מנהל/ת תוכנית": "مدير/ة برنامج",
@@ -57,7 +68,7 @@ const VALUE_TRANSLATIONS = {
     "עובד/ת נוער": "عامل/ة شباب",
     "איש/אישה חינוך בלתי פורמלי": "عامل/ة في التربية غير الرسمية",
     "מנהל/ת מחלקה": "مدير/ة قسم",
-    "אחר": "آخر",
+    אחר: "آخر",
   },
 };
 
@@ -84,8 +95,35 @@ function JobDetailsPage({
 }) {
   const { language } = useLanguage();
   const text = JOB_DETAILS_TEXT[language] || JOB_DETAILS_TEXT.he;
+  const { isUser } = useAuth();
 
   const [showForm, setShowForm] = useState(false);
+  const [autoSubmitting, setAutoSubmitting] = useState(false);
+
+  const handleAutoApply = async () => {
+    if (!isUser) {
+      alert(text.loginRequiredAuto);
+      return;
+    }
+
+    setAutoSubmitting(true);
+
+    try {
+      await autoApplyToJob(job._id, language);
+      
+      alert(text.autoApplySuccess);
+    } catch (err) {
+      const message = err?.response?.data?.error || text.autoApplyError;
+
+      alert(message);
+
+      if (err?.response?.status === 400) {
+        setShowForm(true);
+      }
+    } finally {
+      setAutoSubmitting(false);
+    }
+  };
 
   if (!job) {
     return (
@@ -166,20 +204,14 @@ function JobDetailsPage({
               {text.descriptionTitle}
             </h2>
 
-            <p className="leading-8 text-gray-700">
-              {job.description}
-            </p>
+            <p className="leading-8 text-gray-700">{job.description}</p>
           </div>
 
           {job.sourceName && (
             <div className="mb-6 rounded-xl bg-stone-50 p-4 text-sm text-gray-600">
-              <span className="font-medium">
-                {text.source}{" "}
-              </span>
+              <span className="font-medium">{text.source} </span>
 
-              {job.source === "manual"
-                ? text.manualSource
-                : job.sourceName}
+              {job.source === "manual" ? text.manualSource : job.sourceName}
 
               {hasApplyUrl && (
                 <a
@@ -194,7 +226,7 @@ function JobDetailsPage({
             </div>
           )}
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
             {hasApplyUrl && (
               <a
                 href={job.applyUrl}
@@ -206,9 +238,21 @@ function JobDetailsPage({
               </a>
             )}
 
+            {isUser && (
+              <button
+                type="button"
+                onClick={handleAutoApply}
+                disabled={autoSubmitting}
+                className="rounded-lg bg-[#1f5135] px-6 py-3 text-center font-medium text-white transition hover:bg-[#173c28] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {autoSubmitting ? text.autoApplying : text.autoApply}
+              </button>
+            )}
+
             <button
+              type="button"
               onClick={() => setShowForm(true)}
-              className="rounded-lg bg-[#2f6b46] px-6 py-3 font-medium text-white transition hover:bg-[#245539]"
+              className="rounded-lg bg-[#2f6b46] px-6 py-3 text-center font-medium text-white transition hover:bg-[#245539]"
             >
               {text.applySystem}
             </button>
@@ -217,10 +261,7 @@ function JobDetailsPage({
       </main>
 
       {showForm && (
-        <ApplicationForm
-          job={job}
-          onClose={() => setShowForm(false)}
-        />
+        <ApplicationForm job={job} onClose={() => setShowForm(false)} />
       )}
     </div>
   );
