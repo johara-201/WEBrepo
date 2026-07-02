@@ -9,6 +9,7 @@ const path = require("path");
 const Job = require("../models/jobSchema");
 const Application = require("../models/applicationSchema");
 const User = require("../models/userSchema");
+const { requireAdmin } = require("../middleware/authMiddleware");
 
 const {
   notifyApplicantsJobDeleted,
@@ -27,6 +28,19 @@ router.get("/", async (req, res) => {
     res.status(200).send(jobs);
   } catch (error) {
     res.status(500).send(error);
+  }
+});
+
+//Get jobs for admin dashboard
+router.get("/admin/list", requireAdmin, async (req, res) => {
+  try {
+    const filter = req.canSeeAll ? {} : { postedBy: req.adminId };
+
+    const jobs = await Job.find(filter).sort({ publishDate: -1 });
+
+    res.status(200).send(jobs);
+  } catch (error) {
+    res.status(500).json({ error: "שגיאה בשליפת משרות למנהל" });
   }
 });
 
@@ -79,10 +93,14 @@ router.get("/curated-feed-data", async (req, res) => {
 });
 
 //Create a new job
-router.post("/", async (req, res) => {
+router.post("/", requireAdmin, async (req, res) => {
   try {
     //Create a new job from the request body
-    const job = new Job(req.body);
+    const job = new Job({
+      ...req.body,
+      postedBy: req.adminId,
+      source: req.body.source || "manual",
+    });
 
     //Save the job in the database
     await job.save();
@@ -97,7 +115,7 @@ router.post("/", async (req, res) => {
 });
 
 //Update an existing job
-router.put("/:id", async (req, res) => {
+router.put("/:id", requireAdmin, async (req, res) => {  
   try {
     //Save the old job before updating, so we can compare what changed
     const oldJob = await Job.findById(req.params.id);
@@ -135,7 +153,7 @@ router.put("/:id", async (req, res) => {
 });
 
 //Delete a job
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireAdmin, async (req, res) => {  
   try {
     //Find the selected job before deleting it
     const job = await Job.findById(req.params.id);
