@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createManualJob } from "../../Services/ManualJobsService";
 import { useLanguage } from "../../Context/LanguageContext";
+import { useToast } from "../../Components/Toast";
 
 const POST_JOB_TEXT = {
   he: {
@@ -167,6 +168,7 @@ const JOB_TYPE_OPTIONS = [
 
 function PostJobPage({ onBack }) {
   const { language } = useLanguage();
+  const showToast = useToast();
   const text = POST_JOB_TEXT[language] || POST_JOB_TEXT.he;
 
   const [formData, setFormData] = useState({
@@ -206,11 +208,11 @@ function PostJobPage({ onBack }) {
     try {
       await createManualJob(jobToSend);
 
-      alert(text.alerts.success);
+      showToast(text.alerts.success, "success");
       onBack();
     } catch (error) {
       console.error(error);
-      alert(text.alerts.error);
+      showToast(text.alerts.error, "error");
     }
   };
 

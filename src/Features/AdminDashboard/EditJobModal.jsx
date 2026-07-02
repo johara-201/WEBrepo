@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { updateJob } from "./adminService";
 import { useLanguage } from "../../Context/LanguageContext";
+import { useToast } from "../../Components/Toast";
 
 const EDIT_JOB_TEXT = {
   he: {
@@ -44,6 +45,7 @@ const EDIT_JOB_TEXT = {
 
 function EditJobModal({ job, onClose, onSaved }) {
   const { language } = useLanguage();
+  const showToast = useToast();
   const text = EDIT_JOB_TEXT[language] || EDIT_JOB_TEXT.he;
 
   const [formData, setFormData] = useState({
@@ -85,7 +87,7 @@ function EditJobModal({ job, onClose, onSaved }) {
       onClose();
     } catch (err) {
       console.error(err);
-      alert(text.saveError);
+      showToast(text.saveError, "error");
     } finally {
       setSaving(false);
     }

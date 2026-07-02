@@ -2,8 +2,10 @@
 // כרגע PostJobPage.jsx עושה את העבודה. קומפוננט זה מוכן לשימוש עתידי.
 import { useState } from "react";
 import { createJob } from "./postJobService";
+import { useToast } from "../../Components/Toast";
 
 function AdminJobForm({ onSuccess, onCancel }) {
+  const showToast = useToast();
   const [formData, setFormData] = useState({
     title: "",
     organization: "",
@@ -38,7 +40,7 @@ function AdminJobForm({ onSuccess, onCancel }) {
       onSuccess?.();
     } catch (err) {
       console.error(err);
-      alert("שגיאה בשמירה");
+      showToast("שגיאה בשמירה", "error");
     } finally {
       setSaving(false);
     }

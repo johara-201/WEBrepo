@@ -1,8 +1,19 @@
 import axios from "axios";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "";
+
 export const getJobById = async (id) => {
-  const response = await axios.get(`/api/jobs/${id}`);
-  return response.data;
+  try {
+    const response = await axios.get(`${BASE_URL}/api/jobs/${id}`);
+    return response.data;
+  } catch (error) {
+    const message =
+      error.response?.data?.error ||
+      error.response?.data ||
+      error.message ||
+      "שגיאה בטעינת המשרה";
+    throw new Error(message);
+  }
 };
 
 export async function updateApplication(applicationId, formData, token) {
@@ -17,19 +28,23 @@ export async function updateApplication(applicationId, formData, token) {
     data.append("resumeFile", formData.resumeFile);
   }
 
-  const res = await fetch(`${API}/api/applications/${applicationId}`, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: data,
-  });
+  try {
+    const res = await fetch(`${BASE_URL}/api/applications/${applicationId}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: data,
+    });
 
-  const result = await res.json().catch(() => ({}));
+    const result = await res.json().catch(() => ({}));
 
-  if (!res.ok) {
-    throw new Error(result.error || "שגיאה בעדכון המועמדות");
+    if (!res.ok) {
+      throw new Error(result.error || "שגיאה בעדכון המועמדות");
+    }
+
+    return result;
+  } catch (error) {
+    throw error instanceof Error ? error : new Error("שגיאה בעדכון המועמדות");
   }
-
-  return result;
 }

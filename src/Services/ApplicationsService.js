@@ -14,6 +14,15 @@ const authConfig = () => {
     : {};
 };
 
+function extractError(error, fallback) {
+  return (
+    error.response?.data?.error ||
+    error.response?.data ||
+    error.message ||
+    fallback
+  );
+}
+
 export const submitApplication = async (applicationData) => {
   const formData = new FormData();
 
@@ -23,46 +32,54 @@ export const submitApplication = async (applicationData) => {
     }
   });
 
-  const response = await axios.post(
-    `${BASE_URL}/api/applications`,
-    formData,
-    {
-      ...authConfig(),
-      headers: {
-        ...authConfig().headers,
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
-
-  return response.data;
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/api/applications`,
+      formData,
+      { headers: { ...authConfig().headers } }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.status === 409
+      ? error
+      : new Error(extractError(error, "שגיאה בשליחת המועמדות"));
+  }
 };
 
 export const getAllApplications = async () => {
-  const response = await axios.get(
-    `${BASE_URL}/api/applications`,
-    authConfig()
-  );
-
-  return response.data;
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/api/applications`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(extractError(error, "שגיאה בטעינת המועמדויות"));
+  }
 };
 
 export const getApplicationsByJob = async (jobId) => {
-  const response = await axios.get(
-    `${BASE_URL}/api/applications/job/${jobId}`,
-    authConfig()
-  );
-
-  return response.data;
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/api/applications/job/${jobId}`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(extractError(error, "שגיאה בטעינת מועמדויות למשרה"));
+  }
 };
 
 export const deleteApplication = async (id) => {
-  const response = await axios.delete(
-    `${BASE_URL}/api/applications/${id}`,
-    authConfig()
-  );
-
-  return response.data;
+  try {
+    const response = await axios.delete(
+      `${BASE_URL}/api/applications/${id}`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(extractError(error, "שגיאה במחיקת המועמדות"));
+  }
 };
 
 export const updateApplication = async (id, applicationData) => {
@@ -74,27 +91,27 @@ export const updateApplication = async (id, applicationData) => {
     }
   });
 
-  const response = await axios.put(
-    `${BASE_URL}/api/applications/${id}`,
-    formData,
-    {
-      ...authConfig(),
-      headers: {
-        ...authConfig().headers,
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
-
-  return response.data;
+  try {
+    const response = await axios.put(
+      `${BASE_URL}/api/applications/${id}`,
+      formData,
+      { headers: { ...authConfig().headers } }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(extractError(error, "שגיאה בעדכון המועמדות"));
+  }
 };
 
 export const autoApplyToJob = async (jobId, preferredLanguage = "he") => {
-  const response = await axios.post(
-    `${BASE_URL}/api/applications/auto/${jobId}`,
-    { preferredLanguage },
-    authConfig()
-  );
-
-  return response.data;
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/api/applications/auto/${jobId}`,
+      { preferredLanguage },
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(extractError(error, "שגיאה בהגשה אוטומטית"));
+  }
 };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../Context/AuthContext";
 import { useLanguage } from "../../Context/LanguageContext";
+import { useConfirm } from "../../Components/ConfirmDialog";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -251,6 +252,7 @@ export function AdminProfilePanel() {
 export function AdminsListPanel() {
   const { token } = useAuth();
   const { language } = useLanguage();
+  const showConfirm = useConfirm();
   const text = ADMIN_MANAGEMENT_TEXT[language] || ADMIN_MANAGEMENT_TEXT.he;
 
   const [admins, setAdmins] = useState([]);
@@ -309,7 +311,7 @@ export function AdminsListPanel() {
   }
 
   async function removeAdmin(id) {
-    if (!confirm(text.admins.confirmDelete)) return;
+    if (!(await showConfirm(text.admins.confirmDelete))) return;
 
     try {
       const res = await fetch(`${API}/api/admins/${id}`, {

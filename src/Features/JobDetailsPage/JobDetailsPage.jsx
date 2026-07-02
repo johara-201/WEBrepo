@@ -4,6 +4,7 @@ import NavBar from "../../Components/NavBar";
 import { useLanguage } from "../../Context/LanguageContext";
 import { useAuth } from "../../Context/AuthContext";
 import { autoApplyToJob } from "../../Services/ApplicationsService";
+import { useToast } from "../../Components/Toast";
 
 const JOB_DETAILS_TEXT = {
   he: {
@@ -94,6 +95,7 @@ function JobDetailsPage({
   onAIChat,
 }) {
   const { language } = useLanguage();
+  const showToast = useToast();
   const text = JOB_DETAILS_TEXT[language] || JOB_DETAILS_TEXT.he;
   const { isUser } = useAuth();
 
@@ -102,7 +104,7 @@ function JobDetailsPage({
 
   const handleAutoApply = async () => {
     if (!isUser) {
-      alert(text.loginRequiredAuto);
+      showToast(text.loginRequiredAuto, "info");
       return;
     }
 
@@ -110,12 +112,12 @@ function JobDetailsPage({
 
     try {
       await autoApplyToJob(job._id, language);
-      
-      alert(text.autoApplySuccess);
+
+      showToast(text.autoApplySuccess, "success");
     } catch (err) {
       const message = err?.response?.data?.error || text.autoApplyError;
 
-      alert(message);
+      showToast(message, "error");
 
       if (err?.response?.status === 400) {
         setShowForm(true);

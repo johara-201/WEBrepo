@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {submitApplication, updateApplication} from "../../Services/ApplicationsService";
 import { useLanguage } from "../../Context/LanguageContext";
 import { useAuth } from "../../Context/AuthContext";
+import { useToast } from "../../Components/Toast";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -83,7 +84,8 @@ const APPLICATION_FORM_TEXT = {
 
 function ApplicationForm({ job, onClose }) {
   const { language } = useLanguage();
-  const { token, user } = useAuth();  
+  const { token, user } = useAuth();
+  const showToast = useToast();
   const text = APPLICATION_FORM_TEXT[language] || APPLICATION_FORM_TEXT.he;
   const [formData, setFormData] = useState({
   fullName: "",
@@ -157,14 +159,14 @@ const handleFileChange = (e) => {
   if (file.size > maxSize) {
     setSelectedResumeName("");
     e.target.value = "";
-    alert("הקובץ גדול מדי. אפשר להעלות קובץ עד 5MB.");
+    showToast("הקובץ גדול מדי. אפשר להעלות קובץ עד 5MB.", "error");
     return;
   }
 
   if (!isAllowed) {
     setSelectedResumeName("");
     e.target.value = "";
-    alert("אפשר להעלות רק קובץ PDF / DOC / DOCX.");
+    showToast("אפשר להעלות רק קובץ PDF / DOC / DOCX.", "error");
     return;
   }
 
@@ -240,17 +242,17 @@ setMissingFields([]);
       return;
     }
 
-    alert(
-      err.response.data?.error ||
-      "כבר הגשת מועמדות למשרה הזו. ניתן לעדכן פרטים במקום לשלוח שוב."
+    showToast(
+      err.response?.data?.error ||
+        "כבר הגשת מועמדות למשרה הזו. ניתן לעדכן פרטים במקום לשלוח שוב.",
+      "error"
     );
     return;
   }
 
-  alert(
-    err.response?.data?.message ||
-    err.response?.data?.error ||
-    text.error
+  showToast(
+    err.response?.data?.message || err.response?.data?.error || err.message || text.error,
+    "error"
   );
 
 } finally {

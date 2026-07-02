@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { deleteJob, getAdminJobs } from "./adminService";
+import { useToast } from "../../Components/Toast";
 import JobsTable from "./JobsTable";
 import StatsCards from "./StatsCards";
 import EditJobModal from "./EditJobModal";
@@ -92,6 +93,7 @@ function AdminDashboard({
 }) {
   const { admin, token, logout, isSuperAdmin } = useAuth();
   const { language } = useLanguage();
+  const showToast = useToast();
 
   const text = ADMIN_TEXT[language] || ADMIN_TEXT.he;
 
@@ -153,7 +155,7 @@ function AdminDashboard({
       setDeletingJob(null);
       loadJobs();
     } catch {
-      alert(text.messages.deleteError);
+      showToast(text.messages.deleteError, "error");
     }
   };
 

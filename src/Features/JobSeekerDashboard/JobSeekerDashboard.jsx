@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../Context/AuthContext";
 import { useLanguage } from "../../Context/LanguageContext";
 import NavBar from "../../Components/NavBar";
+import { useToast } from "../../Components/Toast";
+import { useConfirm } from "../../Components/ConfirmDialog";
 import {
   getProfile,
   updateProfile,
@@ -554,6 +556,8 @@ function PasswordPanel({ token }) {
 //פאנל: קורות חיים 
 function CVPanel({ token }) {
   const { language } = useLanguage();
+  const showToast = useToast();
+  const showConfirm = useConfirm();
   const text = DASHBOARD_TEXT[language] || DASHBOARD_TEXT.he;
 
   const [profile, setProfile] = useState(null);
@@ -592,7 +596,7 @@ function CVPanel({ token }) {
   }
 
   async function handleDelete() {
-    if (!confirm(text.cv.confirmDelete)) return;
+    if (!(await showConfirm(text.cv.confirmDelete))) return;
 
     setMsg("");
     setError("");
@@ -673,7 +677,7 @@ function CVPanel({ token }) {
 })
 .catch((err) => {
   console.error("CV view error:", err);
-  alert("שגיאה בטעינת קורות החיים");
+  showToast("שגיאה בטעינת קורות החיים", "error");
 });
               }}
               className="rounded-xl border border-[#2f6b46] px-3 py-1.5 text-xs font-semibold text-[#2f6b46] transition hover:bg-[#2f6b46] hover:text-white"
@@ -731,6 +735,7 @@ function CVPanel({ token }) {
 //פאנל: מועמדויות 
 function ApplicationsPanel({ token, onViewJob }) {
   const { language } = useLanguage();
+  const showConfirm = useConfirm();
   const text = DASHBOARD_TEXT[language] || DASHBOARD_TEXT.he;
 
   const [apps, setApps] = useState([]);
@@ -749,7 +754,7 @@ function ApplicationsPanel({ token, onViewJob }) {
   }, [token]);
 
   async function withdraw(appId) {
-    if (!confirm(text.applications.confirmWithdraw)) return;
+    if (!(await showConfirm(text.applications.confirmWithdraw))) return;
 
     try {
       await withdrawApplication(token, appId);
