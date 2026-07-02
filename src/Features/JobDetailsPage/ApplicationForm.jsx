@@ -230,25 +230,30 @@ setMissingFields([]);
 
     setSubmitted(true);
   } catch (err) {
-    console.error(err);
+  console.error(err);
 
-    if (err.response?.status === 409) {
-      const existing = err.response.data?.application;
+  if (err.response?.status === 409) {
+    const existing = err.response.data?.application;
 
-      if (existing) {
-        setExistingApplication(existing);
-        return;
-      }
-
-      alert(
-        err.response.data?.error ||
-          "כבר הגשת מועמדות למשרה הזו. ניתן לעדכן פרטים במקום לשלוח שוב."
-      );
+    if (existing) {
+      setExistingApplication(existing);
       return;
     }
 
-    alert(text.error);
-   } finally {
+    alert(
+      err.response.data?.error ||
+      "כבר הגשת מועמדות למשרה הזו. ניתן לעדכן פרטים במקום לשלוח שוב."
+    );
+    return;
+  }
+
+  alert(
+    err.response?.data?.message ||
+    err.response?.data?.error ||
+    text.error
+  );
+
+} finally {
     setSubmitting(false);
   }
 };

@@ -10,9 +10,23 @@ const multer = require("multer");
 const User = require("../models/userSchema");
 
 //Store uploaded CV files in memory
+const allowedCvTypes = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
+
+  fileFilter: (req, file, cb) => {
+    if (allowedCvTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("קובץ קורות חיים חייב להיות PDF או Word"));
+    }
+  },
 });
 
 //Create a new job application
@@ -440,6 +454,28 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     res.status(500).send(error);
   }
+});
+
+router.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        message: "קובץ קורות החיים גדול מדי. ניתן להעלות קובץ עד 5MB.",
+      });
+    }
+
+    return res.status(400).json({
+      message: "שגיאה בהעלאת קובץ קורות החיים.",
+    });
+  }
+
+  if (err.message === "קובץ קורות חיים חייב להיות PDF או Word") {
+    return res.status(400).json({
+      message: err.message,
+    });
+  }
+
+  next(err);
 });
 
 //Export the applications router
