@@ -6,6 +6,7 @@ const multer = require("multer");
 
 const User = require("../models/userSchema");
 const { requireUser } = require("../middleware/authMiddleware");
+const { encryptCv, decryptCv } = require("../utils/cvEncryption");
 
 const router = express.Router();
 
@@ -93,13 +94,17 @@ router.post("/me/cv", requireUser, upload.single("cv"), async (req, res) => {
     if (!req.file)
       return res.status(400).json({ error: "קובץ לא הועלה" });
 
-    //Save the uploaded CV in the user's profile
+    //Encrypt the uploaded CV before saving it in the database
+    const encryptedCv = encryptCv(req.file.buffer);
+
     await User.findByIdAndUpdate(req.userId, {
       $set: {
-        "cv.data": req.file.buffer,
+        "cv.data": encryptedCv.encryptedBuffer,
         "cv.filename": req.file.originalname,
         "cv.mimetype": req.file.mimetype,
         "cv.uploadedAt": new Date(),
+        "cv.iv": encryptedCv.iv,
+        "cv.isEncrypted": true,
       },
     });
 
@@ -129,7 +134,13 @@ router.get("/me/cv", requireUser, async (req, res) => {
       `inline; filename="${user.cv.filename}"`
     );
 
-    res.send(user.cv.data);
+    const fileBuffer =
+      user.cv.isEncrypted && user.cv.iv
+        ? decryptCv(user.cv.data, user.cv.iv)
+        : user.cv.data;
+
+    res.send(fileBuffer);
+  
   } catch (err) {
     res.status(500).json({ error: "שגיאה בשרת" });
   }
