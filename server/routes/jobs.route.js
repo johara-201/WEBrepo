@@ -124,6 +124,10 @@ router.put("/:id", requireAdmin, async (req, res) => {
       return res.status(404).send("Job not found");
     }
 
+    if (!req.canSeeAll && String(oldJob.postedBy) !== String(req.adminId)) {
+      return res.status(403).json({ error: "אין הרשאה לערוך משרה של מנהל אחר" });
+    }
+
     //Update the job and return the new version
     const job = await Job.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -160,6 +164,10 @@ router.delete("/:id", requireAdmin, async (req, res) => {
 
     if (!job) {
       return res.status(404).send("Job not found");
+    }
+
+    if (!req.canSeeAll && String(job.postedBy) !== String(req.adminId)) {
+      return res.status(403).json({ error: "אין הרשאה למחוק משרה של מנהל אחר" });
     }
 
     //Find applicants before deleting the job

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { getJobs } from "../HomePage/homeService";
-import { deleteJob } from "./adminService";
+import { deleteJob, getAdminJobs } from "./adminService";
 import JobsTable from "./JobsTable";
 import StatsCards from "./StatsCards";
 import EditJobModal from "./EditJobModal";
@@ -133,8 +132,7 @@ function AdminDashboard({
   const loadJobs = async () => {
     try {
       setLoading(true);
-      const data = await getJobs();
-
+      const data = await getAdminJobs();
       setJobs(data);
       setError("");
     } catch {

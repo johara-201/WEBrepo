@@ -46,3 +46,11 @@ export const getApplicationsByJob = async (jobId) => {
   );
   return response.data;
 };
+
+export const getAdminJobs = async () => {
+  const response = await axios.get(
+    `${BASE_URL}/api/jobs/admin/list`,
+    authConfig()
+  );
+  return response.data;
+};
