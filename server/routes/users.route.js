@@ -142,6 +142,7 @@ router.get("/me/cv", requireUser, async (req, res) => {
     res.send(fileBuffer);
   
   } catch (err) {
+    console.error("CV upload error:", err);
     res.status(500).json({ error: "שגיאה בשרת" });
   }
 });
