@@ -657,11 +657,24 @@ function CVPanel({ token }) {
                     Authorization: `Bearer ${token}`,
                   },
                 })
-                  .then((response) => response.blob())
-                  .then((blob) => {
-                    const url = URL.createObjectURL(blob);
-                    window.open(url, "_blank");
-                  });
+                  .then((response) => {
+  if (!response.ok) {
+    throw new Error("שגיאה בטעינת קורות החיים");
+  }
+  return response.blob();
+})
+.then((blob) => {
+  const fileBlob = new Blob([blob], {
+    type: blob.type || "application/pdf",
+  });
+
+  const url = URL.createObjectURL(fileBlob);
+  window.open(url, "_blank");
+})
+.catch((err) => {
+  console.error("CV view error:", err);
+  alert("שגיאה בטעינת קורות החיים");
+});
               }}
               className="rounded-xl border border-[#2f6b46] px-3 py-1.5 text-xs font-semibold text-[#2f6b46] transition hover:bg-[#2f6b46] hover:text-white"
             >
