@@ -45,6 +45,8 @@ const applicationSchema = new mongoose.Schema(
       filename: { type: String },
       mimetype: { type: String },
       uploadedAt: { type: Date },
+      iv: String,
+      isEncrypted: {type: Boolean,default: false,},
     },
 
     //Check if the related job was removed

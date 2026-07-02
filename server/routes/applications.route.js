@@ -8,6 +8,7 @@ const { requireUser, requireAdmin } = require("../middleware/authMiddleware");
 const Job = require("../models/jobSchema");
 const multer = require("multer");
 const User = require("../models/userSchema");
+const { encryptCv, decryptCv } = require("../utils/cvEncryption");
 
 //Store uploaded CV files in memory
 const allowedCvTypes = [

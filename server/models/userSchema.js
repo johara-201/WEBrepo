@@ -39,6 +39,9 @@ const userSchema = new mongoose.Schema(
 
       //Date when the CV was uploaded
       uploadedAt: { type: Date },
+
+       iv: String,
+       isEncrypted: {type: Boolean, default: false,},
     },
 
     //Save the account creation date
