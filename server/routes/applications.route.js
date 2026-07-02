@@ -57,11 +57,15 @@ router.post("/", upload.single("resumeFile"), async (req, res) => {
 
     //If the user uploaded a CV, save a copy of it in this application
     if (req.file) {
+      const encryptedCv = encryptCv(req.file.buffer);
+
       data.cvSnapshot = {
-        data: req.file.buffer,
+        data: encryptedCv.encryptedBuffer,
         filename: req.file.originalname,
         mimetype: req.file.mimetype,
         uploadedAt: new Date(),
+        iv: encryptedCv.iv,
+        isEncrypted: true,
       };
     }
 
@@ -228,6 +232,8 @@ router.post("/auto/:jobId", requireUser, async (req, res) => {
         filename: user.cv.filename,
         mimetype: user.cv.mimetype,
         uploadedAt: user.cv.uploadedAt || new Date(),
+        iv: user.cv.iv,
+        isEncrypted: user.cv.isEncrypted,
       },
     });
 
@@ -329,7 +335,12 @@ router.get("/:id/cv", requireUser, async (req, res) => {
       `inline; filename="${application.cvSnapshot.filename}"`
     );
 
-    res.send(application.cvSnapshot.data);
+    const fileBuffer =
+  application.cvSnapshot.isEncrypted && application.cvSnapshot.iv
+    ? decryptCv(application.cvSnapshot.data, application.cvSnapshot.iv)
+    : application.cvSnapshot.data;
+
+res.send(fileBuffer);
   } catch (error) {
     res.status(500).json({ error: "שגיאה בטעינת קורות החיים" });
   }
@@ -382,13 +393,17 @@ router.put("/:id", requireUser, upload.single("resumeFile"), async (req, res) =>
 
     //Replace the CV if a new file was uploaded
     if (req.file) {
-      updateData.cvSnapshot = {
-        data: req.file.buffer,
-        filename: req.file.originalname,
-        mimetype: req.file.mimetype,
-        uploadedAt: new Date(),
-      };
-    }
+  const encryptedCv = encryptCv(req.file.buffer);
+
+  updateData.cvSnapshot = {
+    data: encryptedCv.encryptedBuffer,
+    filename: req.file.originalname,
+    mimetype: req.file.mimetype,
+    uploadedAt: new Date(),
+    iv: encryptedCv.iv,
+    isEncrypted: true,
+  };
+}
 
     const updatedApplication = await Application.findByIdAndUpdate(
       req.params.id,
