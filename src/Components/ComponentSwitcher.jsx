@@ -13,10 +13,16 @@ import SearchPage from "../Features/SearchPage/SearchPage";
 import LoginPage from "../Features/AuthPage/LoginPage";
 import JobSeekerDashboard from "../Features/JobSeekerDashboard/JobSeekerDashboard";
 import AIChat from "../Features/AIChat/AIChat";
+import ForceChangePasswordPage from "../Features/AuthPage/ForceChangePasswordPage";
 
 function ComponentSwitcher() {
   //Check if the current logged-in account is a user or an admin
-  const { isUser, isAdmin } = useAuth();
+  const { isUser, isAdmin, admin } = useAuth();
+
+  //Block admin access entirely until they change their first-login password
+  if (isAdmin && admin?.mustChangePassword) {
+    return <ForceChangePasswordPage />;
+  }
 
   //Save the page that is currently shown
   const [activePage, setActivePage] = useState("home");

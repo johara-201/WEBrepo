@@ -1,13 +1,84 @@
 import { useState } from "react";
+import axios from "axios";
 import { useAuth } from "../../Context/AuthContext";
 import logoImg from "../../assets/logo.png";
 import heroIllustration from "../../assets/hero-illustration.png";
 import { useLanguage } from "../../Context/LanguageContext";
+
+const BASE_URL = import.meta.env.VITE_API_URL || "";
+
+// ── שחזור סיסמה ───────────────────────────────────────────────────────────────
+function ForgotPasswordPanel({ type = "user", onBack }) {
+  const { t, language } = useLanguage();
+  const [value, setValue] = useState("");
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSend(e) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const endpoint = type === "admin"
+        ? `${BASE_URL}/api/auth/admin/forgot-password`
+        : `${BASE_URL}/api/auth/forgot-password`;
+      const body = type === "admin"
+        ? { username: value, language }
+        : { email: value, language };
+      await axios.post(endpoint, body);
+      setSent(true);
+    } catch {
+      setSent(true); // show same message regardless to avoid email enumeration
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const accentColor = type === "admin" ? "#4f46e5" : "#2f6b46";
+  const desc = type === "admin" ? t.auth.forgotPasswordDescAdmin : t.auth.forgotPasswordDesc;
+
+  if (sent) {
+    return (
+      <div className="flex flex-col gap-5 text-center">
+        <div className="text-5xl">📧</div>
+        <p className="text-sm text-gray-600 leading-6">{t.auth.resetLinkSent}</p>
+        <button type="button" onClick={onBack}
+          className="text-sm font-semibold hover:underline" style={{ color: accentColor }}>
+          {t.auth.backToLogin}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSend} className="flex flex-col gap-4">
+      <p className="text-sm text-gray-500 leading-6">{desc}</p>
+      <input
+        type={type === "admin" ? "text" : "email"}
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        placeholder={type === "admin" ? t.auth.usernamePlaceholder : "your@email.com"}
+        required
+        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none"
+        style={{ "--tw-ring-color": accentColor }}
+      />
+      <button type="submit" disabled={loading}
+        className="w-full text-white font-bold py-3 rounded-xl transition disabled:opacity-60 text-sm"
+        style={{ background: accentColor }}>
+        {loading ? "..." : t.auth.sendResetLink}
+      </button>
+      <button type="button" onClick={onBack}
+        className="text-sm text-center font-semibold hover:underline" style={{ color: accentColor }}>
+        {t.auth.backToLogin}
+      </button>
+    </form>
+  );
+}
+
 // ── טאב: מחפש עבודה ──────────────────────────────────────────────────────────
 function UserPanel({ onSuccess, onClose }) {
   const { loginUser, registerUser } = useAuth();
   const { t } = useLanguage();
-  const [mode,  setMode]  = useState("login"); // "login" | "register"
+  const [mode,  setMode]  = useState("login"); // "login" | "register" | "forgot"
   const [form,  setForm]  = useState({ email: "", password: "", name: "", phone: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,6 +103,10 @@ function UserPanel({ onSuccess, onClose }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (mode === "forgot") {
+    return <ForgotPasswordPanel type="user" onBack={() => setMode("login")} />;
   }
 
   return (
@@ -80,6 +155,14 @@ function UserPanel({ onSuccess, onClose }) {
             {showPw ? "🙈" : "👁️"}
           </button>
         </div>
+        {mode === "login" && (
+          <div className="text-left mt-1">
+            <button type="button" onClick={() => { setMode("forgot"); setError(""); }}
+              className="text-xs text-[#2f6b46] hover:underline">
+              {t.auth.forgotPassword}
+            </button>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -124,6 +207,7 @@ function UserPanel({ onSuccess, onClose }) {
 function AdminPanel({ onSuccess }) {
   const { loginAdmin } = useAuth();
   const { t } = useLanguage();
+  const [mode,  setMode]  = useState("login"); // "login" | "forgot"
   const [form,  setForm]  = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -142,6 +226,10 @@ function AdminPanel({ onSuccess }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (mode === "forgot") {
+    return <ForgotPasswordPanel type="admin" onBack={() => setMode("login")} />;
   }
 
   return (
@@ -166,6 +254,12 @@ function AdminPanel({ onSuccess }) {
           <button type="button" onClick={() => setShowPw(!showPw)}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg">
             {showPw ? "🙈" : "👁️"}
+          </button>
+        </div>
+        <div className="text-left mt-1">
+          <button type="button" onClick={() => { setMode("forgot"); setError(""); }}
+            className="text-xs text-[#4f46e5] hover:underline">
+            {t.auth.forgotPassword}
           </button>
         </div>
       </div>

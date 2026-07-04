@@ -26,6 +26,13 @@ const adminSchema = new mongoose.Schema(
     //Force the admin to change the password after the first login
     mustChangePassword: { type: Boolean, default: false },
 
+    //Temporary plain-text password shown to super admin until the admin changes it
+    tempPassword: { type: String },
+
+    //Token for password reset (cleared after use)
+    resetToken: { type: String },
+    resetExpires: { type: Date },
+
     //Save the account creation date
     createdAt: { type: Date, default: Date.now },
   },

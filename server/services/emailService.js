@@ -277,7 +277,52 @@ async function notifyApplicantsJobUpdated(applications, oldJob, updatedJob) {
   );
 }
 
+async function sendPasswordResetEmail(to, resetUrl, language = "he") {
+  const isAr = language === "ar";
+
+  const subject = isAr
+    ? "إعادة تعيين كلمة المرور"
+    : "איפוס סיסמה";
+
+  const html = isAr
+    ? `
+      <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.8; max-width: 520px; margin: auto;">
+        <h2 style="color: #4f46e5;">إعادة تعيين كلمة المرور</h2>
+        <p>استلمنا طلبًا لإعادة تعيين كلمة المرور الخاصة بك.</p>
+        <p>انقر/ي على الزر أدناه لإعادة تعيين كلمة المرور. الرابط صالح لمدة ساعة واحدة فقط.</p>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${escapeHtml(resetUrl)}"
+             style="background: #4f46e5; color: white; padding: 14px 32px; border-radius: 12px;
+                    text-decoration: none; font-weight: bold; font-size: 15px;">
+            إعادة تعيين كلمة المرور
+          </a>
+        </div>
+        <p style="color: #888; font-size: 13px;">إذا لم تطلب/ي إعادة تعيين كلمة المرور، يمكنك تجاهل هذا البريد الإلكتروني.</p>
+        <p>مع التحية،<br/>فريق النظام</p>
+      </div>
+    `
+    : `
+      <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.8; max-width: 520px; margin: auto;">
+        <h2 style="color: #4f46e5;">איפוס סיסמה</h2>
+        <p>קיבלנו בקשה לאיפוס הסיסמה שלך.</p>
+        <p>לחץ/י על הכפתור למטה לאיפוס הסיסמה. הקישור תקף לשעה אחת בלבד.</p>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${escapeHtml(resetUrl)}"
+             style="background: #4f46e5; color: white; padding: 14px 32px; border-radius: 12px;
+                    text-decoration: none; font-weight: bold; font-size: 15px;">
+            איפוס סיסמה
+          </a>
+        </div>
+        <p style="color: #888; font-size: 13px;">אם לא ביקשת לאפס סיסמה, אפשר להתעלם מאימייל זה.</p>
+        <p>בברכה,<br/>צוות המערכת</p>
+      </div>
+    `;
+
+  await sendEmail(to, subject, html);
+}
+
 module.exports = {
   notifyApplicantsJobDeleted,
   notifyApplicantsJobUpdated,
+  sendPasswordResetEmail,
 };

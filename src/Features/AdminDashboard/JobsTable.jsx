@@ -9,6 +9,7 @@ const JOBS_TABLE_TEXT = {
     jobType: "סוג תפקיד",
     employmentPercent: "אחוז משרה",
     source: "מקור",
+    addedBy: "הוסף על ידי",
     students: "סטודנטים",
     actions: "פעולות",
     manualSource: "פרסום עצמאי",
@@ -26,6 +27,7 @@ const JOBS_TABLE_TEXT = {
     jobType: "نوع الوظيفة",
     employmentPercent: "نسبة الوظيفة",
     source: "المصدر",
+    addedBy: "أضافه/ها",
     students: "مناسب للطلاب",
     actions: "إجراءات",
     manualSource: "نشر ذاتي",
@@ -87,6 +89,7 @@ function JobsTable({ jobs, onEdit, onDelete }) {
             <th className="px-4 py-3">{text.jobType}</th>
             <th className="px-4 py-3">{text.employmentPercent}</th>
             <th className="px-4 py-3">{text.source}</th>
+            <th className="px-4 py-3">{text.addedBy}</th>
             <th className="px-4 py-3">{text.students}</th>
             <th className="px-4 py-3">{text.actions}</th>
           </tr>
@@ -119,6 +122,16 @@ function JobsTable({ jobs, onEdit, onDelete }) {
                 {job.source === "manual"
                   ? text.manualSource
                   : translateValue(job.sourceName, language)}
+              </td>
+
+              <td className="px-4 py-3">
+                {job.source === "manual" && job.postedBy?.username ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
+                    👤 {job.postedBy.username}
+                  </span>
+                ) : (
+                  <span className="text-gray-300">—</span>
+                )}
               </td>
 
               <td className="px-4 py-3">

@@ -19,15 +19,19 @@ const upload = multer({
   //Limit uploaded file size to 5MB
   limits: { fileSize: 5 * 1024 * 1024 },
 
-  //Allow only PDF and Word files
+  //Allow only PDF and Word files (check both MIME type and extension for compatibility)
   fileFilter: (req, file, cb) => {
-    const allowed = [
+    const allowedMime = [
       "application/pdf",
+      "application/x-pdf",
+      "application/acrobat",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
+    const allowedExt = [".pdf", ".doc", ".docx"];
+    const ext = file.originalname.toLowerCase().slice(file.originalname.lastIndexOf("."));
 
-    if (allowed.includes(file.mimetype)) cb(null, true);
+    if (allowedMime.includes(file.mimetype) || allowedExt.includes(ext)) cb(null, true);
     else cb(new Error("קובץ חייב להיות PDF או Word"));
   },
 });

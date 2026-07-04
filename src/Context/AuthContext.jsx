@@ -92,6 +92,12 @@ export function AuthProvider({ children }) {
     setAdmin(null);
   }
 
+  //Update the admin object in state and localStorage (e.g. after password change)
+  function updateAdmin(updatedAdmin) {
+    setAdmin(updatedAdmin);
+    localStorage.setItem("authData", JSON.stringify(updatedAdmin));
+  }
+
   //Save login data in localStorage and in React state
   function _saveSession(type, tok, data) {
     localStorage.setItem("token", tok);
@@ -123,7 +129,7 @@ export function AuthProvider({ children }) {
       isUser: !!user,
       isAdmin: !!admin,
       isSuperAdmin: admin?.canSeeAll === true,
-      loginUser, registerUser, loginAdmin, logout, authHeader,
+      loginUser, registerUser, loginAdmin, logout, authHeader, updateAdmin,
     }}>
       {children}
     </AuthContext.Provider>

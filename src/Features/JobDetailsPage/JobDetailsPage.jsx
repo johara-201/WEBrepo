@@ -24,6 +24,7 @@ const JOB_DETAILS_TEXT = {
     autoApplying: "מגיש אוטומטית...",
     autoApplySuccess: "המועמדות נשלחה אוטומטית בהצלחה!",
     loginRequiredAuto: "כדי להשתמש בהגשה אוטומטית צריך להתחבר למערכת.",
+    alreadyApplied: "כבר הגשת מועמדות למשרה הזאת.",
     autoApplyError: "לא ניתן לבצע הגשה אוטומטית כרגע.",
   },
 
@@ -44,6 +45,7 @@ const JOB_DETAILS_TEXT = {
     autoApplying: "جارٍ التقديم تلقائيًا...",
     autoApplySuccess: "تم إرسال الطلب تلقائيًا بنجاح!",
     loginRequiredAuto: "لاستخدام التقديم التلقائي يجب تسجيل الدخول.",
+    alreadyApplied: "لقد قدّمت طلبًا لهذه الوظيفة من قبل.",
     autoApplyError: "لا يمكن تنفيذ التقديم التلقائي الآن.",
   },
 };
@@ -115,12 +117,15 @@ function JobDetailsPage({
 
       showToast(text.autoApplySuccess, "success");
     } catch (err) {
-      const message = err?.response?.data?.error || text.autoApplyError;
+      const status = err?.response?.status;
 
-      showToast(message, "error");
-
-      if (err?.response?.status === 400) {
+      if (status === 409) {
+        showToast(text.alreadyApplied, "info");
+      } else if (status === 400) {
+        showToast(err?.response?.data?.error || text.autoApplyError, "error");
         setShowForm(true);
+      } else {
+        showToast(err?.message || text.autoApplyError, "error");
       }
     } finally {
       setAutoSubmitting(false);

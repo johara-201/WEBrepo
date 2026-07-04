@@ -112,6 +112,10 @@ export const autoApplyToJob = async (jobId, preferredLanguage = "he") => {
     );
     return response.data;
   } catch (error) {
+    // Preserve original axios error for 400/409 so callers can check status
+    if (error.response?.status === 400 || error.response?.status === 409) {
+      throw error;
+    }
     throw new Error(extractError(error, "שגיאה בהגשה אוטומטית"));
   }
 };

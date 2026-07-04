@@ -258,23 +258,27 @@ function AdminDashboard({
                 {text.sidebar.applications}
               </button>
 
-              <button
-                onClick={handleImportLocalSources}
-                disabled={importingLocal}
-                className="w-full text-right px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition flex items-center gap-2 disabled:opacity-50"
-              >
-                <span>🌐</span>
-                {importingLocal ? text.sidebar.importing : text.sidebar.importLocal}
-              </button>
+              {isSuperAdmin && (
+                <>
+                  <button
+                    onClick={handleImportLocalSources}
+                    disabled={importingLocal}
+                    className="w-full text-right px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <span>🌐</span>
+                    {importingLocal ? text.sidebar.importing : text.sidebar.importLocal}
+                  </button>
 
-              <button
-                onClick={handleImportCuratedFeed}
-                disabled={importingCurated}
-                className="w-full text-right px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition flex items-center gap-2 disabled:opacity-50"
-              >
-                <span>📥</span>
-                {importingCurated ? text.sidebar.importing : text.sidebar.importCurated}
-              </button>
+                  <button
+                    onClick={handleImportCuratedFeed}
+                    disabled={importingCurated}
+                    className="w-full text-right px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <span>📥</span>
+                    {importingCurated ? text.sidebar.importing : text.sidebar.importCurated}
+                  </button>
+                </>
+              )}
 
               <button
                 onClick={() => {

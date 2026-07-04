@@ -44,6 +44,10 @@ const userSchema = new mongoose.Schema(
        isEncrypted: {type: Boolean, default: false,},
     },
 
+    //Token for password reset (cleared after use)
+    resetToken: { type: String },
+    resetExpires: { type: Date },
+
     //Save the account creation date
     createdAt: { type: Date, default: Date.now },
   },

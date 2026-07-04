@@ -12,6 +12,8 @@ const ADMIN_MANAGEMENT_TEXT = {
       mustChange:
         "⚠️ עליך לשנות את שם המשתמש והסיסמה לפני שתוכל להמשיך.",
       username: "שם משתמש",
+      email: "אימייל",
+      emailPlaceholder: "הזן כתובת אימייל",
       currentPassword: "סיסמה נוכחית",
       currentPasswordPlaceholder: "הכנס סיסמה נוכחית לאימות",
       newPassword: "סיסמה חדשה (אופציונלי)",
@@ -20,6 +22,7 @@ const ADMIN_MANAGEMENT_TEXT = {
       saving: "שומר...",
       success: "פרטים עודכנו בהצלחה ✓",
       error: "שגיאה",
+      noChanges: "לא בוצעו שינויים.",
     },
 
     admins: {
@@ -31,6 +34,7 @@ const ADMIN_MANAGEMENT_TEXT = {
       mainAdmin: "מנהל ראשי",
       admin: "מנהל",
       mustChangePassword: "טרם שינה סיסמה",
+      tempPassword: "סיסמה זמנית:",
       active: "פעיל",
       delete: "מחיקה",
 
@@ -49,6 +53,8 @@ const ADMIN_MANAGEMENT_TEXT = {
       mustChange:
         "⚠️ عليك تغيير اسم المستخدم وكلمة المرور قبل أن تتمكن/ي من المتابعة.",
       username: "اسم المستخدم",
+      email: "البريد الإلكتروني",
+      emailPlaceholder: "أدخل/ي عنوان البريد الإلكتروني",
       currentPassword: "كلمة المرور الحالية",
       currentPasswordPlaceholder: "أدخل/ي كلمة المرور الحالية للتأكيد",
       newPassword: "كلمة مرور جديدة (اختياري)",
@@ -57,6 +63,7 @@ const ADMIN_MANAGEMENT_TEXT = {
       saving: "جارٍ الحفظ...",
       success: "تم تحديث البيانات بنجاح ✓",
       error: "خطأ",
+      noChanges: "لم يتم إجراء أي تغييرات.",
     },
 
     admins: {
@@ -68,6 +75,7 @@ const ADMIN_MANAGEMENT_TEXT = {
       mainAdmin: "مدير رئيسي",
       admin: "مدير",
       mustChangePassword: "لم يغيّر كلمة المرور بعد",
+      tempPassword: "كلمة المرور المؤقتة:",
       active: "فعّال",
       delete: "حذف",
 
@@ -90,36 +98,59 @@ export function AdminProfilePanel() {
 
   const [form, setForm] = useState({
     username: "",
+    email: "",
     newPassword: "",
     currentPassword: "",
   });
 
+  const [initialEmail, setInitialEmail] = useState("");
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
 
   useEffect(() => {
-    if (admin) {
-      setForm((prev) => ({
-        ...prev,
-        username: admin.username || "",
-      }));
-    }
-  }, [admin]);
+    if (!admin) return;
+    setForm((prev) => ({ ...prev, username: admin.username || "" }));
+
+    // Fetch full profile to get email (not stored in auth context)
+    fetch(`${API}/api/admins/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        const email = data.email || "";
+        setInitialEmail(email);
+        setForm((prev) => ({ ...prev, email }));
+      })
+      .catch(() => {});
+  }, [admin, token]);
 
   async function save(e) {
     e.preventDefault();
 
     setMsg("");
     setError("");
+
+    const usernameChanged = form.username.trim() !== (admin?.username || "");
+    const emailChanged = form.email.trim() !== initialEmail;
+    const hasNewPassword = !!form.newPassword;
+
+    if (!usernameChanged && !emailChanged && !hasNewPassword) {
+      setError(text.profile.noChanges);
+      return;
+    }
+
     setLoading(true);
 
     try {
       const body = {
         username: form.username,
+        email: form.email.trim(),
       };
 
-      if (form.newPassword) {
+      if (hasNewPassword) {
         body.newPassword = form.newPassword;
       }
 
@@ -143,6 +174,7 @@ export function AdminProfilePanel() {
       }
 
       setMsg(text.profile.success);
+      setInitialEmail(form.email.trim());
 
       setForm((prev) => ({
         ...prev,
@@ -200,21 +232,46 @@ export function AdminProfilePanel() {
 
         <div>
           <label className="mb-1 block text-xs font-semibold text-gray-500">
-            {text.profile.currentPassword}
+            {text.profile.email}
           </label>
 
           <input
-            type="password"
-            value={form.currentPassword}
+            type="email"
+            value={form.email}
             onChange={(e) =>
-              setForm((prev) => ({
-                ...prev,
-                currentPassword: e.target.value,
-              }))
+              setForm((prev) => ({ ...prev, email: e.target.value }))
             }
-            placeholder={text.profile.currentPasswordPlaceholder}
+            placeholder={text.profile.emailPlaceholder}
             className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-[#4f46e5] focus:outline-none"
           />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-semibold text-gray-500">
+            {text.profile.currentPassword}
+          </label>
+
+          <div className="relative">
+            <input
+              type={showCurrentPw ? "text" : "password"}
+              value={form.currentPassword}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  currentPassword: e.target.value,
+                }))
+              }
+              placeholder={text.profile.currentPasswordPlaceholder}
+              className="w-full rounded-xl border border-gray-200 px-4 py-2.5 pl-10 text-sm focus:border-[#4f46e5] focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => setShowCurrentPw((v) => !v)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-base"
+            >
+              {showCurrentPw ? "🙈" : "👁️"}
+            </button>
+          </div>
         </div>
 
         <div>
@@ -222,18 +279,27 @@ export function AdminProfilePanel() {
             {text.profile.newPassword}
           </label>
 
-          <input
-            type="password"
-            value={form.newPassword}
-            onChange={(e) =>
-              setForm((prev) => ({
-                ...prev,
-                newPassword: e.target.value,
-              }))
-            }
-            placeholder={text.profile.newPasswordPlaceholder}
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-[#4f46e5] focus:outline-none"
-          />
+          <div className="relative">
+            <input
+              type={showNewPw ? "text" : "password"}
+              value={form.newPassword}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  newPassword: e.target.value,
+                }))
+              }
+              placeholder={text.profile.newPasswordPlaceholder}
+              className="w-full rounded-xl border border-gray-200 px-4 py-2.5 pl-10 text-sm focus:border-[#4f46e5] focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => setShowNewPw((v) => !v)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-base"
+            >
+              {showNewPw ? "🙈" : "👁️"}
+            </button>
+          </div>
         </div>
 
         <button
@@ -244,6 +310,26 @@ export function AdminProfilePanel() {
           {loading ? text.profile.saving : text.profile.save}
         </button>
       </form>
+    </div>
+  );
+}
+
+// ── כפתור הצגה/הסתרה של סיסמה זמנית ─────────────────────────────────────────
+function TempPasswordDisplay({ password, label }) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="mt-1.5 flex items-center gap-2 rounded-lg bg-yellow-50 border border-yellow-200 px-3 py-1.5 text-xs text-yellow-800">
+      <span className="font-medium">{label}</span>
+      <span className="font-mono tracking-wide">
+        {visible ? password : "••••••••"}
+      </span>
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        className="text-yellow-600 hover:text-yellow-800 text-sm leading-none"
+      >
+        {visible ? "🙈" : "👁️"}
+      </button>
     </div>
   );
 }
@@ -426,6 +512,13 @@ export function AdminsListPanel() {
                   text.admins.active
                 )}
               </p>
+
+              {adminItem.mustChangePassword && adminItem.tempPassword && (
+                <TempPasswordDisplay
+                  password={adminItem.tempPassword}
+                  label={text.admins.tempPassword}
+                />
+              )}
             </div>
 
             {!adminItem.canSeeAll && (

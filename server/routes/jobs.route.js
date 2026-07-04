@@ -36,7 +36,9 @@ router.get("/admin/list", requireAdmin, async (req, res) => {
   try {
     const filter = req.canSeeAll ? {} : { postedBy: req.adminId };
 
-    const jobs = await Job.find(filter).sort({ publishDate: -1 });
+    const jobs = await Job.find(filter)
+      .populate("postedBy", "username")
+      .sort({ publishDate: -1 });
 
     res.status(200).send(jobs);
   } catch (error) {

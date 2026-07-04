@@ -51,8 +51,9 @@ router.put("/me", requireAdmin, async (req, res) => {
     //Encrypt the new password before saving it
     if (newPassword) admin.password = await bcrypt.hash(newPassword, 10);
 
-    //After update, the admin no longer has to change password
+    //After update, the admin no longer has to change password; clear the temp password
     admin.mustChangePassword = false;
+    admin.tempPassword = undefined;
 
     await admin.save();
 
@@ -84,10 +85,11 @@ router.post("/", requireSuper, async (req, res) => {
     //Encrypt the temporary password before saving it
     const hashed = await bcrypt.hash(randomPass, 10);
 
-    //Save the new admin in the database
+    //Save the new admin in the database (tempPassword stored until first login change)
     const admin = await Admin.create({
       username: randomUser,
       password: hashed,
+      tempPassword: randomPass,
       role: "admin",
       canSeeAll: false,
       createdBy: req.adminId,

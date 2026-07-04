@@ -13,16 +13,24 @@ const { encryptCv, decryptCv } = require("../utils/cvEncryption");
 //Store uploaded CV files in memory
 const allowedCvTypes = [
   "application/pdf",
+  "application/x-pdf",
+  "application/acrobat",
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
+
+const allowedCvExtensions = [".pdf", ".doc", ".docx"];
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
 
   fileFilter: (req, file, cb) => {
-    if (allowedCvTypes.includes(file.mimetype)) {
+    const ext = file.originalname.toLowerCase().slice(file.originalname.lastIndexOf("."));
+    const mimeOk = allowedCvTypes.includes(file.mimetype);
+    const extOk = allowedCvExtensions.includes(ext);
+
+    if (mimeOk || extOk) {
       cb(null, true);
     } else {
       cb(new Error("קובץ קורות חיים חייב להיות PDF או Word"));
