@@ -48,30 +48,6 @@ export const deleteJob = async (id) => {
   }
 };
 
-export const getAllApplications = async () => {
-  try {
-    const response = await axios.get(
-      `${BASE_URL}/api/applications`,
-      authConfig()
-    );
-    return response.data;
-  } catch (error) {
-    throw new Error(extractError(error, "שגיאה בטעינת המועמדויות"));
-  }
-};
-
-export const getApplicationsByJob = async (jobId) => {
-  try {
-    const response = await axios.get(
-      `${BASE_URL}/api/applications/job/${jobId}`,
-      authConfig()
-    );
-    return response.data;
-  } catch (error) {
-    throw new Error(extractError(error, "שגיאה בטעינת מועמדויות למשרה"));
-  }
-};
-
 export const getAdminJobs = async () => {
   try {
     const response = await axios.get(

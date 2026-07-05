@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllApplications } from "./adminService";
+import { getAllApplications } from "../../Services/ApplicationsService";
 import { useLanguage } from "../../Context/LanguageContext";
 
 const APPLICATIONS_TEXT = {
