@@ -14,6 +14,7 @@ import {
   changePassword,
   getApplicationCVUrl,
   updateApplicationCV,
+  respondToJobUpdate,
 } from "./jobSeekerService";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -109,15 +110,24 @@ const DASHBOARD_TEXT = {
       empty: "לא הגשת מועמדות עדיין",
       defaultJob: "משרה",
       removedBadge: "המשרה הוסרה",
+      updateBadge: "המשרה עודכנה",
       submitted: "הוגש:",
       removedMessage: "המשרה נמחקה על ידי המנהל ולכן כבר לא זמינה באתר.",
+      updateMessage:
+        "פרטי המשרה עודכנו. בדקי מה השתנה ואשרי אם המשרה עדיין רלוונטית עבורך.",
+      before: "לפני:",
+      after: "אחרי:",
+      stillRelevant: "עדיין רלוונטי",
+      notRelevant: "לא רלוונטי",
+      stillRelevantSuccess: "סימנת שהמשרה עדיין רלוונטית עבורך",
+      notRelevantSuccess: "המועמדות הוסרה מהרשימה",
       removeFromList: "הסרה מהרשימה",
       remove: "הסרה",
-      viewCv: "צפייה ב־CV", 
-      updateCv: "עדכון CV", 
-      updatingCv: "מעדכן...", 
-      cvUpdated: "קורות החיים למשרה עודכנו בהצלחה ✓", 
-      cvLoadError: "שגיאה בטעינת קורות החיים", 
+      viewCv: "צפייה ב־CV",
+      updateCv: "עדכון CV",
+      updatingCv: "מעדכן...",
+      cvUpdated: "קורות החיים למשרה עודכנו בהצלחה ✓",
+      cvLoadError: "שגיאה בטעינת קורות החיים",
       cvNotFound: "לא נמצאו קורות חיים למועמדות זו",
     },
   },
@@ -212,21 +222,31 @@ const DASHBOARD_TEXT = {
       empty: "لم تقدّم/ي لأي وظيفة بعد",
       defaultJob: "وظيفة",
       removedBadge: "تمت إزالة الوظيفة",
+      updateBadge: "تم تحديث الوظيفة",
       submitted: "تم التقديم:",
-      removedMessage: "تم حذف الوظيفة من قبل المدير، لذلك لم تعد متاحة في الموقع.",
+      removedMessage:
+        "تم حذف الوظيفة من قبل المدير، لذلك لم تعد متاحة في الموقع.",
+      updateMessage:
+        "تم تحديث تفاصيل الوظيفة. راجع/ي التغييرات وأكّد/ي إذا كانت الوظيفة ما زالت مناسبة لك.",
+      before: "قبل:",
+      after: "بعد:",
+      stillRelevant: "ما زالت مناسبة",
+      notRelevant: "لم تعد مناسبة",
+      stillRelevantSuccess: "تم تأكيد أن الوظيفة ما زالت مناسبة لك",
+      notRelevantSuccess: "تمت إزالة طلب التقديم من القائمة",
       removeFromList: "إزالة من القائمة",
       remove: "إزالة",
-      viewCv: "عرض السيرة الذاتية", 
-      updateCv: "تحديث السيرة الذاتية", 
-      updatingCv: "جارٍ التحديث...", 
-      cvUpdated: "تم تحديث السيرة الذاتية الخاصة بالوظيفة بنجاح ✓", 
-      cvLoadError: "حدث خطأ أثناء تحميل السيرة الذاتية", 
+      viewCv: "عرض السيرة الذاتية",
+      updateCv: "تحديث السيرة الذاتية",
+      updatingCv: "جارٍ التحديث...",
+      cvUpdated: "تم تحديث السيرة الذاتية الخاصة بالوظيفة بنجاح ✓",
+      cvLoadError: "حدث خطأ أثناء تحميل السيرة الذاتية",
       cvNotFound: "لم يتم العثور على سيرة ذاتية لهذا الطلب",
     },
   },
 };
 
-//פאנל: פרטים אישיים 
+//פאנל: פרטים אישיים
 function ProfilePanel({ token }) {
   const { language } = useLanguage();
   const text = DASHBOARD_TEXT[language] || DASHBOARD_TEXT.he;
@@ -297,9 +317,7 @@ function ProfilePanel({ token }) {
       ) : (
         <p className="border-b border-gray-100 px-1 py-2.5 text-sm text-gray-800">
           {profile[key] || (
-            <span className="text-gray-300">
-              {text.common.notProvided}
-            </span>
+            <span className="text-gray-300">{text.common.notProvided}</span>
           )}
         </p>
       )}
@@ -342,24 +360,36 @@ function ProfilePanel({ token }) {
         )}
       </div>
 
-      {msg && (
-        <p className="mb-4 text-sm text-green-600">
-          {msg}
-        </p>
-      )}
+      {msg && <p className="mb-4 text-sm text-green-600">{msg}</p>}
 
-      {error && (
-        <p className="mb-4 text-sm text-red-500">
-          {error}
-        </p>
-      )}
+      {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {field(text.profile.fields.name, "name", "text", text.profile.placeholders.name)}
+        {field(
+          text.profile.fields.name,
+          "name",
+          "text",
+          text.profile.placeholders.name
+        )}
         {field(text.profile.fields.email, "email", "email")}
-        {field(text.profile.fields.phone, "phone", "tel", text.profile.placeholders.phone)}
-        {field(text.profile.fields.city, "city", "text", text.profile.placeholders.city)}
-        {field(text.profile.fields.profession, "profession", "text", text.profile.placeholders.profession)}
+        {field(
+          text.profile.fields.phone,
+          "phone",
+          "tel",
+          text.profile.placeholders.phone
+        )}
+        {field(
+          text.profile.fields.city,
+          "city",
+          "text",
+          text.profile.placeholders.city
+        )}
+        {field(
+          text.profile.fields.profession,
+          "profession",
+          "text",
+          text.profile.placeholders.profession
+        )}
       </div>
 
       {editing ? (
@@ -398,7 +428,7 @@ function ProfilePanel({ token }) {
   );
 }
 
-//פאנל: שינוי סיסמה 
+//פאנל: שינוי סיסמה
 function PasswordPanel({ token }) {
   const { language } = useLanguage();
   const text = DASHBOARD_TEXT[language] || DASHBOARD_TEXT.he;
@@ -471,17 +501,9 @@ function PasswordPanel({ token }) {
         </p>
       </div>
 
-      {msg && (
-        <p className="mb-4 text-sm text-green-600">
-          {msg}
-        </p>
-      )}
+      {msg && <p className="mb-4 text-sm text-green-600">{msg}</p>}
 
-      {error && (
-        <p className="mb-4 text-sm text-red-500">
-          {error}
-        </p>
-      )}
+      {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
 
       <form onSubmit={handleSubmit} className="max-w-md space-y-4">
         <div>
@@ -553,7 +575,7 @@ function PasswordPanel({ token }) {
   );
 }
 
-//פאנל: קורות חיים 
+//פאנל: קורות חיים
 function CVPanel({ token }) {
   const { language } = useLanguage();
   const showToast = useToast();
@@ -621,17 +643,9 @@ function CVPanel({ token }) {
         {text.cv.title}
       </h2>
 
-      {msg && (
-        <p className="mb-4 text-sm text-green-600">
-          {msg}
-        </p>
-      )}
+      {msg && <p className="mb-4 text-sm text-green-600">{msg}</p>}
 
-      {error && (
-        <p className="mb-4 text-sm text-red-500">
-          {error}
-        </p>
-      )}
+      {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
 
       {hasCv ? (
         <div className="mb-4 flex items-center gap-4 rounded-2xl border border-[#c3e6d3] bg-[#f0faf4] p-4">
@@ -644,7 +658,9 @@ function CVPanel({ token }) {
 
             <p className="text-xs text-gray-400">
               {text.cv.uploaded}{" "}
-              {new Date(profile.cv.uploadedAt).toLocaleDateString(text.common.locale)}
+              {new Date(profile.cv.uploadedAt).toLocaleDateString(
+                text.common.locale
+              )}
             </p>
           </div>
 
@@ -662,23 +678,23 @@ function CVPanel({ token }) {
                   },
                 })
                   .then((response) => {
-  if (!response.ok) {
-    throw new Error("שגיאה בטעינת קורות החיים");
-  }
-  return response.blob();
-})
-.then((blob) => {
-  const fileBlob = new Blob([blob], {
-    type: blob.type || "application/pdf",
-  });
+                    if (!response.ok) {
+                      throw new Error("שגיאה בטעינת קורות החיים");
+                    }
+                    return response.blob();
+                  })
+                  .then((blob) => {
+                    const fileBlob = new Blob([blob], {
+                      type: blob.type || "application/pdf",
+                    });
 
-  const url = URL.createObjectURL(fileBlob);
-  window.open(url, "_blank");
-})
-.catch((err) => {
-  console.error("CV view error:", err);
-  showToast("שגיאה בטעינת קורות החיים", "error");
-});
+                    const url = URL.createObjectURL(fileBlob);
+                    window.open(url, "_blank");
+                  })
+                  .catch((err) => {
+                    console.error("CV view error:", err);
+                    showToast("שגיאה בטעינת קורות החיים", "error");
+                  });
               }}
               className="rounded-xl border border-[#2f6b46] px-3 py-1.5 text-xs font-semibold text-[#2f6b46] transition hover:bg-[#2f6b46] hover:text-white"
             >
@@ -704,9 +720,7 @@ function CVPanel({ token }) {
         <div className="mb-4 rounded-2xl border-2 border-dashed border-gray-200 p-10 text-center">
           <div className="mb-3 text-4xl">📁</div>
 
-          <p className="mb-4 text-sm text-gray-500">
-            {text.cv.noCv}
-          </p>
+          <p className="mb-4 text-sm text-gray-500">{text.cv.noCv}</p>
 
           <button
             onClick={() => fileRef.current?.click()}
@@ -725,14 +739,12 @@ function CVPanel({ token }) {
         onChange={handleUpload}
       />
 
-      <p className="text-xs text-gray-400">
-        {text.cv.allowedFiles}
-      </p>
+      <p className="text-xs text-gray-400">{text.cv.allowedFiles}</p>
     </div>
   );
 }
 
-//פאנל: מועמדויות 
+//פאנל: מועמדויות
 function ApplicationsPanel({ token, onViewJob }) {
   const { language } = useLanguage();
   const showConfirm = useConfirm();
@@ -765,49 +777,69 @@ function ApplicationsPanel({ token, onViewJob }) {
       setMsg(text.applications.errorWithdraw);
     }
   }
-  
+
   async function viewApplicationCV(appId) {
-  try {
-    const response = await fetch(getApplicationCVUrl(appId), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      const response = await fetch(getApplicationCVUrl(appId), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    if (!response.ok) {
-      setMsg(text.applications.cvNotFound);
-      return;
+      if (!response.ok) {
+        setMsg(text.applications.cvNotFound);
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch {
+      setMsg(text.applications.cvLoadError);
     }
-
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
-  } catch {
-    setMsg(text.applications.cvLoadError);
   }
-}
 
-async function handleApplicationCVUpload(appId, e) {
-  const file = e.target.files?.[0];
-  if (!file) return;
+  async function handleApplicationCVUpload(appId, e) {
+    const file = e.target.files?.[0];
 
-  setUploadingAppId(appId);
+    if (!file) return;
 
-  try {
-    const updated = await updateApplicationCV(token, appId, file);
+    setUploadingAppId(appId);
 
-    setApps((prev) =>
-      prev.map((app) => (app._id === appId ? updated : app))
-    );
+    try {
+      const updated = await updateApplicationCV(token, appId, file);
 
-    setMsg(text.applications.cvUpdated);
-  } catch (err) {
-    setMsg(err.message);
-  } finally {
-    setUploadingAppId(null);
-    e.target.value = "";
+      setApps((prev) =>
+        prev.map((app) => (app._id === appId ? updated : app))
+      );
+
+      setMsg(text.applications.cvUpdated);
+    } catch (err) {
+      setMsg(err.message);
+    } finally {
+      setUploadingAppId(null);
+      e.target.value = "";
+    }
   }
-}
+
+  async function handleJobUpdateResponse(appId, stillRelevant) {
+    try {
+      const updated = await respondToJobUpdate(token, appId, stillRelevant);
+
+      if (stillRelevant) {
+        setApps((prev) =>
+          prev.map((app) => (app._id === appId ? updated : app))
+        );
+
+        setMsg(text.applications.stillRelevantSuccess);
+      } else {
+        setApps((prev) => prev.filter((app) => app._id !== appId));
+        setMsg(text.applications.notRelevantSuccess);
+      }
+    } catch (err) {
+      setMsg(err.message);
+    }
+  }
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
@@ -815,11 +847,7 @@ async function handleApplicationCVUpload(appId, e) {
         {text.applications.title}
       </h2>
 
-      {msg && (
-        <p className="mb-4 text-sm text-green-600">
-          {msg}
-        </p>
-      )}
+      {msg && <p className="mb-4 text-sm text-green-600">{msg}</p>}
 
       {loading && (
         <p className="py-8 text-center text-sm text-gray-400">
@@ -837,10 +865,9 @@ async function handleApplicationCVUpload(appId, e) {
       <div className="flex flex-col gap-3">
         {apps.map((app) => {
           const removed = app.jobRemoved || app.jobExists === false;
+          const hasJobUpdate = app.jobUpdateStatus === "pending_review";
           const title =
-            app.jobTitle ||
-            app.job?.title ||
-            text.applications.defaultJob;
+            app.jobTitle || app.job?.title || text.applications.defaultJob;
 
           return (
             <div
@@ -874,11 +901,19 @@ async function handleApplicationCVUpload(appId, e) {
                       {text.applications.removedBadge}
                     </span>
                   )}
+
+                  {hasJobUpdate && !removed && (
+                    <span className="rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-[11px] font-bold text-blue-700">
+                      {text.applications.updateBadge}
+                    </span>
+                  )}
                 </div>
 
                 <p className="mt-1 text-xs text-gray-400">
                   {text.applications.submitted}{" "}
-                  {new Date(app.submittedAt).toLocaleDateString(text.common.locale)}
+                  {new Date(app.submittedAt).toLocaleDateString(
+                    text.common.locale
+                  )}
                 </p>
 
                 {removed && (
@@ -886,35 +921,84 @@ async function handleApplicationCVUpload(appId, e) {
                     {text.applications.removedMessage}
                   </p>
                 )}
+
+                {hasJobUpdate && !removed && (
+                  <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-3 text-xs text-blue-900">
+                    <p className="mb-2 font-bold">
+                      {text.applications.updateMessage}
+                    </p>
+
+                    {app.jobChanges?.length > 0 && (
+                      <div className="mb-3 space-y-2">
+                        {app.jobChanges.map((change, index) => (
+                          <div
+                            key={`${change.field}-${index}`}
+                            className="rounded-lg bg-white p-2"
+                          >
+                            <p className="font-semibold">{change.label}</p>
+
+                            <p className="text-gray-500">
+                              {text.applications.before}{" "}
+                              {change.oldValue || text.common.notProvided}
+                            </p>
+
+                            <p className="text-gray-800">
+                              {text.applications.after}{" "}
+                              {change.newValue || text.common.notProvided}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleJobUpdateResponse(app._id, true)}
+                        className="rounded-lg bg-[#2f6b46] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#245539]"
+                      >
+                        {text.applications.stillRelevant}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleJobUpdateResponse(app._id, false)}
+                        className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50"
+                      >
+                        {text.applications.notRelevant}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex shrink-0 gap-2">
-  <button
-    onClick={() => viewApplicationCV(app._id)}
-    className="rounded-xl border border-[#2f6b46] px-3 py-1.5 text-xs font-semibold text-[#2f6b46] transition hover:bg-[#2f6b46] hover:text-white"
-  >
-   {text.applications.viewCv}
-  </button>
+                <button
+                  onClick={() => viewApplicationCV(app._id)}
+                  className="rounded-xl border border-[#2f6b46] px-3 py-1.5 text-xs font-semibold text-[#2f6b46] transition hover:bg-[#2f6b46] hover:text-white"
+                >
+                  {text.applications.viewCv}
+                </button>
 
-  <button
-    onClick={() => fileRefs.current[app._id]?.click()}
-    className="rounded-xl border border-gray-300 px-3 py-1.5 text-xs text-gray-600 transition hover:bg-gray-50"
-  >
-    {uploadingAppId === app._id
-  ? text.applications.updatingCv
-  : text.applications.updateCv}
-  </button>
+                <button
+                  onClick={() => fileRefs.current[app._id]?.click()}
+                  className="rounded-xl border border-gray-300 px-3 py-1.5 text-xs text-gray-600 transition hover:bg-gray-50"
+                >
+                  {uploadingAppId === app._id
+                    ? text.applications.updatingCv
+                    : text.applications.updateCv}
+                </button>
 
-  <input
-    ref={(el) => {
-      fileRefs.current[app._id] = el;
-    }}
-    type="file"
-    accept=".pdf,.doc,.docx"
-    className="hidden"
-    onChange={(e) => handleApplicationCVUpload(app._id, e)}
-  />
-</div>
+                <input
+                  ref={(el) => {
+                    fileRefs.current[app._id] = el;
+                  }}
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  className="hidden"
+                  onChange={(e) => handleApplicationCVUpload(app._id, e)}
+                />
+              </div>
 
               <button
                 onClick={() => withdraw(app._id)}
@@ -973,7 +1057,10 @@ function JobSeekerDashboard({
   ];
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#f9f8f4] text-right text-gray-800 font-sans">
+    <div
+      dir="rtl"
+      className="min-h-screen bg-[#f9f8f4] text-right font-sans text-gray-800"
+    >
       <NavBar
         activePage="dashboard"
         onHome={onHome}

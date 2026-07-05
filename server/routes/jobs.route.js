@@ -16,6 +16,35 @@ const {
   notifyApplicantsJobUpdated,
 } = require("../services/emailService");
 
+//Compare old and updated job fields and return the exact changes
+function getJobChanges(oldJob, updatedJob) {
+  const fields = [
+    { key: "title", label: "שם המשרה" },
+    { key: "organization", label: "ארגון" },
+    { key: "city", label: "יישוב" },
+    { key: "jobType", label: "סוג תפקיד" },
+    { key: "employmentPercent", label: "אחוז משרה" },
+    { key: "distanceMinutes", label: "מרחק נסיעה" },
+    { key: "suitableForStudents", label: "התאמה לסטודנטים" },
+    { key: "description", label: "תיאור המשרה" },
+    { key: "applyUrl", label: "קישור הגשה" },
+  ];
+
+  return fields
+    .filter(({ key }) => {
+      const oldValue = oldJob?.[key];
+      const newValue = updatedJob?.[key];
+
+      return String(oldValue ?? "") !== String(newValue ?? "");
+    })
+    .map(({ key, label }) => ({
+      field: key,
+      label,
+      oldValue: String(oldJob?.[key] ?? "לא הוזן"),
+      newValue: String(updatedJob?.[key] ?? "לא הוזן"),
+    }));
+}
+
 //Default URL for the curated local jobs feed
 const CURATED_LOCAL_FEED_URL =
   process.env.CURATED_LOCAL_FEED_URL ||
@@ -117,7 +146,7 @@ router.post("/", requireAdmin, async (req, res) => {
 });
 
 //Update an existing job
-router.put("/:id", requireAdmin, async (req, res) => {  
+router.put("/:id", requireAdmin, async (req, res) => {
   try {
     //Save the old job before updating, so we can compare what changed
     const oldJob = await Job.findById(req.params.id);
@@ -139,15 +168,38 @@ router.put("/:id", requireAdmin, async (req, res) => {
       return res.status(404).send("Job not found");
     }
 
-    //Find applicants who applied to this job
-    const applications = await Application.find({
-      jobId: req.params.id,
-      cancelledByUser: { $ne: true },
-      email: { $exists: true, $ne: "" },
-    }).select("fullName email preferredLanguage");
+    //Find what fields were really changed
+    const jobChanges = getJobChanges(oldJob, job);
 
-    //Send email update to the applicants
-    await notifyApplicantsJobUpdated(applications, oldJob, job);
+    //Only notify users if something actually changed
+    if (jobChanges.length > 0) {
+      //Find applicants who applied to this job
+      const applications = await Application.find({
+        jobId: req.params.id,
+        cancelledByUser: { $ne: true },
+        email: { $exists: true, $ne: "" },
+      }).select("fullName email preferredLanguage");
+
+      //Mark the existing applications as waiting for candidate review
+      await Application.updateMany(
+        {
+          jobId: req.params.id,
+          cancelledByUser: { $ne: true },
+        },
+        {
+          $set: {
+            jobTitle: job.title,
+            jobUpdateStatus: "pending_review",
+            jobUpdatedAt: new Date(),
+            jobChanges,
+            jobUpdateReviewedAt: null,
+          },
+        }
+      );
+
+      //Send email update to the applicants
+      await notifyApplicantsJobUpdated(applications, oldJob, job);
+    }
 
     //Notify connected clients that statistics changed
     req.app.get("broadcastStatsUpdate")?.();
@@ -159,28 +211,37 @@ router.put("/:id", requireAdmin, async (req, res) => {
 });
 
 //Delete a job
-router.delete("/:id", requireAdmin, async (req, res) => {  
+router.delete("/:id", requireAdmin, async (req, res) => {
   try {
-    //Find the selected job before deleting it
-    const job = await Job.findById(req.params.id);
+    //Build delete filter according to admin permissions
+    const deleteFilter = req.canSeeAll
+      ? { _id: req.params.id }
+      : { _id: req.params.id, postedBy: req.adminId };
+
+    //Delete the job atomically.
+    //Only one request can actually delete the job.
+    const job = await Job.findOneAndDelete(deleteFilter);
 
     if (!job) {
-      return res.status(404).send("Job not found");
+      const existingJob = await Job.findById(req.params.id);
+
+      if (existingJob) {
+        return res.status(403).json({
+          error: "אין הרשאה למחוק משרה של מנהל אחר",
+        });
+      }
+
+      return res.status(404).json({
+        error: "המשרה כבר נמחקה או לא קיימת",
+      });
     }
 
-    if (!req.canSeeAll && String(job.postedBy) !== String(req.adminId)) {
-      return res.status(403).json({ error: "אין הרשאה למחוק משרה של מנהל אחר" });
-    }
-
-    //Find applicants before deleting the job
+    //Find applicants only after we know this request really deleted the job
     const applications = await Application.find({
       jobId: req.params.id,
       cancelledByUser: { $ne: true },
       email: { $exists: true, $ne: "" },
     }).select("fullName email preferredLanguage");
-
-    //Delete the selected job from the database
-    await Job.findByIdAndDelete(req.params.id);
 
     //Do not delete applications, so users can still see that the job was removed
     await Application.updateMany(
@@ -194,15 +255,20 @@ router.delete("/:id", requireAdmin, async (req, res) => {
       }
     );
 
-    //Send email notification to applicants
+    //Send email notification only once, by the request that really deleted the job
     await notifyApplicantsJobDeleted(applications, job);
 
     //Notify connected clients that statistics changed
     req.app.get("broadcastStatsUpdate")?.();
 
-    res.status(200).send("Job deleted");
+    res.status(200).json({
+      message: "Job deleted",
+    });
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).json({
+      error: "שגיאה במחיקת המשרה",
+      details: error.message,
+    });
   }
 });
 

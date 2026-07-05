@@ -105,3 +105,19 @@ export async function updateApplicationCV(token, appId, file) {
 
   return data;
 }
+
+export async function respondToJobUpdate(token, appId, stillRelevant) {
+  const res = await fetch(`${API}/api/applications/${appId}/job-update-response`, {
+    method: "PATCH",
+    headers: headers(token),
+    body: JSON.stringify({ stillRelevant }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(data.error || "שגיאה בעדכון סטטוס המשרה");
+  }
+
+  return data;
+}

@@ -26,7 +26,10 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 
   fileFilter: (req, file, cb) => {
-    const ext = file.originalname.toLowerCase().slice(file.originalname.lastIndexOf("."));
+    const ext = file.originalname
+      .toLowerCase()
+      .slice(file.originalname.lastIndexOf("."));
+
     const mimeOk = allowedCvTypes.includes(file.mimetype);
     const extOk = allowedCvExtensions.includes(ext);
 
@@ -38,11 +41,48 @@ const upload = multer({
   },
 });
 
+//Normalize email before saving/searching
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+//Remove the CV file buffer before sending data back to the frontend
+function removeCvData(application) {
+  const result =
+    typeof application.toObject === "function"
+      ? application.toObject()
+      : { ...application };
+
+  if (result.cvSnapshot) {
+    delete result.cvSnapshot.data;
+  }
+
+  return result;
+}
+
+//Return a duplicate application message by language
+function duplicateApplicationMessage(language = "he") {
+  return language === "ar"
+    ? "لقد قمتِ/قمتَ بالتقديم لهذه الوظيفة مسبقًا."
+    : "כבר הגשת מועמדות למשרה הזו.";
+}
+
+//Check if this is a MongoDB duplicate key error
+function isDuplicateKeyError(error) {
+  return error && error.code === 11000;
+}
+
 //Create a new job application
 router.post("/", upload.single("resumeFile"), async (req, res) => {
+  let preferredLanguage = "he";
+
   try {
     //Copy all form data from the request body
     const data = { ...req.body };
+
+    //Save the preferred language for future email notifications
+    preferredLanguage = data.preferredLanguage === "ar" ? "ar" : "he";
+    data.preferredLanguage = preferredLanguage;
 
     //Check if the request has a user token
     const auth = req.headers.authorization;
@@ -60,8 +100,12 @@ router.post("/", upload.single("resumeFile"), async (req, res) => {
           data.userId = decoded.id;
         }
       } catch {
+        //Invalid token is ignored because guest application is allowed
       }
     }
+
+    //Normalize email before every DB operation
+    data.email = normalizeEmail(data.email);
 
     //If the user uploaded a CV, save a copy of it in this application
     if (req.file) {
@@ -98,48 +142,69 @@ router.post("/", upload.single("resumeFile"), async (req, res) => {
     //Save job details inside the application
     data.jobTitle = job.title;
     data.postedBy = job.postedBy;
-    data.email = data.email?.trim().toLowerCase();
 
-    //Save the preferred language for future email notifications
-    data.preferredLanguage = data.preferredLanguage === "ar" ? "ar" : "he";
+    //Check if this user or email already applied to this job.
+    //This prevents duplicates before saving.
+    const duplicateConditions = [];
 
-    //Check duplicates by user ID if logged in, or by email if guest
-    const duplicateQuery = data.userId
-      ? {
-          jobId: data.jobId,
-          userId: data.userId,
-          cancelledByUser: { $ne: true },
-        }
-      : {
-          jobId: data.jobId,
-          email: data.email,
-          cancelledByUser: { $ne: true },
-        };
+    if (data.userId) {
+      duplicateConditions.push({ userId: data.userId });
+    }
 
-    //Check if this user or email already applied to this job
-    const existingApplication = await Application.findOne(duplicateQuery);
+    if (data.email) {
+      duplicateConditions.push({ email: data.email });
+    }
+
+    const existingApplication = await Application.findOne({
+      jobId: data.jobId,
+      $or: duplicateConditions,
+    }).select("-cvSnapshot.data");
 
     if (existingApplication) {
+      //If the old application was cancelled, reuse the same document instead of creating a duplicate.
+      if (existingApplication.cancelledByUser) {
+        existingApplication.set({
+          ...data,
+          submittedAt: new Date(),
+          cancelledByUser: false,
+          cancelledAt: null,
+          hiddenFromAdmin: false,
+          jobRemoved: false,
+          removedJobTitle: "",
+          removedJobAt: null,
+          jobUpdateStatus: "none",
+          jobUpdatedAt: null,
+          jobChanges: [],
+          jobUpdateReviewedAt: null,
+        });
+
+        await existingApplication.save();
+
+        return res.status(200).json(removeCvData(existingApplication));
+      }
+
       return res.status(409).json({
-        error: "כבר הגשת מועמדות למשרה הזו. ניתן לעדכן פרטים במקום לשלוח שוב.",
-        application: existingApplication,
+        error: duplicateApplicationMessage(preferredLanguage),
+        application: removeCvData(existingApplication),
       });
     }
 
-    //Save the new application
+    //Save the new application.
+    //The unique indexes in applicationSchema also protect this line from race conditions.
     const application = new Application(data);
     await application.save();
 
-    res.status(201).send(application);
+    return res.status(201).json(removeCvData(application));
   } catch (error) {
-    //Handle duplicate index errors from MongoDB
-    if (error.code === 11000) {
+    //Handle duplicate index errors from MongoDB.
+    //This is the important protection when two requests arrive at the exact same time.
+    if (isDuplicateKeyError(error)) {
       return res.status(409).json({
-        error: "כבר קיימת מועמדות למשרה הזו.",
+        error: duplicateApplicationMessage(preferredLanguage),
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       error: "שגיאה בשליחת מועמדות",
       details: error.message,
     });
@@ -148,11 +213,13 @@ router.post("/", upload.single("resumeFile"), async (req, res) => {
 
 //Create a new application automatically from the logged-in user's profile
 router.post("/auto/:jobId", requireUser, async (req, res) => {
+  let preferredLanguage = "he";
+
   try {
     const jobId = req.params.jobId;
 
     //Save the preferred language for future email notifications
-    const preferredLanguage = req.body.preferredLanguage === "ar" ? "ar" : "he";
+    preferredLanguage = req.body.preferredLanguage === "ar" ? "ar" : "he";
 
     //Find the logged-in user
     const user = await User.findById(req.userId);
@@ -198,26 +265,66 @@ router.post("/auto/:jobId", requireUser, async (req, res) => {
       });
     }
 
-    const email = user.email.trim().toLowerCase();
+    const email = normalizeEmail(user.email);
 
-    //Prevent duplicate application for the same job
+    //Prevent duplicate application for the same job before saving.
     const existingApplication = await Application.findOne({
       jobId,
-      cancelledByUser: { $ne: true },
       $or: [{ userId: req.userId }, { email }],
     }).select("-cvSnapshot.data");
 
     if (existingApplication) {
+      //If an old cancelled application exists, reactivate it instead of creating a duplicate.
+      if (existingApplication.cancelledByUser) {
+        const reactivatedApplication = await Application.findByIdAndUpdate(
+          existingApplication._id,
+          {
+            jobId,
+            jobTitle: job.title,
+            postedBy: job.postedBy,
+            userId: req.userId,
+            fullName: user.name,
+            email,
+            phone: user.phone || "",
+            preferredLanguage,
+            message:
+              preferredLanguage === "ar"
+                ? "تقديم تلقائي عبر النظام"
+                : "הגשה אוטומטית דרך המערכת",
+            cvSnapshot: {
+              data: user.cv.data,
+              filename: user.cv.filename,
+              mimetype: user.cv.mimetype,
+              uploadedAt: user.cv.uploadedAt || new Date(),
+              iv: user.cv.iv,
+              isEncrypted: user.cv.isEncrypted,
+            },
+            submittedAt: new Date(),
+            cancelledByUser: false,
+            cancelledAt: null,
+            hiddenFromAdmin: false,
+            jobRemoved: false,
+            removedJobTitle: "",
+            removedJobAt: null,
+            jobUpdateStatus: "none",
+            jobUpdatedAt: null,
+            jobChanges: [],
+            jobUpdateReviewedAt: null,
+          },
+          { new: true, runValidators: true }
+        ).select("-cvSnapshot.data");
+
+        return res.status(200).json(reactivatedApplication);
+      }
+
       return res.status(409).json({
-        error:
-          preferredLanguage === "ar"
-            ? "لقد قمتِ/قمتَ بالتقديم لهذه الوظيفة مسبقًا."
-            : "כבר הגשת מועמדות למשרה הזו.",
-        application: existingApplication,
+        error: duplicateApplicationMessage(preferredLanguage),
+        application: removeCvData(existingApplication),
       });
     }
 
-    //Create application automatically from user profile
+    //Create application automatically from user profile.
+    //The unique indexes in applicationSchema also protect this save from race conditions.
     const application = new Application({
       jobId,
       jobTitle: job.title,
@@ -247,22 +354,17 @@ router.post("/auto/:jobId", requireUser, async (req, res) => {
 
     await application.save();
 
-    const result = application.toObject();
-
-    //Do not send the CV file data back to the frontend
-    if (result.cvSnapshot) {
-      delete result.cvSnapshot.data;
-    }
-
-    res.status(201).json(result);
+    return res.status(201).json(removeCvData(application));
   } catch (error) {
-    if (error.code === 11000) {
+    //Handle duplicate index errors from MongoDB.
+    //This catches the case where auto apply and manual apply happen at the same time.
+    if (isDuplicateKeyError(error)) {
       return res.status(409).json({
-        error: "כבר קיימת מועמדות למשרה הזו.",
+        error: duplicateApplicationMessage(preferredLanguage),
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       error: "שגיאה בהגשה האוטומטית",
       details: error.message,
     });
@@ -275,9 +377,11 @@ router.get("/", requireAdmin, async (req, res) => {
     //Super admins see all applications, regular admins see only their own
     const query = req.canSeeAll ? {} : { postedBy: req.adminId };
 
-    const applications = await Application.find(query).sort({
-      submittedAt: -1,
-    });
+    const applications = await Application.find(query)
+      .select("-cvSnapshot.data")
+      .sort({
+        submittedAt: -1,
+      });
 
     res.status(200).send(applications);
   } catch (error) {
@@ -291,7 +395,9 @@ router.get("/my", requireUser, async (req, res) => {
     const applications = await Application.find({
       userId: req.userId,
       cancelledByUser: { $ne: true },
-    }).sort({ submittedAt: -1 });
+    })
+      .select("-cvSnapshot.data")
+      .sort({ submittedAt: -1 });
 
     res.status(200).send(applications);
   } catch (error) {
@@ -304,9 +410,11 @@ router.get("/job/:jobId", requireAdmin, async (req, res) => {
   try {
     const applications = await Application.find({
       jobId: req.params.jobId,
-    }).sort({
-      submittedAt: -1,
-    });
+    })
+      .select("-cvSnapshot.data")
+      .sort({
+        submittedAt: -1,
+      });
 
     res.status(200).send(applications);
   } catch (error) {
@@ -344,11 +452,11 @@ router.get("/:id/cv", requireUser, async (req, res) => {
     );
 
     const fileBuffer =
-  application.cvSnapshot.isEncrypted && application.cvSnapshot.iv
-    ? decryptCv(application.cvSnapshot.data, application.cvSnapshot.iv)
-    : application.cvSnapshot.data;
+      application.cvSnapshot.isEncrypted && application.cvSnapshot.iv
+        ? decryptCv(application.cvSnapshot.data, application.cvSnapshot.iv)
+        : application.cvSnapshot.data;
 
-res.send(fileBuffer);
+    res.send(fileBuffer);
   } catch (error) {
     res.status(500).json({ error: "שגיאה בטעינת קורות החיים" });
   }
@@ -380,7 +488,7 @@ router.put("/:id", requireUser, upload.single("resumeFile"), async (req, res) =>
 
     //Update email only if it was sent
     if (req.body.email !== undefined) {
-      updateData.email = req.body.email.trim().toLowerCase();
+      updateData.email = normalizeEmail(req.body.email);
     }
 
     //Update phone only if it was sent
@@ -401,23 +509,23 @@ router.put("/:id", requireUser, upload.single("resumeFile"), async (req, res) =>
 
     //Replace the CV if a new file was uploaded
     if (req.file) {
-  const encryptedCv = encryptCv(req.file.buffer);
+      const encryptedCv = encryptCv(req.file.buffer);
 
-  updateData.cvSnapshot = {
-    data: encryptedCv.encryptedBuffer,
-    filename: req.file.originalname,
-    mimetype: req.file.mimetype,
-    uploadedAt: new Date(),
-    iv: encryptedCv.iv,
-    isEncrypted: true,
-  };
-}
+      updateData.cvSnapshot = {
+        data: encryptedCv.encryptedBuffer,
+        filename: req.file.originalname,
+        mimetype: req.file.mimetype,
+        uploadedAt: new Date(),
+        iv: encryptedCv.iv,
+        isEncrypted: true,
+      };
+    }
 
     const updatedApplication = await Application.findByIdAndUpdate(
       req.params.id,
       updateData,
       { new: true, runValidators: true }
-    );
+    ).select("-cvSnapshot.data");
 
     if (!updatedApplication) {
       return res.status(404).json({ error: "המועמדות לא נמצאה" });
@@ -425,8 +533,58 @@ router.put("/:id", requireUser, upload.single("resumeFile"), async (req, res) =>
 
     res.status(200).json(updatedApplication);
   } catch (error) {
+    if (isDuplicateKeyError(error)) {
+      return res.status(409).json({
+        error: "כבר קיימת מועמדות למשרה הזו.",
+      });
+    }
+
     res.status(500).json({
       error: "שגיאה בעדכון המועמדות",
+      details: error.message,
+    });
+  }
+});
+
+//Candidate confirms whether an updated job is still relevant
+router.patch("/:id/job-update-response", requireUser, async (req, res) => {
+  try {
+    const { stillRelevant } = req.body;
+
+    const application = await Application.findById(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({ error: "המועמדות לא נמצאה" });
+    }
+
+    if (String(application.userId) !== String(req.userId)) {
+      return res.status(403).json({ error: "אין הרשאה" });
+    }
+
+    if (stillRelevant) {
+      application.jobUpdateStatus = "still_relevant";
+      application.jobUpdateReviewedAt = new Date();
+      application.cancelledByUser = false;
+      application.cancelledAt = null;
+
+      await application.save();
+
+      return res.status(200).json(removeCvData(application));
+    }
+
+    application.jobUpdateStatus = "not_relevant";
+    application.jobUpdateReviewedAt = new Date();
+    application.cancelledByUser = true;
+    application.cancelledAt = new Date();
+
+    await application.save();
+
+    return res.status(200).json({
+      message: "המועמדות סומנה כלא רלוונטית והוסרה מהרשימה",
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "שגיאה בעדכון סטטוס המועמדות",
       details: error.message,
     });
   }
@@ -449,6 +607,7 @@ router.delete("/:id", async (req, res) => {
           userId = decoded.id;
         }
       } catch {
+        //Invalid token
       }
     }
 
