@@ -322,7 +322,6 @@ function LoginPage({ onSuccess, onClose, onHome }) {
         onClick={onHome || onClose}
         className="inline-flex items-center justify-center gap-2 bg-[#2f6b46] text-white font-bold px-4 py-2 rounded-xl hover:bg-[#245539] transition shadow-md text-xs"
       >
-        <span>🏠</span>
         <span>{t.auth.backHome}</span>
       </button>
     </div>

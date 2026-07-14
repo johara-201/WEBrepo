@@ -117,6 +117,8 @@ router.post("/me/cv", requireUser, upload.single("cv"), async (req, res) => {
       filename: req.file.originalname,
     });
   } catch (err) {
+    //Print the real error in the server terminal to make debugging easier
+    console.error("CV upload error:", err);
     res.status(500).json({ error: "שגיאה בשרת" });
   }
 });

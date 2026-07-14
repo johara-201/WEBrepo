@@ -313,8 +313,9 @@ function SearchPage({
         onAIChat={onAIChat}
       />
 
-      <div className="max-w-7xl mx-auto px-6 py-8 flex gap-6 items-start">
-        <aside className="w-64 shrink-0 sticky top-24">
+      {/* במובייל: הפילטרים מעל התוצאות. במחשב: פאנל צד דביק עם גלילה פנימית */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col lg:flex-row gap-6 items-stretch lg:items-start">
+        <aside className="w-full lg:w-64 shrink-0 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-bold text-gray-800">
@@ -463,7 +464,7 @@ function SearchPage({
         </aside>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
             <h1 className="text-2xl font-bold text-gray-900">
               {text.pageTitle}
             </h1>
