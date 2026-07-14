@@ -49,6 +49,11 @@ let Job = new mongoose.Schema(
 
     //Check if the job came from an external source
     isExternal: { type: Boolean, default: false },
+
+    //Version number for optimistic locking.
+    //Every update increases this number by one, so two admins
+    //cannot overwrite each other's changes without noticing.
+    version: { type: Number, default: 0 },
   },
 
   //Save the data in the "Jobs" collection

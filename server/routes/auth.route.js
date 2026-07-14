@@ -23,8 +23,12 @@ const JWT_SECRET = process.env.JWT_SECRET || "beit-hakerem-secret-2024";
 
 //Check if the system needs first admin setup
 router.get("/admin/needs-setup", async (req, res) => {
-  const count = await Admin.countDocuments();
-  res.json({ needsSetup: count === 0 });
+  try {
+    const count = await Admin.countDocuments();
+    res.json({ needsSetup: count === 0 });
+  } catch (err) {
+    res.status(500).json({ error: "שגיאה בשרת" });
+  }
 });
 
 //Register a new job seeker
@@ -156,8 +160,23 @@ router.post("/admin/login", async (req, res) => {
   }
 });
 
+//In-process lock (mutex) for the first admin setup.
+//Node.js runs JavaScript on a single thread, so this flag makes the
+//"count admins + create admins" section atomic inside this server process.
+//Without it, two setup requests at the same time could both pass the count
+//check and create four admins instead of two.
+let adminSetupInProgress = false;
+
 //Create the first two super admins only if there are no admins in the database
 router.post("/admin/setup", async (req, res) => {
+  //If another setup request is already running, reject this one
+  if (adminSetupInProgress) {
+    return res.status(409).json({ error: "הגדרה ראשונית כבר מתבצעת כעת" });
+  }
+
+  //Lock the critical section
+  adminSetupInProgress = true;
+
   try {
     //Count how many admins already exist
     const count = await Admin.countDocuments();
@@ -187,6 +206,9 @@ router.post("/admin/setup", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "שגיאה בשרת" });
+  } finally {
+    //Always release the lock, even if an error happened
+    adminSetupInProgress = false;
   }
 });
 

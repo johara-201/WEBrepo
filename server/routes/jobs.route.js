@@ -159,13 +159,31 @@ router.put("/:id", requireAdmin, async (req, res) => {
       return res.status(403).json({ error: "אין הרשאה לערוך משרה של מנהל אחר" });
     }
 
-    //Update the job and return the new version
-    const job = await Job.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    //Never let the client set the version field directly
+    const { version, ...updateFields } = req.body;
 
+    //Update the job with optimistic locking:
+    //the update succeeds only if the version in the database
+    //is still the same version we read above.
+    //Old jobs that were created before this fix have no version field,
+    //so null is also accepted (their first update adds the field).
+    const job = await Job.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        version: { $in: [oldJob.version ?? 0, null] },
+      },
+      {
+        $set: updateFields,
+        $inc: { version: 1 },
+      },
+      { new: true, runValidators: true }
+    );
+
+    //If job is null here, another admin updated the job at the same time
     if (!job) {
-      return res.status(404).send("Job not found");
+      return res.status(409).json({
+        error: "המשרה עודכנה או נמחקה בו-זמנית על ידי מנהל אחר. רענן את הדף ונסה שוב.",
+      });
     }
 
     //Find what fields were really changed
@@ -581,8 +599,26 @@ function mapRemotiveJob(job) {
   };
 }
 
+//In-process lock (mutex) for job import.
+//Both import routes first delete the old imported jobs and then insert
+//the new ones. These two steps are not atomic in the database, so if two
+//imports run at the same time the jobs could be inserted twice.
+//Node.js runs JavaScript on a single thread, so this flag is enough to
+//make sure only one import runs at a time in this server process.
+let importInProgress = false;
+
 //Import jobs from external sources that support direct fetch
 router.post("/import-local-sources", async (req, res) => {
+  //Reject this request if another import is already running
+  if (importInProgress) {
+    return res.status(409).send({
+      error: "ייבוא משרות כבר מתבצע כעת. נסה שוב בעוד רגע.",
+    });
+  }
+
+  //Lock the critical section
+  importInProgress = true;
+
   const jobsToSave = [];
   const skippedSources = [];
   let checkedSources = 0;
@@ -672,11 +708,24 @@ router.post("/import-local-sources", async (req, res) => {
     });
   } catch (error) {
     res.status(500).send(error);
+  } finally {
+    //Always release the lock, even if an error happened
+    importInProgress = false;
   }
 });
 
 //Import jobs from the curated local feed
 router.post("/import-curated-local-feed", async (req, res) => {
+  //Reject this request if another import is already running
+  if (importInProgress) {
+    return res.status(409).send({
+      error: "ייבוא משרות כבר מתבצע כעת. נסה שוב בעוד רגע.",
+    });
+  }
+
+  //Lock the critical section
+  importInProgress = true;
+
   try {
     //Fetch jobs from the curated feed URL
     const response = await fetch(CURATED_LOCAL_FEED_URL);
@@ -734,6 +783,9 @@ router.post("/import-curated-local-feed", async (req, res) => {
     res.status(200).send({ imported: saved.length, jobs: saved });
   } catch (error) {
     res.status(500).send({ error: "שגיאה בייבוא ממאגר חיצוני" });
+  } finally {
+    //Always release the lock, even if an error happened
+    importInProgress = false;
   }
 });
 
