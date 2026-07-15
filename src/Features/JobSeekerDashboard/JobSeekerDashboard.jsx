@@ -648,7 +648,7 @@ function CVPanel({ token }) {
       {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
 
       {hasCv ? (
-        <div className="mb-4 flex items-center gap-4 rounded-2xl border border-[#c3e6d3] bg-[#f0faf4] p-4">
+        <div className="mb-4 flex flex-wrap items-center gap-4 rounded-2xl border border-[#c3e6d3] bg-[#f0faf4] p-4">
           <div className="text-3xl">📄</div>
 
           <div className="flex-1">
@@ -664,7 +664,7 @@ function CVPanel({ token }) {
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <a
               href={`${API}/api/users/me/cv`}
               target="_blank"
@@ -872,7 +872,7 @@ function ApplicationsPanel({ token, onViewJob }) {
           return (
             <div
               key={app._id}
-              className={`flex items-center gap-4 rounded-2xl border p-4 transition ${
+              className={`flex flex-wrap items-center gap-4 rounded-2xl border p-4 transition ${
                 removed
                   ? "border-orange-200 bg-orange-50/70"
                   : "border-gray-100 hover:bg-gray-50"
@@ -972,7 +972,7 @@ function ApplicationsPanel({ token, onViewJob }) {
                 )}
               </div>
 
-              <div className="flex shrink-0 gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => viewApplicationCV(app._id)}
                   className="rounded-xl border border-[#2f6b46] px-3 py-1.5 text-xs font-semibold text-[#2f6b46] transition hover:bg-[#2f6b46] hover:text-white"
@@ -1002,7 +1002,7 @@ function ApplicationsPanel({ token, onViewJob }) {
 
               <button
                 onClick={() => withdraw(app._id)}
-                className="shrink-0 rounded-xl border border-red-100 px-3 py-1.5 text-xs text-red-500 transition hover:bg-red-50"
+                className="rounded-xl border border-red-100 px-3 py-1.5 text-xs text-red-500 transition hover:bg-red-50"
               >
                 {removed
                   ? text.applications.removeFromList
@@ -1072,8 +1072,9 @@ function JobSeekerDashboard({
         onAIChat={onAIChat}
       />
 
-      <div className="mx-auto flex max-w-5xl items-start gap-6 px-6 py-8">
-        <aside className="sticky top-24 w-52 shrink-0">
+      {/* במובייל: הכרטיס האישי מעל התוכן. במחשב: פאנל צד דביק */}
+      <div className="mx-auto flex max-w-5xl flex-col md:flex-row items-stretch md:items-start gap-6 px-4 sm:px-6 py-8">
+        <aside className="w-full md:w-52 shrink-0 md:sticky md:top-24">
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
             <div className="mb-5 border-b border-gray-100 pb-4 text-center">
               <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-[#e9f5ef] text-2xl">

@@ -110,13 +110,13 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
       <NavBar activePage="home" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} onDashboard={onDashboard} onAIChat={onAIChat} />
 
       {/* ───── HERO (תמונת רקע מלאה) ───── */}
+      {/* במובייל הטקסט וסרגל החיפוש תופסים יותר גובה, אז מגדילים את גובה ה-hero כדי שהתמונה תישאר גלויה */}
       <section
-        className="relative w-full overflow-hidden flex flex-col justify-between"
+        className="relative w-full overflow-hidden flex flex-col justify-between min-h-[620px] sm:min-h-[460px]"
         style={{
           backgroundImage: `url(${heroIllustration})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          minHeight: "460px",
         }}
       >
         {/* טקסט — גבוה ומרכזי */}
