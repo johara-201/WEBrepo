@@ -664,7 +664,8 @@ function CVPanel({ token }) {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          {/* במובייל הכפתורים יורדים לשורה נפרדת ברוחב מלא */}
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
             <a
               href={`${API}/api/users/me/cv`}
               target="_blank"
@@ -972,7 +973,8 @@ function ApplicationsPanel({ token, onViewJob }) {
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              {/* במובייל הכפתורים יורדים לשורה נפרדת ברוחב מלא */}
+              <div className="flex w-full flex-wrap gap-2 md:w-auto">
                 <button
                   onClick={() => viewApplicationCV(app._id)}
                   className="rounded-xl border border-[#2f6b46] px-3 py-1.5 text-xs font-semibold text-[#2f6b46] transition hover:bg-[#2f6b46] hover:text-white"
@@ -998,16 +1000,16 @@ function ApplicationsPanel({ token, onViewJob }) {
                   className="hidden"
                   onChange={(e) => handleApplicationCVUpload(app._id, e)}
                 />
-              </div>
 
-              <button
-                onClick={() => withdraw(app._id)}
-                className="rounded-xl border border-red-100 px-3 py-1.5 text-xs text-red-500 transition hover:bg-red-50"
-              >
-                {removed
-                  ? text.applications.removeFromList
-                  : text.applications.remove}
-              </button>
+                <button
+                  onClick={() => withdraw(app._id)}
+                  className="rounded-xl border border-red-100 px-3 py-1.5 text-xs text-red-500 transition hover:bg-red-50"
+                >
+                  {removed
+                    ? text.applications.removeFromList
+                    : text.applications.remove}
+                </button>
+              </div>
             </div>
           );
         })}

@@ -1,6 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&family=Noto+Sans+Hebrew:wght@300;400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
+/* מגדיר שגם המחלקה font-sans של Tailwind תשתמש בפונט של האתר,
+   כדי שכל הדפים יהיו באותו פונט אחיד */
+@theme {
+  --font-sans: "Noto Sans Hebrew", "Noto Sans Arabic", system-ui, -apple-system,
+    "Segoe UI", Arial, sans-serif;
+}
+
 :root {
   --brand: #2f6b46;        
   --brand-dark: #245539;
