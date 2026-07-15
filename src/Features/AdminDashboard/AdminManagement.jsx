@@ -90,7 +90,7 @@ const ADMIN_MANAGEMENT_TEXT = {
   },
 };
 
-// ── פאנל עדכון פרטי המנהל עצמו ───────────────────────────────────────────────
+// ── Panel for updating the admin's own details ───────────────────────────────
 export function AdminProfilePanel() {
   const { token, admin } = useAuth();
   const { language } = useLanguage();
@@ -314,7 +314,7 @@ export function AdminProfilePanel() {
   );
 }
 
-// ── כפתור הצגה/הסתרה של סיסמה זמנית ─────────────────────────────────────────
+// ── Show/hide button for a temporary password ───────────────────────────────
 function TempPasswordDisplay({ password, label }) {
   const [visible, setVisible] = useState(false);
   return (
@@ -334,7 +334,7 @@ function TempPasswordDisplay({ password, label }) {
   );
 }
 
-// ── פאנל ניהול מנהלים (super בלבד) ──────────────────────────────────────────
+// ── Admins management panel (super admin only) ──────────────────────────────
 export function AdminsListPanel() {
   const { token } = useAuth();
   const { language } = useLanguage();

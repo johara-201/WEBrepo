@@ -1,5 +1,5 @@
-// AdminJobForm - גרסה מלאה יותר של טופס פרסום משרה, מוכנה להרחבה
-// כרגע PostJobPage.jsx עושה את העבודה. קומפוננט זה מוכן לשימוש עתידי.
+// AdminJobForm - a fuller version of the job posting form, ready for extension
+// Right now PostJobPage.jsx does the work. This component is ready for future use.
 import { useState } from "react";
 import { createJob } from "./postJobService";
 import { useToast } from "../../Components/Toast";

@@ -158,7 +158,7 @@ const FAQ_CONTENT = {
   },
 };
 
-/* איור SVG קהילתי */
+/* Community SVG illustration */
 function CommunityIllustration() {
   return (
     <svg viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg" className="w-full max-w-sm">

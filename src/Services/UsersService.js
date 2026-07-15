@@ -1,7 +1,7 @@
-// שירות משתמשים - מוכן להרחבה עתידית
-// כרגע אין Backend לניהול משתמשים, אבל המבנה כאן לשימוש עתידי
+// Users service - ready for future use
+// There is no backend for user management yet, the structure here is for the future
 
-export const ADMIN_PASSWORD = "admin123"; // בסביבת ייצור - להחליף בפתרון אמיתי
+export const ADMIN_PASSWORD = "admin123"; // In production this should be replaced with a real solution
 
 export const checkAdminPassword = (password) => {
   return password === ADMIN_PASSWORD;

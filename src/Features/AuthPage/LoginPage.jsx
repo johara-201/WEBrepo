@@ -7,7 +7,7 @@ import { useLanguage } from "../../Context/LanguageContext";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "";
 
-// ── שחזור סיסמה ───────────────────────────────────────────────────────────────
+// ── Password recovery ─────────────────────────────────────────────────────────
 function ForgotPasswordPanel({ type = "user", onBack }) {
   const { t, language } = useLanguage();
   const [value, setValue] = useState("");
@@ -74,7 +74,7 @@ function ForgotPasswordPanel({ type = "user", onBack }) {
   );
 }
 
-// ── טאב: מחפש עבודה ──────────────────────────────────────────────────────────
+// ── Tab: job seeker ──────────────────────────────────────────────────────────
 function UserPanel({ onSuccess, onClose }) {
   const { loginUser, registerUser } = useAuth();
   const { t } = useLanguage();
@@ -203,7 +203,7 @@ function UserPanel({ onSuccess, onClose }) {
   );
 }
 
-// ── טאב: מנהל ────────────────────────────────────────────────────────────────
+// ── Tab: admin ───────────────────────────────────────────────────────────────
 function AdminPanel({ onSuccess }) {
   const { loginAdmin } = useAuth();
   const { t } = useLanguage();
@@ -274,7 +274,7 @@ function AdminPanel({ onSuccess }) {
   );
 }
 
-// ── דף ראשי ───────────────────────────────────────────────────────────────────
+// ── Main page ─────────────────────────────────────────────────────────────────
 function LoginPage({ onSuccess, onClose, onHome }) {
   const [tab, setTab] = useState("user"); // "user" | "admin"
   const { t } = useLanguage();
@@ -282,7 +282,7 @@ function LoginPage({ onSuccess, onClose, onHome }) {
   return (
     <div dir="rtl" className="min-h-screen bg-[#f9f8f4] flex">
 
-      {/* ─── פאנל שמאל: אילוסטרציה ─────────────────────────────────────── */}
+      {/* ─── Left panel: illustration ──────────────────────────────────── */}
       <div
   className="hidden md:flex flex-col w-[42%] relative overflow-hidden"
   style={{ background: "linear-gradient(135deg, #1a4d2e 0%, #2f6b46 60%, #4a9e6b 100%)" }}
@@ -312,11 +312,11 @@ function LoginPage({ onSuccess, onClose, onHome }) {
         </div>
       </div>
 
-      {/* ─── פאנל ימין: טפסים ───────────────────────────────────────────── */}
+      {/* ─── Right panel: forms ────────────────────────────────────────── */}
 <div className="flex-1 flex justify-center items-center px-8 py-12">
   <div className="w-full max-w-md">
 
-    {/* כפתור חזרה לדף הבית - קטן ובצד */}
+    {/* Back to home button - small and on the side */}
     <div className="text-right mb-4">
       <button
         onClick={onHome || onClose}
@@ -326,7 +326,7 @@ function LoginPage({ onSuccess, onClose, onHome }) {
       </button>
     </div>
 
-    {/* כרטיסיית התחברות */}
+    {/* Login card */}
     <div className="bg-white border border-gray-100 rounded-3xl shadow-xl px-8 py-9">
 
       <h1 className="text-3xl font-extrabold text-gray-900 mb-1 text-center">
@@ -337,7 +337,7 @@ function LoginPage({ onSuccess, onClose, onHome }) {
         {t.auth.continueLogin}
       </p>
 
-      {/* טאבים */}
+      {/* Tabs */}
       <div className="flex bg-gray-100 rounded-2xl p-1 mb-6">
         <button
           onClick={() => setTab("user")}

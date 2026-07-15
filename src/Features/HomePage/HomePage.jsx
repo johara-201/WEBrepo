@@ -11,7 +11,7 @@ import icon4 from "../../assets/icon4.png";
 import icon5 from "../../assets/icon5.png";
 import { useLanguage } from "../../Context/LanguageContext";
 
-/* אייקון SVG למנהל/ת */
+/* SVG icon for the manager category */
 function ManagerIcon() {
   return (
     <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10">
@@ -109,8 +109,8 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
 
       <NavBar activePage="home" onHome={onHome} onSearch={onSearch} onAbout={onAbout} onFaq={onFaq} onAdmin={onAdmin} onDashboard={onDashboard} onAIChat={onAIChat} />
 
-      {/* ───── HERO (תמונת רקע מלאה) ───── */}
-      {/* במובייל הטקסט וסרגל החיפוש תופסים יותר גובה, אז מגדילים את גובה ה-hero כדי שהתמונה תישאר גלויה */}
+      {/* ───── HERO (full background image) ───── */}
+      {/* On mobile the text and search bar take more height, so the hero is taller to keep the image visible */}
       <section
         className="relative w-full overflow-hidden flex flex-col justify-between min-h-[620px] sm:min-h-[460px]"
         style={{
@@ -119,7 +119,7 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
           backgroundPosition: "center",
         }}
       >
-        {/* טקסט — גבוה ומרכזי */}
+        {/* Text - high and centered */}
         <div className="flex-1 flex items-start justify-center px-6 pt-10">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold leading-tight text-gray-900 mb-3">
@@ -131,7 +131,7 @@ function HomePage({ onSelectJob, onAdmin, onSearch, onAbout, onFaq, onHome, onDa
           </div>
         </div>
 
-        {/* סרגל חיפוש בתחתית — לכל רוחב */}
+        {/* Search bar at the bottom - full width */}
         <div className="w-full bg-white/90 backdrop-blur-sm border-t border-gray-100 px-4 py-3">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row gap-2 items-stretch">
             <input

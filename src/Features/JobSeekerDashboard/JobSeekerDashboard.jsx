@@ -246,7 +246,7 @@ const DASHBOARD_TEXT = {
   },
 };
 
-//פאנל: פרטים אישיים
+//Panel: personal details
 function ProfilePanel({ token }) {
   const { language } = useLanguage();
   const text = DASHBOARD_TEXT[language] || DASHBOARD_TEXT.he;
@@ -428,7 +428,7 @@ function ProfilePanel({ token }) {
   );
 }
 
-//פאנל: שינוי סיסמה
+//Panel: change password
 function PasswordPanel({ token }) {
   const { language } = useLanguage();
   const text = DASHBOARD_TEXT[language] || DASHBOARD_TEXT.he;
@@ -575,7 +575,7 @@ function PasswordPanel({ token }) {
   );
 }
 
-//פאנל: קורות חיים
+//Panel: CV
 function CVPanel({ token }) {
   const { language } = useLanguage();
   const showToast = useToast();
@@ -664,7 +664,7 @@ function CVPanel({ token }) {
             </p>
           </div>
 
-          {/* במובייל הכפתורים יורדים לשורה נפרדת ברוחב מלא */}
+          {/* On mobile the buttons move to a separate full width row */}
           <div className="flex w-full flex-wrap gap-2 sm:w-auto">
             <a
               href={`${API}/api/users/me/cv`}
@@ -745,7 +745,7 @@ function CVPanel({ token }) {
   );
 }
 
-//פאנל: מועמדויות
+//Panel: my applications
 function ApplicationsPanel({ token, onViewJob }) {
   const { language } = useLanguage();
   const showConfirm = useConfirm();
@@ -973,7 +973,7 @@ function ApplicationsPanel({ token, onViewJob }) {
                 )}
               </div>
 
-              {/* במובייל הכפתורים יורדים לשורה נפרדת ברוחב מלא */}
+              {/* On mobile the buttons move to a separate full width row */}
               <div className="flex w-full flex-wrap gap-2 md:w-auto">
                 <button
                   onClick={() => viewApplicationCV(app._id)}
@@ -1018,7 +1018,7 @@ function ApplicationsPanel({ token, onViewJob }) {
   );
 }
 
-// ── דף ראשי ───────────────────────────────────────────────────────────────────
+// ── Main page ─────────────────────────────────────────────────────────────────
 function JobSeekerDashboard({
   onHome,
   onSearch,
@@ -1074,7 +1074,7 @@ function JobSeekerDashboard({
         onAIChat={onAIChat}
       />
 
-      {/* במובייל: הכרטיס האישי מעל התוכן. במחשב: פאנל צד דביק */}
+      {/* On mobile: the profile card appears above the content. On desktop: sticky side panel */}
       <div className="mx-auto flex max-w-5xl flex-col md:flex-row items-stretch md:items-start gap-6 px-4 sm:px-6 py-8">
         <aside className="w-full md:w-52 shrink-0 md:sticky md:top-24">
           <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">

@@ -313,7 +313,7 @@ function SearchPage({
         onAIChat={onAIChat}
       />
 
-      {/* במובייל: הפילטרים מעל התוצאות. במחשב: פאנל צד דביק עם גלילה פנימית */}
+      {/* On mobile: the filters appear above the results. On desktop: sticky side panel with inner scroll */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col lg:flex-row gap-6 items-stretch lg:items-start">
         <aside className="w-full lg:w-64 shrink-0 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">

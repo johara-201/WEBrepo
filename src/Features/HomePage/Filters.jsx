@@ -11,7 +11,7 @@ function Filters({ jobs, filters, onChange }) {
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
-      {/* סינון לפי יישוב */}
+      {/* Filter by city */}
       <div className="w-full">
         <label className="mb-1 block text-sm text-gray-600">יישוב</label>
         <select
@@ -28,7 +28,7 @@ function Filters({ jobs, filters, onChange }) {
         </select>
       </div>
 
-      {/* סינון לפי סוג תפקיד */}
+      {/* Filter by job type */}
       <div className="w-full">
         <label className="mb-1 block text-sm text-gray-600">סוג תפקיד</label>
         <select
@@ -45,7 +45,7 @@ function Filters({ jobs, filters, onChange }) {
         </select>
       </div>
 
-      {/* סינון לפי אחוז משרה */}
+      {/* Filter by employment percent */}
       <div className="w-full">
         <label className="mb-1 block text-sm text-gray-600">אחוז משרה</label>
         <select
@@ -61,7 +61,7 @@ function Filters({ jobs, filters, onChange }) {
         </select>
       </div>
 
-      {/* סינון לפי ארגון מגייס */}
+      {/* Filter by hiring organization */}
       <div className="w-full">
         <label className="mb-1 block text-sm text-gray-600">ארגון מגייס</label>
         <select
@@ -78,7 +78,7 @@ function Filters({ jobs, filters, onChange }) {
         </select>
       </div>
 
-      {/* סינון לפי מרחק נסיעה */}
+      {/* Filter by travel distance */}
       <div className="w-full">
         <label className="mb-1 block text-sm text-gray-600">מרחק נסיעה</label>
         <select
@@ -94,7 +94,7 @@ function Filters({ jobs, filters, onChange }) {
         </select>
       </div>
 
-      {/* סינון עבודה לסטודנטים */}
+      {/* Filter jobs suitable for students */}
       <div className="flex items-center gap-2 pt-6">
         <input
           id="forStudents"

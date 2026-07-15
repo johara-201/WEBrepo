@@ -203,7 +203,7 @@ function AdminDashboard({
         onAIChat={onAIChat}
       />
 
-      {/* במובייל: התפריט מעל התוכן. במחשב: פאנל צד דביק עם גלילה פנימית */}
+      {/* On mobile: the menu appears above the content. On desktop: sticky side panel with inner scroll */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col md:flex-row gap-6 items-stretch md:items-start">
         <aside className="w-full md:w-52 shrink-0 md:sticky md:top-24 md:max-h-[calc(100vh-7rem)] md:overflow-y-auto">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">

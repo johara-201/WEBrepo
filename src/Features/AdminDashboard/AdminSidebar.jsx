@@ -1,4 +1,4 @@
-// AdminSidebar - מוכן להרחבה עתידית אם רוצים Sidebar קבועה בדאשבורד
+// AdminSidebar - ready for future use if we want a fixed sidebar in the dashboard
 function AdminSidebar({ activePage, onNavigate }) {
   const items = [
     { key: "jobs", label: "🗂️ ניהול משרות" },
