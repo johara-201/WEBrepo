@@ -704,14 +704,14 @@ function CVPanel({ token }) {
 
             <button
               onClick={() => fileRef.current?.click()}
-              className="rounded-xl border border-gray-300 px-3 py-1.5 text-xs text-gray-600 transition hover:bg-gray-50"
+              className="rounded-xl border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50"
             >
               {text.cv.update}
             </button>
 
             <button
               onClick={handleDelete}
-              className="rounded-xl border border-red-200 px-3 py-1.5 text-xs text-red-500 transition hover:bg-red-50"
+              className="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-500 transition hover:bg-red-50"
             >
               {text.cv.delete}
             </button>
@@ -984,7 +984,7 @@ function ApplicationsPanel({ token, onViewJob }) {
 
                 <button
                   onClick={() => fileRefs.current[app._id]?.click()}
-                  className="rounded-xl border border-gray-300 px-3 py-1.5 text-xs text-gray-600 transition hover:bg-gray-50"
+                  className="rounded-xl border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50"
                 >
                   {uploadingAppId === app._id
                     ? text.applications.updatingCv
@@ -1003,7 +1003,7 @@ function ApplicationsPanel({ token, onViewJob }) {
 
                 <button
                   onClick={() => withdraw(app._id)}
-                  className="rounded-xl border border-red-100 px-3 py-1.5 text-xs text-red-500 transition hover:bg-red-50"
+                  className="rounded-xl border border-red-100 px-3 py-1.5 text-xs font-semibold text-red-500 transition hover:bg-red-50"
                 >
                   {removed
                     ? text.applications.removeFromList
