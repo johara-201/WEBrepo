@@ -21,6 +21,9 @@ const POST_JOB_TEXT = {
       distanceMinutes: "מרחק נסיעה בדקות",
       description: "תיאור המשרה",
       applyUrl: "קישור להגשת מועמדות",
+      contactName: "שם איש קשר",
+      contactPhone: "טלפון איש קשר",
+      contactEmail: "אימייל איש קשר",
       suitableForStudents: "מתאים לסטודנטים",
       suitableForStudentsDesc:
         "סמני אם המשרה מתאימה לסטודנטים ובוגרי תואר.",
@@ -37,6 +40,9 @@ const POST_JOB_TEXT = {
       description:
         "כתבי כאן את תיאור המשרה, דרישות התפקיד ופרטים חשובים נוספים...",
       applyUrl: "https://...",
+      contactName: "לדוגמה: רות כהן (לא חובה)",
+      contactPhone: "לדוגמה: 04-0000000",
+      contactEmail: "לדוגמה: jobs@example.org",
     },
 
     buttons: {
@@ -90,6 +96,9 @@ const POST_JOB_TEXT = {
       distanceMinutes: "مدة السفر بالدقائق",
       description: "وصف الوظيفة",
       applyUrl: "رابط تقديم الطلب",
+      contactName: "اسم شخص الاتصال",
+      contactPhone: "هاتف شخص الاتصال",
+      contactEmail: "بريد شخص الاتصال",
       suitableForStudents: "مناسبة للطلاب",
       suitableForStudentsDesc:
         "حددي هذا الخيار إذا كانت الوظيفة مناسبة للطلاب والخريجين.",
@@ -106,6 +115,9 @@ const POST_JOB_TEXT = {
       description:
         "اكتبي هنا وصف الوظيفة، متطلبات الدور وتفاصيل مهمة إضافية...",
       applyUrl: "https://...",
+      contactName: "مثال: روت كوهين (اختياري)",
+      contactPhone: "مثال: 04-0000000",
+      contactEmail: "مثال: jobs@example.org",
     },
 
     buttons: {
@@ -182,6 +194,9 @@ function PostJobPage({ onBack }) {
     suitableForStudents: false,
     description: "",
     applyUrl: "",
+    contactName: "",
+    contactPhone: "",
+    contactEmail: "",
   });
 
   const handleChange = (e) => {
@@ -394,6 +409,53 @@ function PostJobPage({ onBack }) {
                 onChange={handleChange}
                 className={inputClass}
               />
+            </div>
+
+            {/* Contact person details (optional) */}
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                  {text.labels.contactName}
+                </label>
+
+                <input
+                  name="contactName"
+                  placeholder={text.placeholders.contactName}
+                  value={formData.contactName}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                  {text.labels.contactPhone}
+                </label>
+
+                <input
+                  name="contactPhone"
+                  type="tel"
+                  placeholder={text.placeholders.contactPhone}
+                  value={formData.contactPhone}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                  {text.labels.contactEmail}
+                </label>
+
+                <input
+                  name="contactEmail"
+                  type="email"
+                  placeholder={text.placeholders.contactEmail}
+                  value={formData.contactEmail}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
+              </div>
             </div>
 
             <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4">

@@ -15,6 +15,9 @@ const EDIT_JOB_TEXT = {
       distanceMinutes: "מרחק נסיעה (דקות)",
       description: "תיאור המשרה",
       applyUrl: "קישור להגשת מועמדות",
+      contactName: "שם איש קשר",
+      contactPhone: "טלפון איש קשר",
+      contactEmail: "אימייל איש קשר",
     },
     suitableForStudents: "מתאים לסטודנטים",
     cancel: "ביטול",
@@ -34,6 +37,9 @@ const EDIT_JOB_TEXT = {
       distanceMinutes: "مدة السفر بالدقائق",
       description: "وصف الوظيفة",
       applyUrl: "رابط تقديم الطلب",
+      contactName: "اسم شخص الاتصال",
+      contactPhone: "هاتف شخص الاتصال",
+      contactEmail: "بريد شخص الاتصال",
     },
     suitableForStudents: "مناسبة للطلاب",
     cancel: "إلغاء",
@@ -58,6 +64,9 @@ function EditJobModal({ job, onClose, onSaved }) {
     suitableForStudents: job.suitableForStudents || false,
     description: job.description || "",
     applyUrl: job.applyUrl || "",
+    contactName: job.contactName || "",
+    contactPhone: job.contactPhone || "",
+    contactEmail: job.contactEmail || "",
   });
 
   const [saving, setSaving] = useState(false);
@@ -183,6 +192,35 @@ function EditJobModal({ job, onClose, onSaved }) {
             placeholder={text.placeholders.applyUrl}
             className="w-full rounded-lg border p-2.5 text-sm"
           />
+
+          {/* Contact person details (optional) */}
+          <input
+            name="contactName"
+            value={formData.contactName}
+            onChange={handleChange}
+            placeholder={text.placeholders.contactName}
+            className="w-full rounded-lg border p-2.5 text-sm"
+          />
+
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              name="contactPhone"
+              type="tel"
+              value={formData.contactPhone}
+              onChange={handleChange}
+              placeholder={text.placeholders.contactPhone}
+              className="w-full rounded-lg border p-2.5 text-sm"
+            />
+
+            <input
+              name="contactEmail"
+              type="email"
+              value={formData.contactEmail}
+              onChange={handleChange}
+              placeholder={text.placeholders.contactEmail}
+              className="w-full rounded-lg border p-2.5 text-sm"
+            />
+          </div>
 
           <label className="flex items-center gap-2 text-sm">
             <input

@@ -15,6 +15,10 @@ const JOB_DETAILS_TEXT = {
     minutesDrive: "דק' נסיעה",
     suitableForStudents: "מתאים לסטודנטים",
     descriptionTitle: "תיאור התפקיד",
+    contactTitle: "פרטי איש קשר",
+    contactName: "שם:",
+    contactPhone: "טלפון:",
+    contactEmail: "אימייל:",
     source: "מקור:",
     manualSource: "פרסום עצמאי",
     openOriginalSource: "פתיחת המקור המקורי ↗",
@@ -36,6 +40,10 @@ const JOB_DETAILS_TEXT = {
     minutesDrive: "دقيقة سفر",
     suitableForStudents: "مناسب للطلاب",
     descriptionTitle: "وصف الوظيفة",
+    contactTitle: "تفاصيل شخص الاتصال",
+    contactName: "الاسم:",
+    contactPhone: "الهاتف:",
+    contactEmail: "البريد الإلكتروني:",
     source: "المصدر:",
     manualSource: "نشر ذاتي",
     openOriginalSource: "فتح المصدر الأصلي ↗",
@@ -213,6 +221,50 @@ function JobDetailsPage({
 
             <p className="leading-8 text-gray-700">{job.description}</p>
           </div>
+
+          {/* Contact person details - shown only if the job has them */}
+          {(job.contactName || job.contactPhone || job.contactEmail) && (
+            <div className="mb-6 rounded-xl bg-[#e9f1ea] p-4 text-sm text-gray-700">
+              <h2 className="mb-2 font-semibold text-gray-800">
+                {text.contactTitle}
+              </h2>
+
+              <div className="flex flex-wrap gap-x-6 gap-y-1">
+                {job.contactName && (
+                  <p>
+                    <span className="font-medium">{text.contactName} </span>
+                    {job.contactName}
+                  </p>
+                )}
+
+                {job.contactPhone && (
+                  <p>
+                    <span className="font-medium">{text.contactPhone} </span>
+                    <a
+                      href={`tel:${job.contactPhone}`}
+                      className="text-[#2f6b46] hover:underline"
+                      dir="ltr"
+                    >
+                      {job.contactPhone}
+                    </a>
+                  </p>
+                )}
+
+                {job.contactEmail && (
+                  <p>
+                    <span className="font-medium">{text.contactEmail} </span>
+                    <a
+                      href={`mailto:${job.contactEmail}`}
+                      className="text-[#2f6b46] hover:underline"
+                      dir="ltr"
+                    >
+                      {job.contactEmail}
+                    </a>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           {job.sourceName && (
             <div className="mb-6 rounded-xl bg-stone-50 p-4 text-sm text-gray-600">

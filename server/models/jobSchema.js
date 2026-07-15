@@ -38,6 +38,11 @@ let Job = new mongoose.Schema(
     //External application link
     applyUrl: { type: String },
 
+    //Contact person details (optional)
+    contactName: { type: String },
+    contactPhone: { type: String },
+    contactEmail: { type: String },
+
     //Job publish date
     publishDate: { type: Date },
 

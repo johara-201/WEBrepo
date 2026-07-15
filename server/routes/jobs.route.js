@@ -28,6 +28,9 @@ function getJobChanges(oldJob, updatedJob) {
     { key: "suitableForStudents", label: "התאמה לסטודנטים" },
     { key: "description", label: "תיאור המשרה" },
     { key: "applyUrl", label: "קישור הגשה" },
+    { key: "contactName", label: "איש קשר" },
+    { key: "contactPhone", label: "טלפון איש קשר" },
+    { key: "contactEmail", label: "אימייל איש קשר" },
   ];
 
   return fields
